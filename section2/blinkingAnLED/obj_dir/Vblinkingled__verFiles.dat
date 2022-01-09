@@ -1,0 +1,13 @@
+# DESCRIPTION: Verilator output: Timestamp data for --skip-identical.  Delete at will.
+C "--cc blinkingled.v"
+S   7770984  6317959  1633301230   827786118  1598506306           0 "/usr/bin/verilator_bin"
+S       166  3541981  1635795810    44320537  1635795810     8320536 "blinkingled.v"
+T      4331  3541982  1635803636   932484940  1635803636   932484940 "obj_dir/Vblinkingled.cpp"
+T      2915  3541977  1635803636   932484940  1635803636   932484940 "obj_dir/Vblinkingled.h"
+T      1457  3542003  1635803636   932484940  1635803636   932484940 "obj_dir/Vblinkingled.mk"
+T      2255  3541979  1635803636   932484940  1635803636   932484940 "obj_dir/Vblinkingled__Slow.cpp"
+T       569  3541973  1635803636   932484940  1635803636   932484940 "obj_dir/Vblinkingled__Syms.cpp"
+T       823  3541976  1635803636   932484940  1635803636   932484940 "obj_dir/Vblinkingled__Syms.h"
+T       287  3542004  1635803636   932484940  1635803636   932484940 "obj_dir/Vblinkingled__ver.d"
+T         0        0  1635803636   932484940  1635803636   932484940 "obj_dir/Vblinkingled__verFiles.dat"
+T      1570  3541998  1635803636   932484940  1635803636   932484940 "obj_dir/Vblinkingled_classes.mk"

@@ -1,0 +1,78 @@
+function3_code_table_base_integer = {
+    "JALR": 0B000,
+    "BEQ": 0B000,
+    "BNE": 0B001,
+    "BLT": 0B100,
+    "BGE": 0B101,
+    "BLTU": 0B110,
+    "BGEU": 0B111,
+    "LB": 0B000,
+    "LH": 0B001,
+    "LW": 0B010,
+    "LBU": 0B100,
+    "LHU": 0B101,
+    "SB": 0B000,
+    "SH": 0B001,
+    "SW": 0B010,
+    "ADDI": 0B000,
+    "SLTI": 0B010,
+    "SLTIU": 0B011,
+    "XORI": 0B100,
+    "ORI": 0B110,
+    "ANDI": 0B111,
+    "SLLI": 0B001,
+    "SRLI": 0B101,
+    "SRAI": 0B101,
+    "ADD": 0B000,
+    "SUB": 0B000,
+    "SLL": 0B001,
+    "SLT": 0B010,
+    "SLTU": 0B011,
+    "XOR": 0B100,
+    "SRL": 0B101,
+    "SRA": 0B101,
+    "OR": 0B110,
+    "AND": 0B111,
+    "FENCE": 0B000,
+    "FENCE": 0B001,
+    "ECALL": 0B000,
+    "EBREAK": 0B000,
+    "CSRRW": 0B001,
+    "CSRRS": 0B010,
+    "CSRRC": 0B011,
+    "CSRRWI": 0B101,
+    "CSRRSI": 0B110,
+    "CSRRCI": 0B111,
+}
+
+function3_code_table_multiply_standard = {
+    "MUL": 0B000,
+    "MULH": 0B001,
+    "MULHSU": 0B010,
+    "MULHU": 0B011,
+    "DIV": 0B100,
+    "DIVU": 0B101,
+    "REM": 0B110,
+    "REMU": 0B111
+}
+
+# No function3_code_table_atomic_standard needed
+# All atomic instructions have function3 of 0B010, 2 in decimal
+
+function3_code_table_float_standard = {
+    "FLW": 0B010,
+    "FSW": 0B010,
+    "FSGNJ.S": 0B000,
+    "FSGNJN.S": 0B001,
+    "FSGNJX.S": 0B001,
+    "FMIN.S": 0B000,
+    "FMAX.S": 0B001,
+    "FMV.X.W": 0B000,
+    "FEQ.S": 0B010,
+    "FLT.S": 0B001,
+    "FLE.S": 0B000,
+    "FCLASS.S": 0B001,
+    "FMV.W.X": 0B000,
+
+}
+

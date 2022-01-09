@@ -1,0 +1,1 @@
+Verilator will translate a SystemVerilog design into C++ with the --cc option, or into SystemC with the --sc option.

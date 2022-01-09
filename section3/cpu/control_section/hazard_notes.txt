@@ -1,0 +1,8 @@
+1.	We need to make sure that when we branch and we reset the program counter, we also reset the instruction_waiting <= 0; and instruction_ready <= 0;
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
+
+
+2.	We need to make sure that we are not forgetting any assignments for any of the phases. We have added several interphase registers that probably have not all been included in the logic since the last time
+the assignments were updated thoroughly.
+
+
