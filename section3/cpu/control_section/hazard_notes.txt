@@ -66,3 +66,20 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 7.	We need to determine if it is necessary to use a memory_ready output register or if we could rely on the execute_memory_access read and write registers instead. 
 	
 	Intuitively, I think we can just use the execute_memory_access read and write registers to indicate if we are ready to read from memory with the value in the execute_memory_access_alu_result_reg register.
+	
+	We do not.
+
+	We need to make sure that any time the execute_memory_access_pc_reg is set to 0, we also set both execute_memory_access_read_reg and execute_memory_access_write_reg to 0 as well.
+	Here is the code we would use to do that:
+	"""
+		execute_memory_access_read_reg <= 1'b0;
+		execute_memory_access_write_reg <= 2'b0;
+	"""
+	That code is subject to change if we change the size of the read register. The read register might be two bits wide in the future like the write register.
+	There are two changes we need to make in order to accomplish this:
+		- Search through the code. See where execute_memory_access_pc_reg is set to 0. Simply add the above code.
+		- Under the if ( can_execute ) block, add an embedded if block like with the above code in it and the following condition: `if ( !decode_execute_pc_reg )`
+	I believe that there are no other cases where the execute_memory_access_pc_reg could be set to 0, but if there are other times, insert into the code the same embedded conditional and block as the second case listed.
+
+
+

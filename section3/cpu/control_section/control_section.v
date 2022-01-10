@@ -229,6 +229,11 @@ module control_section(
 			execute_memory_access_write <= decode_execute_write;
 			execute_memory_access_read <= decode_execute_read;
 			execute_memory_access_branch_signal_reg <= execute_memory_access_branch_signal;
+
+			if ( !decode_execute_pc_reg ) begin
+				execute_memory_access_read_reg <= 1'b0;
+				execute_memory_access_write_reg <= 2'b0;
+			end
 		end
 
 		// move fetch_decode registers through fetch phase of
@@ -264,7 +269,7 @@ module control_section(
 			fetch_decode_instruction_reg <= instruction;
 
 			pc <= next_pc;
-			instruction_ready <= 1'b1;
+			instruction_ready <= 1'b0;
 			instruction_waiting <= 1'b0;
 		end else if ( can_decode ) begin // If we can decode but not fetch, then the fetch_decode registers should be nullified.
 			fetch_decode_pc_reg <= 32'b0;
@@ -280,6 +285,8 @@ module control_section(
 			fetch_decode_pc_reg <= 32'b0;
 			decode_execute_pc_reg <= 32'b0;
 			execute_memory_access_pc_reg <= 32'b0;
+			execute_memory_access_read_reg <= 1'b0;
+			execute_memory_access_write_reg <= 2'b0;
 
 			pc <= execute_memory_access_branch_result_reg;
 			instruction_ready <= 1'b0;
