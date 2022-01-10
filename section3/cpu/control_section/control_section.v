@@ -2,7 +2,6 @@ module control_section(
 	clk,
 	rst,
 
-	instruction_address,
 	instruction_ready,
 	instruction_wait,
 	instruction,
@@ -23,7 +22,6 @@ module control_section(
 	// ports
 	input				clk;
 
-	output [31:0]			instruction_address;
 	output reg			instruction_ready;
 	input [31:0]			instruction;
 	input				instruction_wait;
@@ -80,7 +78,7 @@ module control_section(
 	reg [1:0]			execute_memory_access_write_reg,
 					execute_memory_access_reg_write_reg;
 	reg				execute_memory_access_read_reg,
-					execute_memory_access_branch_reg;
+					execute_memory_access_branch_signal_reg;
 
 	reg [31:0]			memory_access_write_back_pc_reg,
 					memory_access_write_back_data_reg;
@@ -110,7 +108,7 @@ module control_section(
 		// outputs
 		.branch_result (execute_memory_access_branch_result),
 		.alu_result (execute_memory_access_alu_result),
-		.branch (execute_memory_access_branch),
+		.branch (execute_memory_access_branch_signal),
 		// branch_result
 		// alu_result
 		// branch
@@ -171,14 +169,7 @@ module control_section(
 
 
 	// logic
-	assign instruction_address = pc;
 	assign next_pc = pc + 4;
-	assign instruction_received = instruction_waiting && !instruction_wait;
-	assign memory_received = memory_waiting && !memory_wait;
-	assign can_access_memory = memory_received; // can_access_memory is the same as memory_received, at least for now.
-	assign can_execute = can_access_memory || !execute_memory_access_pc_reg;
-	assign can_decode = can_access_memory || !decode_execute_pc_reg;
-	assign can_fetch = instrucion_received && ( !fetch_decode_pc_reg || can_decode );
 
 	assign register_read_after_write_hazard = 	( memory_access_write_back_destination_reg == select_register1 || memory_access_write_back_destination_reg == select_register2 ) && 
 							memory_access_write_back_pc_reg && memory_access_write_back_destination_reg ||
@@ -187,12 +178,24 @@ module control_section(
 							( (decode_execute_destination_reg == select_register1 || decode_execute_destination_reg == select_register2 ) && 
 							decode_execute_pc_reg && decode_execute_destination_reg ) &&
 							fetch_decode_pc_reg;
+	// The following signal, when high, indicates that the instruction in
+	// the decode_execute registers is being overwritten in memory.
 	assign main_memory_read_after_write_hazard1 = 	execute_memory_access_store_val_reg + execute_memory_access_write_reg >= decode_execute_pc_reg - 4 && 
 							execute_memory_access_store_val_reg < decode_execute_pc_reg &&
 							execute_memory_access_write_reg;
+	// The following signal, when high, indicates that the instruction ni
+	// the fetch_decode registers is being overwritten in memory.
 	assign main_memory_read_after_write_hazard2 = 	execute_memory_access_store_val_reg + execute_memory_access_write_reg >= fetch_decode_pc_reg - 4 &&
 							execute_memory_access_store_val_reg < fetch_decode_pc_reg &&
 							execute_memory_access_write_reg;
+
+	assign instruction_received = instruction_waiting && !instruction_wait;
+	assign memory_received = memory_waiting && !memory_wait;
+	assign can_access_memory = memory_received; // can_access_memory is the same as memory_received, at least for now.
+	assign can_execute = can_access_memory || !execute_memory_access_pc_reg;
+	assign can_decode = ( can_access_memory || !decode_execute_pc_reg ) && !register_read_after_write_hazard && !main_memory_read_after_write_hazard2;
+	assign can_fetch = instrucion_received && ( !fetch_decode_pc_reg || can_decode );
+
 
 	always @(posedge clk) begin
 
@@ -225,7 +228,7 @@ module control_section(
 			execute_memory_access_destination_reg <= decode_execute_destination_reg;
 			execute_memory_access_write <= decode_execute_write;
 			execute_memory_access_read <= decode_execute_read;
-			execute_memory_access_branch_reg <= execute_memory_access_branch;
+			execute_memory_access_branch_signal_reg <= execute_memory_access_branch_signal;
 		end
 
 		// move fetch_decode registers through fetch phase of
@@ -257,11 +260,13 @@ module control_section(
 			// decode_execute_pc_reg is equal to 0, or the 
 			// execute_memory_access_pc_reg is equal to 0, or the 
 			// memory_received wire is on.
-			fetch_decode_pc_reg <= pc + 4;
+			fetch_decode_pc_reg <= next_pc;
 			fetch_decode_instruction_reg <= instruction;
+
+			pc <= next_pc;
 			instruction_ready <= 1'b1;
 			instruction_waiting <= 1'b0;
-		end else begin
+		end else if ( can_decode ) begin // If we can decode but not fetch, then the fetch_decode registers should be nullified.
 			fetch_decode_pc_reg <= 32'b0;
 		end
 		
@@ -271,54 +276,41 @@ module control_section(
 		// a value from a jump instruction. We also have to
 		// protect ourselves from branch hazards.
 		if (branch_signal_reg) begin
-			pc <= execute_memory_access_branch_result_reg;
 			branch_signal_reg <= 1'b0;
 			fetch_decode_pc_reg <= 32'b0;
 			decode_execute_pc_reg <= 32'b0;
 			execute_memory_access_pc_reg <= 32'b0;
+
+			pc <= execute_memory_access_branch_result_reg;
 			instruction_ready <= 1'b0;
 			instruction_waiting <= 1'b0;
-		end else begin
-
-			// Ensure that we do not have any register RAW hazards.
-			if ( register_read_after_write_hazard ) begin
-				// We need to keep the fetch_decode registers the same
-				// as they are now. The Program Counter should not be
-				// incremented either. The decode_execute_registers
-				// should be emptied also.
-				fetch_decode_pc_reg <= fetch_decode_pc_reg;
-				fetch_decode_instruction_reg <= fetch_decode_instruction_reg;
-				pc <= pc;
-				decode_execute_pc_reg <= 32'b0;
-			end else begin
-				// If the current pc is not fetched yet,
-				// then set fetch_decode_pc_reg to 0
-				// WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 
-				pc <= next_pc;
-			end
-
-			// Ensure that we do not have any main memory RAW
-			// hazards.
-			if ( main_memory_read_after_write_hazard1 ) begin
-				pc <= decode_execute_pc_reg - 4;
-				// WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 
-				// We need to make sure that the fetch signals
-				// are reset properly.
-				decode_execute_pc_reg <= 32'b0;
-				fetch_decode_pc_reg <= 32'b0;
-			end else if ( main_memory_read_after_write_hazard2 ) begin
-				fetch_decode_pc_reg <= 32'b0;
-				pc <= fetch_decode_pc_reg - 4;
-				// WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 
-				// We need to make sure that the fetch signals
-				// are reset properly and that
-				// decode_execute signals do not go to
-				// execute_memory_access
-				// and that fetch_decode signals do not get
-				// into decode_execute registers.
-			end
 		end
-		
+
+		// Ensure that we do not have any main memory RAW
+		// hazards.
+		if ( main_memory_read_after_write_hazard1 ) begin
+			// WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 
+			// We need to make sure that the fetch signals
+			// are reset properly.
+			decode_execute_pc_reg <= 32'b0;
+			fetch_decode_pc_reg <= 32'b0;
+
+			pc <= decode_execute_pc_reg - 4;
+			instruction_waiting <= 1'b0;
+			instruction_ready <= 1'b0;
+		end else if ( main_memory_read_after_write_hazard2 ) begin
+			fetch_decode_pc_reg <= 32'b0;
+			// WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 
+			// We need to make sure that the fetch signals
+			// are reset properly and that
+			// decode_execute signals do not go to
+			// execute_memory_access
+			// and that fetch_decode signals do not get
+			// into decode_execute registers.
+			pc <= fetch_decode_pc_reg - 4;
+			instruction_waiting <= 1'b0;
+			instruction_ready <= 1'b0;
+		end
 
 		// Update the waiting signals if needed.
 		if ( instruction_ready && instruction_wait ) begin
@@ -326,6 +318,9 @@ module control_section(
 		end
 		if ( memory_ready && memory_wait ) begin
 			memory_waiting <= 1'b1;
+		end
+		if ( !instruction_ready ) begin
+			instruction_ready <= 1'b1;
 		end
 
 	end // {END OF THE ALWAYS BLOCK}

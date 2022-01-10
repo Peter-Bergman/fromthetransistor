@@ -1,8 +1,68 @@
 1.	We need to make sure that when we branch and we reset the program counter, we also reset the instruction_waiting <= 0; and instruction_ready <= 0;
+
 DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 
 
 2.	We need to make sure that we are not forgetting any assignments for any of the phases. We have added several interphase registers that probably have not all been included in the logic since the last time
-the assignments were updated thoroughly.
+	the assignments were updated thoroughly.
+
+3.	We need to make sure that the commutativity and exclusivity of the hazard checks does not matter. If the order of the hazard checks does matter, then we need to determine the correct order and reflect that order in the code.
+	
+	All potential hazards with memory are dependent on the execute_memory_access registers' values and only when we are writing to memory in the memory access phase.
+	All potential branch hazards also are dependent on the execute_memory_access registers' values and only when we have a branch or jump instruction.
+	Since no branch or jump instruction writes to memory during the memory access phase, it is impossible for us to have a branch hazard and a memory RAW hazard in a single clock cycle.
+	Therefore, it does not matter whether branch hazard checking logic comes before or after memory access hazard checking logic.
+	
+	When a branch or jump instruction is in the execute_memory_access registers, and the branch_signal is high, the following changes are made:
+		- The execute_memory_access_pc_reg is set to 0
+		- The decode_execute_pc_reg is set to 0
+		- The fetch_decode_pc_reg is set to 0
+		- The pc register is set to execute_memory_access_branch_result_reg
+		- The waiting register is set to low (SNTBI) DONE DONE
+	When register RAW hazards are detected, the following changes are made:
+		- the instruction stored in the fetch_decode registers does not pass onto the decode_execute_registers. In other words, can_decode is False (SNTBI). Therefore, can_fetch is False.
+		- 
+	If there is a register RAW hazard and a branch hazard, and the RAW hazard is handled first, any change that would be made by the handling of RAW hazard is nullified.
+	This is provable because all of the inter-phase registers are nullified when the branch or jump sets all of the program counters before memory_access_write_back registers to 0.
+	If there is a register RAW hazard and a branch hazard, and the branch hazard is handled first, the register RAW hazard logic will keep the fetch_decode_pc_reg the same, and the pc reg will remain the same also.
+	This is a problem because the instruction in the fetch_decode registers should not be executed.
+	The instruction in the fetch_decode registers should not be executed because the branch/jump result should be the next instruction to execute after the branch/jump instruction.
+
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 
 
+4.	We need to make sure that we actually need the instruction_ready signal.
+	
+	Suppose that we have a single bit instruction_ready_reg register that drives an instruction_ready signal.
+	We know for sure that the waiting register will need to be set to low when we branch or jump whether there is a ready signal or not.
+	Suppose that we set the instruction_ready_reg to low when a branch/jump instruction resets the program counter.
+	We would have the following logic: `if ( !instruction_ready_reg ) begin instruction_ready_reg <= 1'b1; end`
+	This would take an extra (UNDETERMINED) clock cycles. I think for now, this is acceptable, since we are just making a minimalist implementation with the only cool thing being pipelining.
+	I have decided to use an instruction_ready output register.
+
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
+
+
+5.	We need to make sure that if can_fetch is False, and can_decode is True, then fetch_decode_pc_reg <= 32'b0; (SNTBI)
+
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
+
+
+6.	We need to add the logic for the instruction_ready output register.
+
+	The instruction_ready register needs to be set to 0 (low) when and only when the pc register is set.
+	Side note: the instruction_waiting register will also be set to low any time the pc register is set. This is not the only case when instruction_waiting is set to low, though.
+	
+	If instruction_ready is low, set it to high.
+	There are four (4) cases where we would set the instruction_ready register to low.
+	These four (4) cases are all of the times that we change the value of the program counter (pc) register.
+	These are the four (4) cases when we would change the program counter (pc):
+		- can_fetch is high, and we increment the program counter. We increment the program counter by the following code: `pc <= next_pc;`
+		- execute_memory_access_branch_signal_reg is high, and we set the program counter as follows: `pc <= execute_memory_access_branch_result;`
+		- main_memory_read_after_write_hazard1 is high, and we set the program counter as follows: `pc <= decode_execute_pc_reg - 4;`
+		- main_memory_read_after_write_hazard2 is high, and we set the program counter as follows: `pc <= fetch_decode_pc_reg - 4;`
+	
+
+7.	We need to determine if it is necessary to use a memory_ready output register or if we could rely on the execute_memory_access read and write registers instead. 
+	
+	Intuitively, I think we can just use the execute_memory_access read and write registers to indicate if we are ready to read from memory with the value in the execute_memory_access_alu_result_reg register.
