@@ -14,7 +14,6 @@ module control_section(
 	memory_read,
 	memory_write,
 	memory_data_load,
-	memory_ready,
 	memory_wait,
 	
 	registerd,
@@ -29,8 +28,8 @@ module control_section(
 	output [31:0]			memory_address,
 					memory_data_store;
 	input [31:0]			memory_data_load;
-	output				memory_read,
-					memory_write;
+	output				memory_read;
+	output [1:0]			memory_write;
 
 	// internals
 	reg [31:0]			pc;
@@ -86,8 +85,6 @@ module control_section(
 	reg [1:0]			memory_access_write_back_reg_write_reg;
 
 	reg [31:0]			post_write_back_pc_reg;
-
-	reg				branch_signal_reg;
 
 	wire				next_pc
 
@@ -171,30 +168,54 @@ module control_section(
 	// logic
 	assign next_pc = pc + 4;
 
-	assign register_read_after_write_hazard = 	( memory_access_write_back_destination_reg == select_register1 || memory_access_write_back_destination_reg == select_register2 ) && 
-							memory_access_write_back_pc_reg && memory_access_write_back_destination_reg ||
-							( execute_memory_access_destination_reg == select_register1 || execute_memory_access_destination_reg == select_register2 ) && 
-							execute_memory_access_pc_reg && execute_memory_access_destination_reg || 
-							( (decode_execute_destination_reg == select_register1 || decode_execute_destination_reg == select_register2 ) && 
-							decode_execute_pc_reg && decode_execute_destination_reg ) &&
+	assign operand_register1 = fetch_decode_instruction[15:19];
+	assign operand_register2 = fetch_decode_instruction[24:20];
+
+	assign register_read_after_write_hazard = 	(
+
+							( ( memory_access_write_back_destination_reg == operand_register1 || memory_access_write_back_destination_reg == operand_register2 ) && 
+							memory_access_write_back_pc_reg && memory_access_write_back_destination_reg ) ||
+							
+							( ( execute_memory_access_destination_reg == operand_register1 || execute_memory_access_destination_reg == operand_register2 ) && 
+							execute_memory_access_pc_reg && execute_memory_access_destination_reg ) || 
+
+							( (decode_execute_destination_reg == operand_register1 || decode_execute_destination_reg == operand_register2 ) && 
+							decode_execute_pc_reg && decode_execute_destination_reg )
+
+						        ) &&
 							fetch_decode_pc_reg;
+	
+	assign memory_hazard_check_addend = execute_memory_access_write_reg[1] ? ( execute_memory_access_write_reg[0] ? 2'd3 : 2'd1 ) : 2'd0;
 	// The following signal, when high, indicates that the instruction in
 	// the decode_execute registers is being overwritten in memory.
-	assign main_memory_read_after_write_hazard1 = 	execute_memory_access_store_val_reg + execute_memory_access_write_reg >= decode_execute_pc_reg - 4 && 
+	assign main_memory_read_after_write_hazard1 = 	execute_memory_access_store_val_reg + memory_hazard_check_addend >= decode_execute_pc_reg - 32'd4 && 
 							execute_memory_access_store_val_reg < decode_execute_pc_reg &&
-							execute_memory_access_write_reg;
+							execute_memory_access_write_reg &&
+							execute_memory_access_pc_reg;
 	// The following signal, when high, indicates that the instruction ni
 	// the fetch_decode registers is being overwritten in memory.
-	assign main_memory_read_after_write_hazard2 = 	execute_memory_access_store_val_reg + execute_memory_access_write_reg >= fetch_decode_pc_reg - 4 &&
+	assign main_memory_read_after_write_hazard2 = 	execute_memory_access_store_val_reg + memory_hazard_check_addend >= fetch_decode_pc_reg - 32'd4 &&
 							execute_memory_access_store_val_reg < fetch_decode_pc_reg &&
-							execute_memory_access_write_reg;
+							execute_memory_access_write_reg &&
+							execute_memory_access_pc_reg;
+	// The following signal, when high, indicates that the instruction
+	// held in memory at the address held in the pc register is being
+	// overwritten.
+	assign main_memory_read_after_write_hazard3 =	execute_memory_access_store_val_reg + memory_hazard_check_addend >= pc &&
+							execute_memory_access_store_val_reg < pc + 32'd4 &&
+							execute_memory_access_write_reg &&
+							execute_memory_access_pc_reg;
 
 	assign instruction_received = instruction_waiting && !instruction_wait;
+
+	assign memory_read = execute_memory_access_read_reg;
+	assign memory_write = execute_memory_access_write_reg;
 	assign memory_received = memory_waiting && !memory_wait;
+
 	assign can_access_memory = memory_received; // can_access_memory is the same as memory_received, at least for now.
-	assign can_execute = can_access_memory || !execute_memory_access_pc_reg;
-	assign can_decode = ( can_access_memory || !decode_execute_pc_reg ) && !register_read_after_write_hazard && !main_memory_read_after_write_hazard2;
-	assign can_fetch = instrucion_received && ( !fetch_decode_pc_reg || can_decode );
+	assign can_execute = ( can_access_memory || !execute_memory_access_pc_reg ) && !main_memory_access_read_after_write_hazard1 && !execute_memory_access_branch_signal_reg;
+	assign can_decode = ( can_access_execute || !decode_execute_pc_reg ) && !register_read_after_write_hazard && !main_memory_read_after_write_hazard2;
+	assign can_fetch = instrucion_received && ( !fetch_decode_pc_reg || can_decode ) && !main_memory_read_after_write_hazard3;
 
 
 	always @(posedge clk) begin
@@ -280,8 +301,8 @@ module control_section(
 		// could be a value from a branch instruction or
 		// a value from a jump instruction. We also have to
 		// protect ourselves from branch hazards.
-		if (branch_signal_reg) begin
-			branch_signal_reg <= 1'b0;
+		if (execute_memory_access_branch_signal_reg) begin
+			execute_memory_access_branch_signal_reg <= 1'b0;
 			fetch_decode_pc_reg <= 32'b0;
 			decode_execute_pc_reg <= 32'b0;
 			execute_memory_access_pc_reg <= 32'b0;
@@ -317,13 +338,17 @@ module control_section(
 			pc <= fetch_decode_pc_reg - 4;
 			instruction_waiting <= 1'b0;
 			instruction_ready <= 1'b0;
+		end else if ( main_memory_read_after_write_hazard3 ) begin
+			pc <= pc; // This line is redundant.
+			instruction_ready <= 1'b0;
+			instruction_waiting <= 1'b0;
 		end
 
 		// Update the waiting signals if needed.
 		if ( instruction_ready && instruction_wait ) begin
 			instruction_waiting <= 1'b1;
 		end
-		if ( memory_ready && memory_wait ) begin
+		if ( (memory_read || memory_write) && memory_wait ) begin
 			memory_waiting <= 1'b1;
 		end
 		if ( !instruction_ready ) begin

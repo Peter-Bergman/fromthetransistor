@@ -47,7 +47,6 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 
 DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 
-
 6.	We need to add the logic for the instruction_ready output register.
 
 	The instruction_ready register needs to be set to 0 (low) when and only when the pc register is set.
@@ -61,13 +60,16 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 		- execute_memory_access_branch_signal_reg is high, and we set the program counter as follows: `pc <= execute_memory_access_branch_result;`
 		- main_memory_read_after_write_hazard1 is high, and we set the program counter as follows: `pc <= decode_execute_pc_reg - 4;`
 		- main_memory_read_after_write_hazard2 is high, and we set the program counter as follows: `pc <= fetch_decode_pc_reg - 4;`
+
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
+
 	
 
 7.	We need to determine if it is necessary to use a memory_ready output register or if we could rely on the execute_memory_access read and write registers instead. 
 	
-	Intuitively, I think we can just use the execute_memory_access read and write registers to indicate if we are ready to read from memory with the value in the execute_memory_access_alu_result_reg register.
+	Intuitively, I think we can just use the execute_memory_access read and write registers to indicate if we are ready to read from or write to memory.
 	
-	We do not.
+	We do not need a ready signal.
 
 	We need to make sure that any time the execute_memory_access_pc_reg is set to 0, we also set both execute_memory_access_read_reg and execute_memory_access_write_reg to 0 as well.
 	Here is the code we would use to do that:
@@ -76,10 +78,44 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 		execute_memory_access_write_reg <= 2'b0;
 	"""
 	That code is subject to change if we change the size of the read register. The read register might be two bits wide in the future like the write register.
+	(IN) We will not need to change the size of the read register. There are no hazards related to the memory access read, so changing the amount of data to pull would not make a difference. We also have the reg_write_reg
+	(IN c) register to indicate how much of the data read from memory should be written back to the register file. Writing back to the register file is the only thing that can possibly be done with data read from memory.
 	There are two changes we need to make in order to accomplish this:
 		- Search through the code. See where execute_memory_access_pc_reg is set to 0. Simply add the above code.
 		- Under the if ( can_execute ) block, add an embedded if block like with the above code in it and the following condition: `if ( !decode_execute_pc_reg )`
 	I believe that there are no other cases where the execute_memory_access_pc_reg could be set to 0, but if there are other times, insert into the code the same embedded conditional and block as the second case listed.
 
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 
+8.	We need to double check that the hazards signal assignments are correct.
+	
+	I think that the register RAW assignment is off because of the order of boolean order of operations.
 
+	Using the select_register1 and select_register2 signals for the register_read_after_write_hazard signal assignment looks clean, but I don't think it is right.
+	I could just create two wires that are driven directly by the instruction in the fetch_decode_instruction_reg register.
+
+9.	The memory RAW hazards have faulty arithmetic. We should not be adding the execute_memory_access_write_reg to the store_val_reg. Instead, we need to create a wire that has a value mapped from the write_reg.
+	The mapping should be like so:
+		0 -> 0,
+		1 -> 0,
+		2 -> 1,
+		3 -> 3
+
+	This is the code we should use for that wire assignment:
+	"""
+		assign mapped_wire = execute_memory_access_write_reg[1] ? ( execute_memory_access_write_reg[0] ? 2'd3 : 2'd1 ) : 2'd0;
+	"""
+
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
+
+10.	I need to add logic for main_memory_read_after_write_hazard3 signal.
+	
+	When that signal is high, the following needs to be done:
+		- Set the instruction_ready output register to low like so, `instruction_ready <= 1'b0;`
+		- Set the instruction_waiting signal to low like so, `instruction_waiting <= 1'b0;`
+	
+	It should be noted that this contradicts something said in an earlier note.
+	The instruction_ready register is not set to 0 when and only when the pc register is set to a new value.
+	The instruction_ready register is set to 0 any time the pc register is changed, but it is now no longer only set to 0 when the pc register is set to a new value.
+
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
