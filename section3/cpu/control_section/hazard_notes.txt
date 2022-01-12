@@ -94,6 +94,8 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 	Using the select_register1 and select_register2 signals for the register_read_after_write_hazard signal assignment looks clean, but I don't think it is right.
 	I could just create two wires that are driven directly by the instruction in the fetch_decode_instruction_reg register.
 
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
+
 9.	The memory RAW hazards have faulty arithmetic. We should not be adding the execute_memory_access_write_reg to the store_val_reg. Instead, we need to create a wire that has a value mapped from the write_reg.
 	The mapping should be like so:
 		0 -> 0,
