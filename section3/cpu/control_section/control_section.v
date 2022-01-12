@@ -33,9 +33,14 @@ module control_section(
 
 	// internals
 	reg [31:0]			pc;
+	
+	wire [31:0]			next_pc,
+
+					memory_hazard_check_addend;
 
 	reg				instruction_waiting,
 					memory_waiting;
+
 	wire				instrucion_received,
 					memory_received,
 					can_access_memory,
@@ -43,12 +48,17 @@ module control_section(
 					can_decode,
 					can_fetch,
 
-					select_register1,
+					register_read_after_write_hazard,
+					main_memory_read_after_write_hazard1,
+					main_memory_read_after_write_hazard2,
+					main_memory_read_after_write_hazard3;
+
+	wire [4:0]			select_register1,
 					select_register2,
-					
-					register_read_after_write_hazard;
-					
-					
+
+					operand_register1,
+					operand_register2;
+						
 
 	reg [31:0]			fetch_decode_pc_reg,
 					fetch_decode_instruction_reg,
@@ -86,7 +96,6 @@ module control_section(
 
 	reg [31:0]			post_write_back_pc_reg;
 
-	wire				next_pc
 
 	// alu
 	alu arithmetic_logic_unit(
@@ -185,7 +194,8 @@ module control_section(
 						        ) &&
 							fetch_decode_pc_reg;
 	
-	assign memory_hazard_check_addend = execute_memory_access_write_reg[1] ? ( execute_memory_access_write_reg[0] ? 2'd3 : 2'd1 ) : 2'd0;
+	assign memory_hazard_check_addend = execute_memory_access_write_reg[1] ? ( execute_memory_access_write_reg[0] ? 32'd3 : 32'd1 ) : 32'd0;
+
 	// The following signal, when high, indicates that the instruction in
 	// the decode_execute registers is being overwritten in memory.
 	assign main_memory_read_after_write_hazard1 = 	execute_memory_access_store_val_reg + memory_hazard_check_addend >= decode_execute_pc_reg - 32'd4 && 
@@ -212,7 +222,7 @@ module control_section(
 	assign memory_write = execute_memory_access_write_reg;
 	assign memory_received = memory_waiting && !memory_wait;
 
-	assign can_access_memory = memory_received; // can_access_memory is the same as memory_received, at least for now.
+	assign can_access_memory = memory_received || !( memory_write || memory_read ); // can_access_memory is the same as memory_received, at least for now.
 	assign can_execute = ( can_access_memory || !execute_memory_access_pc_reg ) && !main_memory_access_read_after_write_hazard1 && !execute_memory_access_branch_signal_reg;
 	assign can_decode = ( can_access_execute || !decode_execute_pc_reg ) && !register_read_after_write_hazard && !main_memory_read_after_write_hazard2;
 	assign can_fetch = instrucion_received && ( !fetch_decode_pc_reg || can_decode ) && !main_memory_read_after_write_hazard3;
