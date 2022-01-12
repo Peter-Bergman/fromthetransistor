@@ -222,7 +222,7 @@ module control_section(
 	assign memory_write = execute_memory_access_write_reg;
 	assign memory_received = memory_waiting && !memory_wait;
 
-	assign can_access_memory = memory_received || !( memory_write || memory_read ); // can_access_memory is the same as memory_received, at least for now.
+	assign can_access_memory = memory_received || !( memory_write || memory_read );
 	assign can_execute = ( can_access_memory || !execute_memory_access_pc_reg ) && !main_memory_access_read_after_write_hazard1 && !execute_memory_access_branch_signal_reg;
 	assign can_decode = ( can_access_execute || !decode_execute_pc_reg ) && !register_read_after_write_hazard && !main_memory_read_after_write_hazard2;
 	assign can_fetch = instrucion_received && ( !fetch_decode_pc_reg || can_decode ) && !main_memory_read_after_write_hazard3;
@@ -244,7 +244,11 @@ module control_section(
 
 		if ( can_access_memory ) begin
 			memory_access_write_back_pc_reg <= execute_memory_access_pc_reg;
-			memory_access_write_back_data_reg <= memory_data_load;
+			if ( memory_received ) begin
+				memory_access_write_back_data_reg <= memory_data_load;
+			end else begin
+				memory_access_write_back_data_reg <= execute_memory_access_alu_result_reg;
+			end
 			memory_access_write_back_destination_reg <= execute_memory_access_destination_reg;
 			memory_access_write_back_reg_write_reg <= execute_memory_access_reg_write_reg;
 
