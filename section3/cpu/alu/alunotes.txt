@@ -1,0 +1,4 @@
+1.	We need to implement the shamt input.
+	Remember that shamt stands for shift amount. It is a five bit value. It comes from the bits that would usually select register 2.
+
+
