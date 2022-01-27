@@ -63,9 +63,11 @@ always_comb begin
 	end
 	else if (op_code == 7'b1101111) begin // JAL
 		branch_result = program_counter + jump_immediate;
+		branch = 1;
 	end
 	else if (op_code == 7'b1100111 && !func3) begin // JALR
 		branch_result = { { reg1 + immediate } [31:1], 1'b0 };
+		branch = 1;
 	end
 	else if (op_code == 7'b0000011) begin // LB LH LW LBU LHU
 		alu_result = reg1 + immediate;

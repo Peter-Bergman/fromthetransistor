@@ -19,15 +19,26 @@ module instruction_decoder(
 );
 	
 	// ports
-	input [31:0] instruction;
+	input [31:0]		instruction;
 
 	output [4:0]		register1,
-				register2,
-				registerd,
-	output [11:0] immediate;
-	
+				register2, // shamt, or shift amount, is the same as the register2 value
+				registerd;
+	output [6:0]		op_code,
+				func7;
+	output [2:0]		func3;
+	output [31:0]		immediate,
+				store_immediate,
+				branch_immediate,
+				upper_immediate,
+				jump_immediate;
+	output [1:0]		read,
+				write,
+				reg_write;
+
+		
 	// internals
-	// (No internals)
+	assign branch = op_code == 7'b0100011;
 
 
 	// logic
@@ -44,5 +55,9 @@ module instruction_decoder(
 	assign op_code = instruction [6:0];
 	assign func3 = instruction [14:12];
 	assign func7 = instruction [31:25];
-	
+
+	assign read = (op_code == 7'b0000011) ? (func3 == 3'b0 || func3 == 3'b100 ? 2'b01 : (func3 == 3'b001 || func3 == 3'b101 ? 2'b10 : (func3 == 3'b010 ? 2'b11 : 2'b0))) : 2'b0;
+	assign write = (op_code == 7'b0100011) ? (func3 == 3'b0 ? 2'b01 : (func3 == 3'b001 ? 2'b10 : (func3 == 3'b010 ? 2'b010 : 2'b0))) : 2'b0;
+	assign reg_write = !branch && !write;
+
 endmodule

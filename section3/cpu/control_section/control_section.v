@@ -71,8 +71,8 @@ module control_section(
 					decode_execute_branch_immediate_reg,
 					decode_execute_upper_immediate_reg,
 					decode_execute_jump_immediate_reg;
-	reg [4:0]			decode_execute_destination_reg;
-	reg				decode_execute_branch_reg;
+	reg [4:0]			decode_execute_destination_reg,
+					decode_execute_shamt;
 	reg [6:0]			decode_execute_op_code_reg;
 	reg [2:0]			decode_execute_func3_reg;
 	reg [6:0]			decode_execute_func7_reg;
@@ -283,10 +283,10 @@ module control_section(
 			decode_execute_upper_immediate_reg <= decode_execute_upper_immediate;
 			decode_execute_jump_immediate_reg <= decode_execute_jump_immediate;
 			decode_execute_destination_reg <= decode_execute_destination;
+			decode_execute_shamt_reg <= select_register2;
 			decode_execute_write_reg <= decode_execute_write;
 			decode_execute_reg_write_reg <= decode_execute_reg_write_reg;
 			decode_execute_read_reg <= decode_execute_read;
-			decode_execute_branch_reg <= decode_execute_branch;
 			decode_execute_op_code_reg <= decode_execute_op_code;
 		end
 

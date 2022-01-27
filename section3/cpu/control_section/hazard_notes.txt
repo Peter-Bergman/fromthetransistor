@@ -6,6 +6,10 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 2.	We need to make sure that we are not forgetting any assignments for any of the phases. We have added several interphase registers that probably have not all been included in the logic since the last time
 	the assignments were updated thoroughly.
 
+	decode_execute wires need to be declared.
+
+	
+
 3.	We need to make sure that the commutativity and exclusivity of the hazard checks does not matter. If the order of the hazard checks does matter, then we need to determine the correct order and reflect that order in the code.
 	
 	All potential hazards with memory are dependent on the execute_memory_access registers' values and only when we are writing to memory in the memory access phase.
@@ -121,3 +125,20 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 	The instruction_ready register is set to 0 any time the pc register is changed, but it is now no longer only set to 0 when the pc register is set to a new value.
 
 DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
+
+11.	I need to find what I was trying to do with the decode_execute_branch_reg variable, and if it is not necessary, delete it.
+
+	deleted it.
+
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
+
+12.	I need to make sure that all of the wires needed for the decoder are in place. I also need to make sure that the decoder has logic for every wire.
+
+	Wires that do not have logic written up yet:
+	 - reg_write
+	 - write
+	 - read
+	(I think that's all)
+
+	
+
