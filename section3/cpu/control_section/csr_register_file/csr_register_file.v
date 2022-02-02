@@ -7,7 +7,8 @@ module CSR_Register_File(
 	read_data,
 	write_back,
 	write_back_address,
-	write_back_data
+	write_back_data,
+	increment_instret
 );
 
 	// ports
@@ -18,7 +19,8 @@ module CSR_Register_File(
 	input [1:0]		write_back;
 	input [11:0]		write_back_address;
 	input [31:0]		write_back_data;
-
+	
+	input			increment_instret;
 
 	// internals
 	reg [31:0]		cycle,
@@ -68,7 +70,14 @@ module CSR_Register_File(
 			end
 
 		end // end of the if (read) block
-
+		
+		// Increment the cyle/cycleh counter
+		{ cycleh, cycle } <= { cycleh, cycle } + 64'b1;
+		
+		// Increment the instreth/instret counter
+		if (increment_instret) begin
+			{ instreth, instret } <= { instreth, instret } + 64'b1;
+		end
 
 		if (write_back == 2'b01) begin
 			// clear
