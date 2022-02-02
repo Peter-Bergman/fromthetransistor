@@ -140,5 +140,19 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 	 - read
 	(I think that's all)
 
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 	
+13.	CSR instructions need to be implemented. The pipeline will not need many changes.
+	
+	Here are some things to do:
+	 - Need to see if we should wait for all prior instructions to finish executing before accessing one of the CSRs.
+	 - Need to add in logic to stop CSR register hazards.
+	 - Need logic in the decoder to grab the unsigned immediate from CSR instructions .......................................
+	 - Need to add module instance of CSR regsiter file in control_section.
+	 - Need to add registers in pipeline for CSR instructions to operate.
+		- csr immediate
+		- csr writeback
+		- selected csr register value (the value in the csr that was selected by the 12 bit uimmediate)
+
+	 I think I am going to wait for all prior instructions to finish executing and writing back. The instruction retired CSR might be read to have unexpected values if we don't wait.
 

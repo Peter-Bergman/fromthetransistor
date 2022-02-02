@@ -24,6 +24,7 @@ module instruction_decoder(
 	output [4:0]		register1,
 				register2, // shamt, or shift amount, is the same as the register2 value
 				registerd;
+	output [11:0]		csr_register;
 	output [6:0]		op_code,
 				func7;
 	output [2:0]		func3;
@@ -31,10 +32,12 @@ module instruction_decoder(
 				store_immediate,
 				branch_immediate,
 				upper_immediate,
-				jump_immediate;
+				jump_immediate,
+				csr_immediate;
 	output [1:0]		read,
 				write,
-				reg_write;
+				reg_write,
+				csr_writeback;
 
 		
 	// internals
@@ -45,12 +48,14 @@ module instruction_decoder(
 	assign register1 = instruction [19:15];
 	assign register2 = instruction [24:20];
 	assign registerd = instruction [11:7];
+	assign csr_register = 12'(register1);
 
 	assign immediate = 32'(signed'( instruction [31:20] ));
 	assign store_immediate = 32'(signed'( { instruction [31:25], instruction [11:7] } ));
 	assign branch_immediate = 32'(signed'( { instruction [31], instruction [7], instruction [30:25], instruction [11:8], 1'b0 } )); // Going to adjust for instruction alignment in ALU
 	assign upper_immediate = { instruction [31:12], 12'b0 };
 	assign jump_immediate = 32'(signed'( { instruction [31], instruction [19:12], instruction [20], instruction [30:21], 1'b0 } ));
+	assign csr_immediate = 32'(register1);
 
 	assign op_code = instruction [6:0];
 	assign func3 = instruction [14:12];
@@ -59,5 +64,13 @@ module instruction_decoder(
 	assign read = (op_code == 7'b0000011) ? (func3 == 3'b0 || func3 == 3'b100 ? 2'b01 : (func3 == 3'b001 || func3 == 3'b101 ? 2'b10 : (func3 == 3'b010 ? 2'b11 : 2'b0))) : 2'b0;
 	assign write = (op_code == 7'b0100011) ? (func3 == 3'b0 ? 2'b01 : (func3 == 3'b001 ? 2'b10 : (func3 == 3'b010 ? 2'b010 : 2'b0))) : 2'b0;
 	assign reg_write = !branch && !write;
+
+	assign csr_writeback = (op_code != 7'b1110011 || func3 == 3'd0) ? 2'd0 : 
+		(func3 == 3'b001 || func3 == 3'b101) ? 2'b11 : // readwrite
+		(func3 == 3'b010 || func3 == 3'b110) ? 2'b10 : // readset
+		(func3 == 3'b011 || func3 == 3'b111) ? 2'b01 : // readclear
+		2'd0;
+
+
 
 endmodule
