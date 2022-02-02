@@ -218,14 +218,17 @@ module control_section(
 
 	assign instruction_received = instruction_waiting && !instruction_wait;
 
+	assign reading_from_csr = (decode_execute_op_code == 7'b1110011) && decode_execute_func3;
+
 	assign memory_read = execute_memory_access_read_reg;
 	assign memory_write = execute_memory_access_write_reg;
 	assign memory_received = memory_waiting && !memory_wait;
 
 	assign can_access_memory = memory_received || !( memory_write || memory_read );
 	assign can_execute = ( can_access_memory || !execute_memory_access_pc_reg ) && !main_memory_access_read_after_write_hazard1 && !execute_memory_access_branch_signal_reg;
-	assign can_decode = ( can_access_execute || !decode_execute_pc_reg ) && !register_read_after_write_hazard && !main_memory_read_after_write_hazard2;
+	assign can_decode = ( can_access_execute || !decode_execute_pc_reg ) && !register_read_after_write_hazard && !main_memory_read_after_write_hazard2 && !reading_from_csr;
 	assign can_fetch = instrucion_received && ( !fetch_decode_pc_reg || can_decode ) && !main_memory_read_after_write_hazard3;
+	assign can_access_csr = reading_from_csr && !memory_access_write_back_pc_reg && !execute_memory_access_pc_reg && !decode_execute_pc_reg;
 
 
 	always @(posedge clk) begin
@@ -308,6 +311,11 @@ module control_section(
 			instruction_waiting <= 1'b0;
 		end else if ( can_decode ) begin // If we can decode but not fetch, then the fetch_decode registers should be nullified.
 			fetch_decode_pc_reg <= 32'b0;
+		end
+
+		if ( can_access_csr ) begin
+			// Set the writeback registers to some stuff from the
+			// decoder.
 		end
 		
 		// get the next program counter value

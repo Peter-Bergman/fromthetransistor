@@ -154,7 +154,16 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 		- csr writeback
 		- selected csr register value (the value in the csr that was selected by the 12 bit uimmediate)
 
-	 I think I am going to wait for all prior instructions to finish executing and writing back. The instruction retired CSR might be read to have unexpected values if we don't wait.
+	I think I am going to wait for all prior instructions to finish executing and writing back. The instruction retired CSR might be read to have unexpected values if we don't wait.
+	By this I mean that if SYSTEM opcode is in the decode_execute wires (not in the decode_execute registers yet),
+	then the pipeline will wait for all previous instructions to finish executing.
+	In other words, if (op_code == 1110011 (memory_access_write_back_pc_reg != 0 or execute_memory_access_pc_reg != 0 or decode_execute_pc_reg != 0)), then can_decode = 0;
+
+	We also have to handle RAW dependencies for the CSR register file. 
+	This actually does not require any additional code. 
+	If there is an instruction that is still yet to write back to the CSR register file,
+	then no read will happen regardless of whether the instruction that the earlier instruction which still needs to write back is writing to the same register address or not.
+	
 
 14.	We need to create a module for the Control and Status Register (CSR) register file.
 
@@ -176,4 +185,5 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 	 - instreth	: 0xC82
 	
 	I think that when these counters and timers are incremented, I will need to use packed array syntax.
+
 
