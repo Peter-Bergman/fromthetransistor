@@ -156,3 +156,24 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 
 	 I think I am going to wait for all prior instructions to finish executing and writing back. The instruction retired CSR might be read to have unexpected values if we don't wait.
 
+14.	We need to create a module for the Control and Status Register (CSR) register file.
+
+	This register file will have three double words, all of which are listed in the instruction set manual. They are as follows:
+	 - cycle
+	 - time
+	 - instret
+	
+	The upper words for the three double words listed above are the respective names with an "h" following.
+	
+	The addresses where each of these control and status registers should be in the register file are specified in the instruction set manual just after the RVD instruction listings.
+	
+	The addresses are as follows:
+	 - cycle	: 0xC01
+	 - time		: 0xC02
+	 - instret 	: 0xC03
+	 - cycleh	: 0xC80
+	 - timeh	: 0xC81
+	 - instreth	: 0xC82
+	
+	I think that when these counters and timers are incremented, I will need to use packed array syntax.
+
