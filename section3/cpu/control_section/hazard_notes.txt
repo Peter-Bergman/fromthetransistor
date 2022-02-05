@@ -158,6 +158,7 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 	By this I mean that if SYSTEM opcode is in the decode_execute wires (not in the decode_execute registers yet),
 	then the pipeline will wait for all previous instructions to finish executing.
 	In other words, if (op_code == 1110011 (memory_access_write_back_pc_reg != 0 or execute_memory_access_pc_reg != 0 or decode_execute_pc_reg != 0)), then can_decode = 0;
+	We also have to add logic to the memory_write_back_pc_reg to be set to 0 when can_access_memory is low;
 
 	We also have to handle RAW dependencies for the CSR register file. 
 	This actually does not require any additional code. 
@@ -186,4 +187,15 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 	
 	I think that when these counters and timers are incremented, I will need to use packed array syntax.
 
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 
+15.	We need to add functionality that will continuously update the time CSR
+
+16.	We need to instantiate the csr_register_file in the control_section.
+
+	We need to also change the wirings for the decoder because the wires needed for CSR instructions have not been added to the instantiation.
+
+17.	We need to make sure that all of the components of the CSR instruction are decoded correctly.
+
+	We need to make sure whether there is a selection of the csr_immediate or register1, depending on the MSB of func3.
+	If csr_immediate_instruction, then set memory_access_write_back_csr_write_back_data_reg to csr_immediate

@@ -3,15 +3,21 @@ module instruction_decoder(
 
 	register1,
 	register2,
+	csr_register,
 	immediate,
 	store_immediate,
 	branch_immediate,
 	upper_immediate,
 	jump_immediate,
+	csr_immediate,
 	registerd,
 	op_code,
 	func3,
 	func7,
+	read,
+	write,
+	reg_write,
+	csr_write_back,
 
 	// Instruction types include (register, immediate, upper), jump,
 	// branch, store, and load.
@@ -37,18 +43,23 @@ module instruction_decoder(
 	output [1:0]		read,
 				write,
 				reg_write,
-				csr_writeback;
+				csr_write_back;
+	output			csr_immediate_instruction;
 
 		
 	// internals
-	assign branch = op_code == 7'b0100011;
+	wire			system_instruction,
+				csr_instruction,
+				external_instruction,
+				branch,
+				store;
 
 
 	// logic
 	assign register1 = instruction [19:15];
 	assign register2 = instruction [24:20];
 	assign registerd = instruction [11:7];
-	assign csr_register = 12'(register1);
+	assign csr_register = instruction[31:20];
 
 	assign immediate = 32'(signed'( instruction [31:20] ));
 	assign store_immediate = 32'(signed'( { instruction [31:25], instruction [11:7] } ));
@@ -62,10 +73,18 @@ module instruction_decoder(
 	assign func7 = instruction [31:25];
 
 	assign read = (op_code == 7'b0000011) ? (func3 == 3'b0 || func3 == 3'b100 ? 2'b01 : (func3 == 3'b001 || func3 == 3'b101 ? 2'b10 : (func3 == 3'b010 ? 2'b11 : 2'b0))) : 2'b0;
-	assign write = (op_code == 7'b0100011) ? (func3 == 3'b0 ? 2'b01 : (func3 == 3'b001 ? 2'b10 : (func3 == 3'b010 ? 2'b010 : 2'b0))) : 2'b0;
+	assign write = store ? (func3 == 3'b0 ? 2'b01 : (func3 == 3'b001 ? 2'b10 : (func3 == 3'b010 ? 2'b010 : 2'b0))) : 2'b0;
 	assign reg_write = !branch && !write;
 
-	assign csr_writeback = (op_code != 7'b1110011 || func3 == 3'd0) ? 2'd0 : 
+	assign branch = op_code == 7'b0100011;
+	assign store = op_code == 7'b0100011;
+
+	assign system_instruction = op_code == 7'b1110011;
+	assign csr_instruction = system_instruction && func3;
+	assign csr_immediate_instruction = csr_instruction && func3[2] == 1'b1;
+	assign external_instruction = system_instruction && !csr_instruction;
+	assign csr_read = (csr_instruction && registerd) ? 1'b1 : 1'b0;
+	assign csr_writeback = (!csr_instruction) ? 2'd0 : 
 		(func3 == 3'b001 || func3 == 3'b101) ? 2'b11 : // readwrite
 		(func3 == 3'b010 || func3 == 3'b110) ? 2'b10 : // readset
 		(func3 == 3'b011 || func3 == 3'b111) ? 2'b01 : // readclear

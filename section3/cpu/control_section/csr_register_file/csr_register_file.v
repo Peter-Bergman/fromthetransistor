@@ -5,9 +5,11 @@ module CSR_Register_File(
 	read,
 	read_address,
 	read_data,
+
 	write_back,
 	write_back_address,
 	write_back_data,
+
 	increment_instret
 );
 
