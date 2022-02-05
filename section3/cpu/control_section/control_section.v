@@ -30,6 +30,7 @@ module control_section(
 	input [31:0]			memory_data_load;
 	output				memory_read;
 	output [1:0]			memory_write;
+	input				memory_wait;
 
 	// internals
 	reg [31:0]			pc;
@@ -37,22 +38,19 @@ module control_section(
 	wire [31:0]			next_pc,
 
 					memory_hazard_check_addend,
-					
-					csr_read_address,
-					csr_read_data,
-					csr_write_back_address,
 
-					csr_write_back_data;
-
+					fetch_decode_instruction,
+				
 	reg				instruction_waiting,
 					memory_waiting;
 
-	wire				instrucion_received,
+	wire				instruction_received,
 					memory_received,
 					can_access_memory,
 					can_execute,
 					can_decode,
 					can_fetch,
+					can_access_csr,
 
 					register_read_after_write_hazard,
 					main_memory_read_after_write_hazard1,
@@ -60,19 +58,39 @@ module control_section(
 					main_memory_read_after_write_hazard3,
 
 					csr_read,
-					csr_immediate_instruction;
+					csr_immediate_instruction,
 
-	wire [4:0]			select_register1,
-					select_register2,
+					system_instruction_in_decoder,
+					csr_instruction_in_decoder;	
 
-					operand_register1,
-					operand_register2;
-						
+	wire [4:0]			operand_register1,
+					operand_register2,
 
 	reg [31:0]			fetch_decode_pc_reg,
 					fetch_decode_instruction_reg,
 
-					decode_execute_pc_reg,
+	wire [31:0]			decode_execute_operand1,
+					decode_execute_operand2,
+					decode_execute_immediate,
+					decode_execute_store_immediate,
+					decode_execute_branch_immediate,
+					decode_execute_upper_immediate,
+					decode_execute_jump_immediate,
+					csr_immediate,
+					csr_address,
+					csr_read_data;
+					csr_write_back_data;
+	wire [4:0]			decode_execute_destination;
+	wire				decode_execute_shamt;
+	wire [2:0]			decode_execute_func3;
+	wire [6:0]			decode_execute_func7,
+					decode_execute_op_code;
+	wire [1:0]			decode_execute_write,
+					decode_execute_reg_write,
+					csr_write_back;
+	wire				decode_execute_read;
+
+	reg [31:0]			decode_execute_pc_reg,
 					decode_execute_operand_reg1,
 					decode_execute_operand_reg2,
 					decode_execute_immediate_reg,
@@ -81,13 +99,24 @@ module control_section(
 					decode_execute_upper_immediate_reg,
 					decode_execute_jump_immediate_reg;
 	reg [4:0]			decode_execute_destination_reg,
-					decode_execute_shamt;
-	reg [6:0]			decode_execute_op_code_reg;
+					decode_execute_shamt_reg;
+	reg [6:0]			decode_execute_op_code_reg,
+					decode_execute_func7_reg;
 	reg [2:0]			decode_execute_func3_reg;
-	reg [6:0]			decode_execute_func7_reg;
 	reg [1:0]			decode_execute_write_reg,
 					decode_execute_reg_write_reg;
+	reg				decode_execute_read_reg;
 					
+
+	wire [31:0]			execute_memory_access_store_val,
+					execute_memory_access_branch,
+					execute_memory_access_alu_result,
+	wire [4:0]			execute_memory_access_destination,
+	wire [1:0]			execute_memory_access_write,
+					execute_memory_access_reg_write;
+	wire				execute_memory_access_read,
+					execute_memory_access_branch_signal;
+
 	reg [31:0]			execute_memory_access_pc_reg,
 					execute_memory_access_store_val_reg;
 					execute_memory_access_branch_result_reg,
@@ -137,14 +166,15 @@ module control_section(
 	instruction_decoder decoder (
 		.instruction (fetch_decode_instruction),
 		
-		.register1 (select_register1),
-		.register2 (select_register2),
-		.csr_register (csr_read_address),
+		.register1 (operand_register1),
+		.register2 (operand_register2),
+		.csr_register (csr_address),
 		.immediate (decode_execute_immediate),
 		.store_immediate (decode_execute_store_immediate),
 		.branch_immediate (decode_execute_branch_immediate),
 		.upper_immediate (decode_execute_upper_immediate),
 		.jump_immediate (decode_execute_jump_immediate),
+		.csr_immediate (csr_immediate)
 		.registerd (decode_execute_destination),
 	//	.branch (decode_execute_branch), // This line of code is
 	//	commented because we get the branch signal from the output of
@@ -165,8 +195,8 @@ module control_section(
 		.clk (clk),
 		.rst (rst),
 
-		.select_operand1 (select_register1),
-		.select_operand2 (select_register2),
+		.select_operand1 (operand_register1),
+		.select_operand2 (operand_register2),
 		
 		.operand_output1 (decode_execute_operand1),
 		.operand_output2 (decode_execute_operand2),
@@ -198,7 +228,7 @@ module control_section(
 		.rst (rst),
 
 		.read (csr_read),
-		.read_address (csr_read_address),
+		.read_address (csr_address),
 		.read_data (csr_read_data),
 		
 		.write_back (memory_access_write_back_csr_write_back_reg),
@@ -211,22 +241,18 @@ module control_section(
 	// logic
 	assign next_pc = pc + 4;
 
-	assign operand_register1 = fetch_decode_instruction[15:19];
-	assign operand_register2 = fetch_decode_instruction[24:20];
-
 	assign register_read_after_write_hazard = 	(
 
-							( ( memory_access_write_back_destination_reg == operand_register1 || memory_access_write_back_destination_reg == operand_register2 ) && 
-							memory_access_write_back_pc_reg && memory_access_write_back_destination_reg ) ||
-							
-							( ( execute_memory_access_destination_reg == operand_register1 || execute_memory_access_destination_reg == operand_register2 ) && 
-							execute_memory_access_pc_reg && execute_memory_access_destination_reg ) || 
+		( ( memory_access_write_back_destination_reg == operand_register1 || memory_access_write_back_destination_reg == operand_register2 ) && 
+			memory_access_write_back_pc_reg && memory_access_write_back_destination_reg ) ||
 
-							( (decode_execute_destination_reg == operand_register1 || decode_execute_destination_reg == operand_register2 ) && 
-							decode_execute_pc_reg && decode_execute_destination_reg )
+		( ( execute_memory_access_destination_reg == operand_register1 || execute_memory_access_destination_reg == operand_register2 ) && 
+			execute_memory_access_pc_reg && execute_memory_access_destination_reg ) || 
 
-						        ) &&
-							fetch_decode_pc_reg;
+		( (decode_execute_destination_reg == operand_register1 || decode_execute_destination_reg == operand_register2 ) && 
+			decode_execute_pc_reg && decode_execute_destination_reg )
+
+		) && fetch_decode_pc_reg;
 	
 	assign memory_hazard_check_addend = execute_memory_access_write_reg[1] ? ( execute_memory_access_write_reg[0] ? 32'd3 : 32'd1 ) : 32'd0;
 
@@ -252,7 +278,8 @@ module control_section(
 
 	assign instruction_received = instruction_waiting && !instruction_wait;
 
-	assign reading_from_csr = (decode_execute_op_code == 7'b1110011) && decode_execute_func3;
+	assign system_instruction_in_decoder = (decode_execute_op_code == 7'b1110011);
+	assign csr_instruction_in_decoder = system_instruction_in_decoder && decode_execute_func3;
 
 	assign memory_read = execute_memory_access_read_reg;
 	assign memory_write = execute_memory_access_write_reg;
@@ -260,14 +287,16 @@ module control_section(
 
 	assign can_access_memory = memory_received || !( memory_write || memory_read );
 	assign can_execute = ( can_access_memory || !execute_memory_access_pc_reg ) && !main_memory_access_read_after_write_hazard1 && !execute_memory_access_branch_signal_reg;
-	assign can_decode = ( can_access_execute || !decode_execute_pc_reg ) && !register_read_after_write_hazard && !main_memory_read_after_write_hazard2 && !reading_from_csr;
-	assign can_fetch = instrucion_received && ( !fetch_decode_pc_reg || can_decode || can_access_csr ) && !main_memory_read_after_write_hazard3;
-	assign can_access_csr = reading_from_csr && !memory_access_write_back_pc_reg && !execute_memory_access_pc_reg && !decode_execute_pc_reg;
+	assign can_decode = ( can_execute || !decode_execute_pc_reg ) && !register_read_after_write_hazard && !main_memory_read_after_write_hazard2 && !csr_instruction_in_decoder;
+	assign can_fetch = instruction_received && ( !fetch_decode_pc_reg || can_decode || can_access_csr ) && !main_memory_read_after_write_hazard3;
+	assign can_access_csr = csr_instruction_in_decoder && !memory_access_write_back_pc_reg && !execute_memory_access_pc_reg && !decode_execute_pc_reg;
 	
 	// This wire is needed to determine whether the csr_immediate or the
 	// value from register1 is going to be written back to the CSR
 	// register file.
 	assign csr_write_back_data = csr_immediate_instruction ? csr_immediate : decode_execute_operand1;
+
+	assign decode_execute_shamt = operand_register2;
 
 
 	always @(posedge clk) begin
@@ -292,11 +321,15 @@ module control_section(
 				memory_access_write_back_data_reg <= execute_memory_access_alu_result_reg;
 			end
 			memory_access_write_back_destination_reg <= execute_memory_access_destination_reg;
-			memory_access_write_back_reg_write_reg <= execute_memory_access_reg_write_reg;
+			if ( execute_memory_access_pc_reg ) begin
+				memory_access_write_back_reg_write_reg <= execute_memory_access_reg_write_reg;
+			end else begin
+				memory_access_write_back_reg_write_reg <= 2'b0;
 
 			memory_waiting <= 1'b0;
 		end else begin
 			memory_access_write_back_pc_reg <= 32'b0;
+			memory_access_write_back_reg_write_reg <= 2'b0;
 		end
 
 		if ( can_execute ) begin
@@ -305,8 +338,8 @@ module control_section(
 			execute_memory_access_branch_result_reg <= execute_memory_access_branch_result;
 			execute_memory_access_alu_result_reg <= execute_memory_access_alu_result;
 			execute_memory_access_destination_reg <= decode_execute_destination_reg;
-			execute_memory_access_write <= decode_execute_write;
-			execute_memory_access_read <= decode_execute_read;
+			execute_memory_access_write_reg <= decode_execute_write_reg;
+			execute_memory_access_read_reg <= decode_execute_read_reg;
 			execute_memory_access_branch_signal_reg <= execute_memory_access_branch_signal;
 
 			if ( !decode_execute_pc_reg ) begin
@@ -327,23 +360,18 @@ module control_section(
 			decode_execute_upper_immediate_reg <= decode_execute_upper_immediate;
 			decode_execute_jump_immediate_reg <= decode_execute_jump_immediate;
 			decode_execute_destination_reg <= decode_execute_destination;
-			decode_execute_shamt_reg <= select_register2;
+			decode_execute_shamt_reg <= decode_execute_shamt;
 			decode_execute_write_reg <= decode_execute_write;
-			decode_execute_reg_write_reg <= decode_execute_reg_write_reg;
+			decode_execute_reg_write_reg <= decode_execute_reg_write;
 			decode_execute_read_reg <= decode_execute_read;
 			decode_execute_op_code_reg <= decode_execute_op_code;
+			decode_execute_func3_reg <= decode_execute_func3;
+			decode_execute_func7_reg <= decode_execute_func7;
 		end
 
 		// fetch the instruction from instruction memory
 		// with the address held in the program counter
 		if ( can_fetch ) begin
-			// WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 
-			// We need to make sure that the fetch_decode
-			// registers can be overwritten. We need to make sure
-			// that fetch_decode_pc_reg is equal to 0, or the
-			// decode_execute_pc_reg is equal to 0, or the 
-			// execute_memory_access_pc_reg is equal to 0, or the 
-			// memory_received wire is on.
 			fetch_decode_pc_reg <= next_pc;
 			fetch_decode_instruction_reg <= instruction;
 
@@ -359,11 +387,17 @@ module control_section(
 			// decode phase. This block makes the csr instruction
 			// skip the execute and memory_access phases.
 			memory_access_write_back_pc_reg <= fetch_decode_pc_reg;
+			memory_access_write_back_destination_reg <= decode_execute_destination;
 			memory_access_write_back_data_reg <= csr_read_data;
 			memory_access_write_back_reg_write_reg <= decode_execute_reg_write;
-			memory_access_write_back_csr_write_back <= csr_write_back;
-			memory_access_write_back_csr_write_back_address_reg <= csr_write_back_address;
+			memory_access_write_back_csr_write_back_reg <= csr_write_back;
+			memory_access_write_back_csr_write_back_address_reg <= csr_address;
 			memory_access_write_back_csr_write_back_data_reg <= csr_write_back_data;
+		end else begin
+			// If the instruction in the memory_access_write_back
+			// registers is not a csr instruction, then don't
+			// try to write back to the CSR register file.
+			memory_access_write_back_csr_write_back_reg <= 2'b0;
 		end
 		
 		// get the next program counter value
@@ -380,16 +414,13 @@ module control_section(
 			execute_memory_access_write_reg <= 2'b0;
 
 			pc <= execute_memory_access_branch_result_reg;
-			instruction_ready <= 1'b0;
 			instruction_waiting <= 1'b0;
+			instruction_ready <= 1'b0;
 		end
 
 		// Ensure that we do not have any main memory RAW
 		// hazards.
 		if ( main_memory_read_after_write_hazard1 ) begin
-			// WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 
-			// We need to make sure that the fetch signals
-			// are reset properly.
 			decode_execute_pc_reg <= 32'b0;
 			fetch_decode_pc_reg <= 32'b0;
 
@@ -410,8 +441,8 @@ module control_section(
 			instruction_ready <= 1'b0;
 		end else if ( main_memory_read_after_write_hazard3 ) begin
 			pc <= pc; // This line is redundant.
-			instruction_ready <= 1'b0;
 			instruction_waiting <= 1'b0;
+			instruction_ready <= 1'b0;
 		end
 
 		// Update the waiting signals if needed.
