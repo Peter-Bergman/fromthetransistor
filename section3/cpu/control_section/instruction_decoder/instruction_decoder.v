@@ -18,6 +18,8 @@ module instruction_decoder(
 	write,
 	reg_write,
 	csr_write_back,
+	external_call,
+	external_break,
 
 	// Instruction types include (register, immediate, upper), jump,
 	// branch, store, and load.
@@ -44,7 +46,9 @@ module instruction_decoder(
 				write,
 				reg_write,
 				csr_write_back;
-	output			csr_immediate_instruction;
+	output			csr_immediate_instruction,
+				external_call,
+				external_break;
 
 		
 	// internals
@@ -81,6 +85,7 @@ module instruction_decoder(
 
 	assign system_instruction = op_code == 7'b1110011;
 	assign csr_instruction = system_instruction && func3;
+	assign external_call_or_bp = system_instruction && !func3;
 	assign csr_immediate_instruction = csr_instruction && func3[2] == 1'b1;
 	assign external_instruction = system_instruction && !csr_instruction;
 	assign csr_read = (csr_instruction && registerd) ? 1'b1 : 1'b0;
@@ -89,7 +94,10 @@ module instruction_decoder(
 		(func3 == 3'b010 || func3 == 3'b110) ? 2'b10 : // readset
 		(func3 == 3'b011 || func3 == 3'b111) ? 2'b01 : // readclear
 		2'd0;
+	assign external_call = external_call_or_bp && !func7;
+	assign external_break = external_call_or_bp && func7 == 7'b1;
 
-
+	// We can use an always_comb block to determine if there is an invalid
+	// instruction exception.
 
 endmodule

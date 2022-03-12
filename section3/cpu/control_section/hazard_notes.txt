@@ -195,7 +195,25 @@ DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
 
 	We need to also change the wirings for the decoder because the wires needed for CSR instructions have not been added to the instantiation.
 
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
+
 17.	We need to make sure that all of the components of the CSR instruction are decoded correctly.
 
 	We need to make sure whether there is a selection of the csr_immediate or register1, depending on the MSB of func3.
 	If csr_immediate_instruction, then set memory_access_write_back_csr_write_back_data_reg to csr_immediate
+
+DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE DONE 
+
+18.	We need to add exception handling.
+	
+	This will require adding some more CSR registers. I am not sure how many or where I can find a list of all of them.
+	Some of these CSR registers have to do with permission levels. There are three permission levels in RISC-V:
+		- User Mode (U-Mode)
+		- Supervisor Mode (S-Mode)
+		- Machine Mode (M-Mode)
+	User Mode is the execution environment that users and tasks have.
+	Supervisor Mode is the execution environment of the operating system.
+	I am not quite sure what Machine Mode is. Apparently, this is the only mode which has access to physical memory addresses,
+	which was a surprise to me because I thought the operating system was responsible for handling virtual addresses and address translation,
+	but it seems that virtual address is more complicated than I imagined, which was already quite complicated.
+	

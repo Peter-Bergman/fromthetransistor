@@ -61,7 +61,11 @@ module control_section(
 					csr_immediate_instruction,
 
 					system_instruction_in_decoder,
-					csr_instruction_in_decoder;	
+					csr_instruction_in_decoder,
+
+					external_call,
+					external_break,
+					external_request;
 
 	wire [4:0]			operand_register1,
 					operand_register2,
@@ -188,7 +192,10 @@ module control_section(
 		.write (decode_execute_write),
 		.reg_write (decode_execute_reg_write),
 		.csr_read (csr_read),
-		.csr_write_back (csr_write_back)
+		.csr_write_back (csr_write_back),
+
+		.external_call (external_call),
+		.external_break (external_break),
 	);
 
 	register_file registers(
@@ -280,6 +287,7 @@ module control_section(
 
 	assign system_instruction_in_decoder = (decode_execute_op_code == 7'b1110011);
 	assign csr_instruction_in_decoder = system_instruction_in_decoder && decode_execute_func3;
+	assign external_request = external_call || external_break;
 
 	assign memory_read = execute_memory_access_read_reg;
 	assign memory_write = execute_memory_access_write_reg;
@@ -287,7 +295,8 @@ module control_section(
 
 	assign can_access_memory = memory_received || !( memory_write || memory_read );
 	assign can_execute = ( can_access_memory || !execute_memory_access_pc_reg ) && !main_memory_access_read_after_write_hazard1 && !execute_memory_access_branch_signal_reg;
-	assign can_decode = ( can_execute || !decode_execute_pc_reg ) && !register_read_after_write_hazard && !main_memory_read_after_write_hazard2 && !csr_instruction_in_decoder;
+	assign can_decode = ( can_execute || !decode_execute_pc_reg ) && !register_read_after_write_hazard && !main_memory_read_after_write_hazard2 
+		&& !csr_instruction_in_decoder && !external_call && !external_break;
 	assign can_fetch = instruction_received && ( !fetch_decode_pc_reg || can_decode || can_access_csr ) && !main_memory_read_after_write_hazard3;
 	assign can_access_csr = csr_instruction_in_decoder && !memory_access_write_back_pc_reg && !execute_memory_access_pc_reg && !decode_execute_pc_reg;
 	
@@ -399,13 +408,23 @@ module control_section(
 			// try to write back to the CSR register file.
 			memory_access_write_back_csr_write_back_reg <= 2'b0;
 		end
+
+		if ( external_call ) begin
+			// Handle external call
+			fetch_decode_pc_reg <= 32'b0;
+		end
+
+		if ( external_break ) begin
+			// Handle break point
+			fetch_decode_pc_reg <= 32'b0;
+		end
 		
 		// get the next program counter value
 		// This could be the last pc incremented by 4, or it
 		// could be a value from a branch instruction or
 		// a value from a jump instruction. We also have to
 		// protect ourselves from branch hazards.
-		if (execute_memory_access_branch_signal_reg) begin
+		if ( execute_memory_access_branch_signal_reg ) begin
 			execute_memory_access_branch_signal_reg <= 1'b0;
 			fetch_decode_pc_reg <= 32'b0;
 			decode_execute_pc_reg <= 32'b0;
@@ -429,13 +448,7 @@ module control_section(
 			instruction_ready <= 1'b0;
 		end else if ( main_memory_read_after_write_hazard2 ) begin
 			fetch_decode_pc_reg <= 32'b0;
-			// WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 
-			// We need to make sure that the fetch signals
-			// are reset properly and that
-			// decode_execute signals do not go to
-			// execute_memory_access
-			// and that fetch_decode signals do not get
-			// into decode_execute registers.
+
 			pc <= fetch_decode_pc_reg - 4;
 			instruction_waiting <= 1'b0;
 			instruction_ready <= 1'b0;
