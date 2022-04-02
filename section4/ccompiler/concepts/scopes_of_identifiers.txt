@@ -1,0 +1,36 @@
+An identifier can denote an
+ - object
+ - function
+ - tag for a structure, union, or enumerable
+ - member of a structure, union, or enumerable
+ - typedef name
+ - label name
+ - macro name (preprocessor)
+ - macro parameter (preprocessor)
+
+Different entities designated by the same identifier either have different scopes or are in different name spaces.
+
+There are kinds of scopes:
+ - function (this is only for labels)
+ - file
+ - block
+ - function prototype
+
+Labels all have function scope. Therefore, they must all be declared inside of a function.
+Every other identifier has scope determined by the placement of its declaration (in declarator or type specifier).
+
+File scope is like global scope. An identifier with file scope is accessible from anywhere inside of the translation unit.
+
+If the declarator or type specifier that declares the identifier appears outside of any block or list of parameters, the identifier has file scope, which terminates at the end of the translation unit.
+If the declarator or type specifier that declares the identifier appears inside a block or within the list of parameter declarations in a function definition, the identifier has block scope, which terminates at the end of the associated block.
+If the declarator or type specifier that declares the identifier appears within the list of parameter declarations in a function prototype (not part of a function definition), the identifier has function prototype scope, which terminates at the end of the function declarator.
+
+If an identifier designates two different entities in the same name space, the scopes might overlap.
+If so, the scope of one entity (the inner scope) will end strictly before the scope of the other entity (the outer scope).
+The entity declared in the outer scope is hidden (and not visible) within the inner scope.
+
+Two identifiers have the same scope if and only if their scopes terminate at the same point.
+
+Structure, union, and enumeration tags have scope that begins just after the appearance of the tag in a type specifier that declares the tag.
+Each enumeration constant has scope that begins just after the appearance of its defining enumerator in an enumerator list.
+Any other identifier has scope that begins just after the completion of its declarator.

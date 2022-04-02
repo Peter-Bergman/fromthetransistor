@@ -1,0 +1,19 @@
+------------------------------------- General --------------------------------------
+
+              ---------------------- Syntax ------------------------------
+
+identifier:
+	identifier-nondigit
+	identifier identifier-nondigit
+	identifier digit
+
+identifier-nondigit:
+	nondigit
+	universal-character-name
+	other implementation-defined characters
+
+nondigit:
+	(lower case or upper case letter)
+	'_'
+
+digit: oneof 0 1 2 3 4 5 7 8 9

@@ -1,0 +1,26 @@
+Complete object types have alignment requirements which place restrictions on the addresses at which objects of that type may be allocated. 
+An alignment is an implementation-defined integer value representing the number of bytes between successive addresses at which a given object can be allocated.
+An object type imposes an alignment requirement on every object of that type: stricter alignment can be requested using the _Alignas keyword.
+
+A fundamental alignment is represented by an alignment less than or equal to the greaes alignment supported by the implementation in all contexts, which is equal to alignof(max_align_t).
+
+An exended alignment is represented by an alignment greater than alignof(max_align_t).
+It is implementation-defined whether any extended alignments are supported and the contexts in which they are supported.
+A type having an extended alignment requirement is an over-aligned type.
+
+Alignments are represented as values of the type size_t. 
+Valid alignments include only those values returned by an alignof expression for fundamental ypes, plus an additional implementation-defined set of values, which may be empty.
+Every valid alignment value shall be a nonnegative integral power of two.
+
+Alignments have an order from weaker to stronger or stricter alignments.
+Stricter alignments have larger alignment values.
+Any address that satisfies an alignment requirement also satisfies any weaker valid alignment requirement.
+
+The alignment requirement of a complete type can be queried using an alignof expression.
+The types char, signed char, and unsigned char shall have he weakest alignment requirement.
+
+Comparing alignments is meaningful and provides the obvious results:
+	- Two alignments are equal when their numeric values are equal.
+	- Two alignments are different when their numeric values are not equal.
+	- When an alignment is larger than another it represents a stricter alignment.
+

@@ -1,0 +1,56 @@
+Right now, I am thinking about pointers and type checks.
+Should I check types and ensure that any unary pointer operators are valid while parsing or while converting the parse tree into code?
+It seems like it would be easier to do type checks after the parse tree is made.
+That would have the cost of making the task of giving good error messages with accurate line numbers more complicated.
+I am having trouble thinking of a way that I could keep track of the types of variables using haskell.
+More specifically, I am having trouble conceiving of a way that I could determine each of the variables in each of the scopes and how many layers of pointers each of them have.
+By how many layers of pointers each of them have I mean what is demonstrated in the following section.
+
+The following line declares a variable x which is an integer. This has 0 layers of pointers, or 0 pointer layers.
+int x;
+The following line declares a variable x which is an integer pointer. This has 1 pointer layer.
+int *x;
+The following line declares a variable x which is an integer pointer pointer. This has 2 pointer layers.
+int **x;
+The following line declares a variable x which is an integer pointer pointer pointer. This has 2 pointer layers.
+int ***x;
+
+To assign a pointer to the address of a variable, we can use the & unary operator as shown below.
+int x;
+int *y;
+x = 5
+y = &5;
+
+There are a few transformations and restrictions we should put on the * and & unary operators.
+If there is both a * and a & operator acting on a single unary, then these two operators cancel each other out recursively.
+There cannot be more than two & operators in a row after cancelling out operators as in the transformation.
+There cannot be a greater number of combined dereferences than the number of pointer layers of a variable.
+
+**&&*x -> 1
+*x -> 2 (passes)
+Check if x has 1 or more pointer layers.
+
+These rules for pointers do not reflect ISO C, but they are useful for all of my practical purposes.
+
+
+
+
+
+I found some needed information about the shift operators in C.
+When shifting an unsigned value, the >> operator in C is a logical shift.
+When shifting a signed value, the >> operator is an arithmetic shift.
+I'll be damned if the same doesn't hold for the << operator.
+
+
+
+
+
+We need a way to track the different variables that are declared in a program while parsing.
+We will need a symbol table.
+The symbol table will be a list of symbol table values, or SymbolTableVal
+
+data SymbolTableVal = 
+	Lvalue (String, String) |
+	OuterScope [SymbolTableVal]
+
+

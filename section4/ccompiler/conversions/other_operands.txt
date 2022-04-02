@@ -1,0 +1,53 @@
+----------------------------------- Lvalues, arrays, and function designators -----------------------------------
+
+An lvalue is an expression (with an object type other than void) that potentially designates an object; if an lvalue does not designate an object when it is evaluated, the behavior is undefined.
+When an object is said to have a particular type, the type is specified by the lvalue used to designate the object.
+A modifiable lvalue is an lvalue that does not have array type, does not have an incomplete type, does not have a const-qualified type, and if it is a structure or union, does not have any member (including, recursively, any member or element of all contained aggregates or unions) with a constant qualified type.
+
+Except when it is the operand of the sizeof operator, the unary operator &, the ++ operator, the -- operator, or the left operand of the . operator or an assignment operator, an lvalue that does not have array type is converted to the value stored in the designated object (and is no longer an lvalue); this is called lvalue conversion.
+If the lvalue has qualified type, the value has the unqualified version of the type of the lvalue; otherwise, the value has the type of the lvalue.
+If the lvalue has an incomplete type and does not have array type, the behavior is undefined.
+If the lvalue designates an object of automatic storage duration that could have been declared with the register storage class (never had its address taken), and that object is uninitialized (not declared with an initializer and no assignment to it has been performed prior to use), the behavior is undefined.
+
+Except when it is the operand of the sizeof operator or the unary & operator, or is a string literal used to initialize an array, an expression that has type "array of type" is converted to an expression with type "pointer to type" that points to the initial element of the array object and is not an lvalue.
+If the array object has register storage class, the behavior is undefined.
+
+A function designator is an expression that has function type.
+Except when it is the operand of the sizeof operator or the unary & operator, a function designator with type "function returning type" is converted to an expression that has type "pointer to function returning type".
+
+
+--------------------------------------------------- void --------------------------------------------------------
+
+The (nonexistent) value of a void expression (an expression that has type void) shall not be used in any way, and implicit or explicit conversions (except to void) shall not be applied to such an expression.
+If an expression of any other type is evaluated as a void expression, its value or designator is discarded.
+(A void expression is evaluated for its side effects.)
+
+
+------------------------------------------------- Pointers ------------------------------------------------------
+A pointer to void may be converted to or from a pointer to any object type.
+A pointer to any object type may be converted to a pointer to void and back again; the result shall compare equal to the original pointer.
+
+For any qualifier q, a pointer to a non-q-qualified type may be converted to a pointer to the q-qualified version of the type; the values stored in the original and converted pointers shall compare equal. 
+
+An integer constant expression with the value 0, or such an expression cast to type void *, is called a null pointer constant.
+If a null pointer constant is converted to a pointer type, the resulting pointer, called a null pointer, is guaranteed to compare unequal to a pointer to any object or function.
+
+Conversion of a null pointer to another pointer type yields a null pointer of that type. Any two null pointers shall compare equal.
+
+An integer may be converted to any pointer type.
+Except as previously specified, the result is implementation-defined, might not be correctly aligned, might not point to an entity of the referenced type, and might be a trap representation.
+
+Any pointer type may be converted to an integer type. 
+Except as previously specified, the result is implementation-defined.
+If the result cannot be represented in the integer type, the behavior is undefined.
+The result need not be in the range of values of any integer type.
+
+A pointer to an object type may be converted to a pointer to a different object type.
+If the resulting pointer is not correctly aligned for the referenced type, the behavior is undefined.
+Otherwise, when converted back again, the result shall compare equal to the original pointer. When a pointer to an object is converted to a pointer to a character type, the result points to the lowest addressed byte of the object.
+Successive increments of the result, up to the size of the object, yield pointers to the remaining bytes of the object.
+
+A pointer to a function of one type may be converted to a pointer to a function of another type and back again; the result shall compare equal to the original pointer.
+If a converted pointer is used to call a function whose type is not compatible with the referenced type, the behavior is undefined.
+
+
