@@ -1,0 +1,11 @@
+	Universal Character Names
+
+	------------ Syntax ----------------
+
+universal-character-name:
+	\u hex-quad
+	\U hex-quad hex-quad
+hex-quad:
+	hexadecimal-digit hexadecimal-digit hexadecimal-digit hexadecimal-digit
+
+
