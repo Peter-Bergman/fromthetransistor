@@ -8,4 +8,6 @@ universal-character-name:
 hex-quad:
 	hexadecimal-digit hexadecimal-digit hexadecimal-digit hexadecimal-digit
 
+           ------------------ Semantics ------------------
 
+The universal character names \Unnnnnnnn designates the character whose eigth-digit short identifier (as specified by ISO/IEC 10646) is nnnnnnnn. Similarly, the universal character name \unnnn designates the character whose four-digit short identifier is nnnn (and whose eighth-digit short identifier is 0000nnnn).

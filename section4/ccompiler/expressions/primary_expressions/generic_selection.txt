@@ -1,0 +1,31 @@
+        ----------------------------- Generic Selection ------------------------------------
+
+generic-selection:
+	_Generic ( assignment-expression , generic-assoc-list )
+generic-assoc-list:
+	generic-association
+	generic-assoc-list , generic-association
+generic-association:
+	type-name : assignment-expression
+	default : assignment-expression
+
+
+           ------------------------------ Constraints --------------------------
+
+A generic selection shall have no more than one default generic association.
+The type name in a generic association shall specify a complete object type other than a variably modified type.
+No two generic associations in the same generic selection shall specify compatible types.
+The controlling expression of a generic selection shall have type compatible with at most one of the types named in its generic association list.
+If a generic selection has no default generic association, its controlling expression shall have type compatible with exactly one of the types named in its generic association list.
+
+           ---------------------------- Semantics --------------------------------
+
+The controlling expression of a generic selection is not evaluated. 
+If a generic selection has a generic association with a type name that is compatible with the type of the controlling expression, then the result expression of the generic selection is the expression in that generic association.
+Otherwise, the result expression of the generic selection is the expression in the default generic association.
+None of the expressions from any other generic association of the generic selection evaluated. 
+
+The type and value of a generic selection are identical to those of its result expression.
+It is an lvalue, a function designator, or a void expression if its result expression is, respectively, an lvalue, a function designator, or a void expression.
+
+
