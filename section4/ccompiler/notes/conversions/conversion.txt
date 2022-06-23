@@ -1,0 +1,3 @@
+Several operators convert operand values from one type to another automatically.
+
+This subclause specifies the result required from such an implicit conversion, as well as those that result from a cast operation (explicit conversion).

@@ -1,0 +1,9 @@
+          -------------------- Iteration statements ------------------------
+
+            ------------- Syntax -------------
+
+iteration-statement:
+	while ( expression ) statement
+	do statement while ( expression ) ;
+	for ( expression(opt) ; expression(opt) ; expression(opt) ) statement
+	for ( declaration expression(opt) ; expression(opt)  ) statement

@@ -1,0 +1,22 @@
+            --------------- Type specifiers -----------------
+
+      ------------ Syntax --------------------
+
+type-specifier:
+	void
+	char
+	short
+	int
+	long
+	float
+	double
+	signed
+	unsigned
+	_Bool
+	_Complex
+	atomic-type-specifier
+	struct-or-union-specifier
+	enum-specifier
+	typedef-name
+
+

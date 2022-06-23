@@ -1,0 +1,10 @@
+   -------------------- Equality operators -----------------------
+
+            ------------ Syntax ---------------
+
+equality-expression:
+	relational-expression
+	equality-expression == relational-expression
+	equality-expression != relational-expression
+
+

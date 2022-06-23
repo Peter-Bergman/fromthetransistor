@@ -1,0 +1,11 @@
+        ---------------- Type qualifiers ----------------------
+
+         ------------- Syntax -----------------
+
+type-qualifier:
+	const
+	restrict
+	volatile
+	_Atomic
+
+

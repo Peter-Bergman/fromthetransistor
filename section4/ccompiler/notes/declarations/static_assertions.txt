@@ -1,0 +1,6 @@
+                -------------------- Static assertions ------------------------
+
+                  ------------ Syntax --------------
+
+static_assert-declaration:
+	_Static_assert ( constant-expression , string-literal ) ;

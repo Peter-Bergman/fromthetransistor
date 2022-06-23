@@ -1,0 +1,9 @@
+        ----------------------- Selection statement ------------------------
+
+             ---------------- Syntax -------------------
+
+selection-statement:
+	if ( expression ) statement
+	if ( expression ) statement else statement
+	switch ( expression ) statement
+

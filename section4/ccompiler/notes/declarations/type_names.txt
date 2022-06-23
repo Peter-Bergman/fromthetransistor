@@ -1,0 +1,17 @@
+                   ------------------ Type names ----------------------
+
+                    ---------- Syntax -----------
+
+type-name:
+	specifier-qualifier-list abstract-declarator(opt)
+abstract-declarator:
+	pointer
+	pointer(opt) direct-abstract-declarator
+direct-abstract-declarator:
+	( abstract-declarator )
+	direct-abstract-declarator(opt) [ type-qualifier-list(opt) assignment-expression(opt) ]
+	direct-abstract-declarator(opt) [ static type-qualifier-list(opt) assignment-expression ]
+	direct-abstract-declarator(opt) [ type-qualifier-list static assignment-expressions ]
+	direct-abstract-declarator(opt) [ * ]
+	direct-abstract-declarator(opt) ( parameter-type-list(opt) )
+

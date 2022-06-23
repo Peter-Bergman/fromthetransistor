@@ -1,0 +1,14 @@
+    -------------------------- Compound statement ------------------------------------
+
+      ----------------- Syntax ------------------
+
+compound-statment:
+	{ block-item-list(opt) }
+block-item-list:
+	block-item
+	block-item-list block-item
+block-item:
+	declaration
+	statement
+
+

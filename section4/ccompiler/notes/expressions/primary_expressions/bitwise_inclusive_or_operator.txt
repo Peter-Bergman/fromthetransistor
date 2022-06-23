@@ -1,0 +1,10 @@
+     --------------- Bitwise inclusive OR operator -----------------
+
+        ---------- Syntax ---------
+
+inclusive-OR-expression:
+	exclusive-OR-expression
+	inclusive-OR-expression | exclusive-OR-expression
+
+
+

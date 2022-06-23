@@ -1,0 +1,9 @@
+        ----------- Logical OR operator ---------------
+
+         -------- Syntax ----------
+
+logical-OR-expression:
+	logical-AND-expression
+	logical-OR-expression || logical-AND-expression
+
+

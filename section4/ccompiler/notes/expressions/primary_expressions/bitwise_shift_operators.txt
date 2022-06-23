@@ -1,0 +1,10 @@
+         -------------- Bitwise shift operators -----------------
+
+      ------------- Syntax --------------
+
+shift-expression:
+	additive-expression
+	shift-expression << additive-expression
+	shift-expression >> additive-expression
+
+

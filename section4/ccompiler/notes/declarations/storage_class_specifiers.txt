@@ -1,0 +1,13 @@
+          ---------- Storage class specifiers -------------
+
+     -------------- Syntax ----------------
+
+storage-class-specifier:
+	typedef
+	extern
+	static
+	_Thread_local
+	auto
+	register
+
+

@@ -1,0 +1,21 @@
+              ------------------------------ Initialization ---------------------------------
+
+                 ------------ Syntax --------------
+
+initializer:
+	assignment-expression
+	{ initializer-list }
+	{ initializer-list , }
+initializer-list:
+	designation(opt) initializer
+	initializer-list , designation(opt) initializer
+designation:
+	designator-list =
+designator-list:
+	designator
+	designation-list designator
+designator:
+	[ constant-expression ]
+	. identifier
+
+

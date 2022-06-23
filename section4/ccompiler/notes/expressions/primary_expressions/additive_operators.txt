@@ -1,0 +1,10 @@
+         ------------------ Additive operators ------------------------
+
+          --------------- Syntax ---------------
+
+additive-expression:
+	multiplicative-expression
+	additive-expression + multiplicative-expression
+	additive-expression - multiplicative-expression
+
+

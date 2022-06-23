@@ -1,0 +1,9 @@
+        ------------------------- Function specifiers ----------------------------
+
+          ---------- Syntax ------------
+
+function-specifier:
+	inline
+	_Noreturn
+
+

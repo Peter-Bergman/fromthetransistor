@@ -1,0 +1,10 @@
+       -------------------- Labeled statements -----------------------
+
+        ------------- Syntax ------------
+
+labeled-statement:
+	identifier : statement
+	case constant-expression : statement
+	default : statement
+
+

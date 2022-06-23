@@ -1,0 +1,9 @@
+        ------------------------- Alignment specifier ----------------------------
+
+          --------------- Syntax -------------------
+
+alignment-specifier:
+	_Alignas ( type-name )
+	_Alignas ( constant-expression )
+
+

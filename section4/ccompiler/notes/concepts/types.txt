@@ -1,0 +1,88 @@
+Types are partitioned into object types and function types.
+At various points within a translation unit an objec type may be incomplete (lacking sufficient information tto determine the size of objects of that type) or complete (having sufficient information).
+-- I would like to see examples of when it is incomplete.
+
+An object of type _Bool is large enough to store the values 0 and 1.
+
+If a member of the basic execution character set is stored in a char object, its value is guaranteed to be nonnegative. If any other character is stored in a char object, the resulting value is implementation-defined but shall be within the range of values that can be represented in that type.
+
+There are five standard signed integer types:
+ - signed char
+ - short int
+ - long int
+ - long long int
+These and other types may be designated in several additional ways, as described in 6.7.2
+
+For each of the signed integer types, there is a corresponding (but different) unsigned integer type (designated with the keyword unsigned) that uses the same amount of storage (including sign information) and has the same alignment requirements. The type _Bool and the unsigned integer types that correspond to the standard signed integer types are the standard unsigned integer types.
+
+The standard signed integer types and standard unsigned integer types are collectively called the standard integer ttypes.
+
+The range of nonnegative values of a signed integer ttype is a subrange of the corresponding unsigned integer type, and the representation of the same value in each type is the same.
+
+There are three real floating types, designated as
+ - float
+ - double
+ - long double
+
+There are three complex types, designated as
+ - float _Complex
+ - double _Complex
+ - long double _Complex
+Each complex type has the same representation and alignment requirements as an array type containing exactly two elements of the corresponding real type; the first element equal to the real part, and the second element to the imaginary part, of the complex number.
+
+The type char, the signed and unsigned integer types, and the floating types are collectively called the basic types. The basic types are complete object types.
+Even if the implementation defines two or more basic types to have the same representation, they are nevertheless different types.
+
+The three types char, signed char, and unsigned char are collectively called
+the character types. The implementation shall define char to have the same range,
+representation, and behavior as either signed char or unsigned char.
+
+An enumeration comprises a set of named integer constant values. Each distinct enumeration constitutes a different enumerated type.
+
+The type char, the signed and unsigned integer types, and the enumerated types are collectively called integer types. The integer and real floating types are collectively called real types.
+
+Integer and floating types are collectively called arithmetic types.
+Each arithmetic type belongs to one type domain:
+ - the real type domain comprises the real types,
+ - the complex type domain comprises the complex types
+
+The void type comprises an empty set of values; it is an incomplete object type that cannot be completed.
+
+
+
+Any number of derived types can be constructed from the object and function types, as follows:
+
+ - An array type describes a contiguously allocated nonempty sett of objects witth a particular member object type, called the element type. The element type shall be complete whenever the array type is specified. Array types are characerized by their element type and by the number of elements in the array. An array type is said to be derived from its elemen type, and if its elemen type is T, he array type is sometimes called "array of T". The construction of an array ype from an element type is called "array ttype derivaion".
+
+ - A sructure type describes a sequentially allocated nonempty set of member objects (and, in certain circumstances, an incomplete array), each of which has an optionally specified name and possibly distinct type.
+
+ - A union type describes an overlapping nonempty set of member objects, each of which has an optionally specified name and possibly distinct type.
+
+ - A function type describes a function with specified return type. A function type is characterized by its return type and the number and types of its parameters. A function type is said to be derived from its return type, and if its return type is T, the function type is sometimes called "function returning T". The construction of a function type from a return type is called "function type derivation".
+
+ - A pointer type may be derived from a function type or an object type, called the referenced type. A pointer type describes an object whose value provides a reference to an entity of the referenced type. A pointer type derived from the referenced type T is sometimes called "pointer to T". The construction of a pointer type from a referenced type is called "pointer type derivation". A pointer type is a complete object type.
+
+These methods of constructing derived types can be applied recursively.
+
+Arithmetic types and pointer types are collectively called scalar types. Array and structure types are collectively called aggregate types.
+
+An array type of unknown size is an incomplete type. It is completed, for an identifier of that type, by specifying the size in a later declaration (with internal or external linkage).
+
+A structure or union type of unknown content is an incomplete type. It is completed, for all declarations of that type, by declaring he same structure or union tag with its defining content later in the smae scope.
+
+A type has constant size if the type is not incomplete and is not a variable length array type.
+
+A type is characterized by its type category, which is either the outermost derivation of a derived type (as noted above in the construction of derived types), or the type itself if the type consists of no derived types.
+
+Any type so far mentioned is an unqualified type. Each unqualified type has several qualified versions of its type, corresponding to the combinations of one, two, or all three of the const, volatile, and restrict qualifiers.
+The qualified or unqualified versions of a type are distinct types that belong to the same type category and have the same representation and alignment requirements.
+A derived type is not qualified by the qualifiers (if any) of the type from which it is derived.
+
+
+A pointer to void shall have the same representation and alignment requirements as a pointer to a character type.
+Similarly, pointers to qualified or unqualified versions of compatible types shall have the same representation and alignment requirements.
+All pointers to structure types shall have the same representation and alignment requirements as each other.
+All pointers to union types shall have the same representation and alignment requirements as each other.
+Pointers to other types need not have the same representation or alignment requirements.
+
+

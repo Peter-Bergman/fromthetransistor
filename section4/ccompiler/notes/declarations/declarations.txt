@@ -1,0 +1,21 @@
+       --------------- Declarations -------------------------
+
+      ------------- Syntax -----------------
+
+declaration:
+	declaration-specifiers init-declarator-list(opt) ;
+	static_assert-declaration
+declaration-specifiers:
+	storage-class-specifier declaration-specifiers(opt)
+	type-specifier declaration-specifiers(opt)
+	type-qualifier declaration-specifiers(opt)
+	function-specifier declaration-specifiers(opt)
+	alignment-specifier declaration-specifiers(opt)
+init-declarator-list:
+	init-declarator
+	init-declarator , init-declarator
+init-declarator:
+	declarator
+	declarator = initializer
+
+

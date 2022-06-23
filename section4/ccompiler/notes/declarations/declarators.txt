@@ -1,0 +1,35 @@
+           ----------------- Declarators ----------------------
+
+              ---------- Syntax --------------
+
+declarator:
+	pointer(opt) direct-declarator
+direct-declarator:
+	identifier
+	( declarator )
+	direct-declarator [ type-qualifier-list(opt) assignment-expression(opt) ]
+	direct-declarator [ static type-qualifier-list(opt) assignment-expression ]
+	direct-declarator [ type-qualifier-list(opt) static assignment-expression ]
+	direct-declarator [ type-qualifier-list(opt) * ]
+	direct-declarator ( parameter-type-list )
+	direct-declarator ( identifier-list(opt) )
+pointer:
+	* type-qualifier-list(opt)
+	* type-qualifier-list(opt) pointer
+type-qualifier-list:
+	type-qualifier
+	type-qualifier-list type-qualifier
+parameter-type-list:
+	parameter-list
+	parameter-list , ...
+parameter-list:
+	parameter-declaration
+	parameter-list , parameter-declaration
+parameter-declaration:
+	declaration-specifiers declarator
+	declaration-specifiers abstract-declarator(opt)
+identifier-list:
+	identifier
+	identifier-list , identifier
+
+
