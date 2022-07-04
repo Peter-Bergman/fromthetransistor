@@ -1,9 +1,0 @@
-            ---------- Bitwise exclusive OR operator ----------------
-
-               ----------- Syntax -------------
-
-exclusive-OR-expression:
-	AND-expression
-	exclusive-OR-expression ^ AND-expression
-
-

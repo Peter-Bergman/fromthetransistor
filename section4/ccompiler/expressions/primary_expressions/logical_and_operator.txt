@@ -1,9 +1,0 @@
-    ------------ Logical AND operator ------------------
-
-        ----------- Syntax -----------
-
-logical-AND-expression:
-	inclusive-OR-expression
-	logical-AND-expression && inclusive-OR-expression
-
-

@@ -1,9 +1,0 @@
-             ------------ Bitwise AND operator --------------
-
-         -------- Syntax -----------
-
-AND-expression:
-	equality-expression
-	AND-expression & equality-expression
-
-

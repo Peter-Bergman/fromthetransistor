@@ -1,7 +1,0 @@
-     ------------------------------------- Comments -----------------------------------------------
-
-Except within a character constant, a string literal, or a comment, the characters /* introduce a comment.
-The contents of such a comment are examined only to identify multibyte characters and to find the characters */ that terminate it.
-
-Except within a character constant, a string literal, or a comment, the characters // introduce a comment that includes all multibyte characters up to, but not including, the next new-line character. The contents of such a comment are examined only to identify multibyte characters and to find the terminating new-line character.
-

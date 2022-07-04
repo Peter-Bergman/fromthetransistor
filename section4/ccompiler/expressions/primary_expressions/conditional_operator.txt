@@ -1,9 +1,0 @@
-  -------------------- Conditional operator ---------------------------
-
-     ------------- Syntax --------------
-
-conditional-expression:
-	logical-OR-expression
-	logical-OR-expression ? expression : conditional-expression
-
-
