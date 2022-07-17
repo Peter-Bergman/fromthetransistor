@@ -8,12 +8,12 @@ headerName = do
         char '<'
         headerName <- hCharSequence
         char '>'
-        return headerName
+        return $ "<" ++ headerName ++ ">"
     let qHeaderName = do
         char '\"'
         headerName <- qCharSequence
         char '\"'
-        return headerName
+        return $ "\"" ++ headerName ++ "\""
     hHeaderName <|> qHeaderName
         
 
