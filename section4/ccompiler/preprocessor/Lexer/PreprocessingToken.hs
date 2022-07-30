@@ -18,12 +18,18 @@ preprocessingToken =
     try (characterConstant) <|>
     try (stringLiteral) <|>
     try (punctuator) <|>
+    newLineAsString <|>
     otherCharacter
 
 otherCharacter :: Parser String
 otherCharacter = do
     parsedCharacter <- satisfy nonSpace
     return $ parsedCharacter : ""
+
+newLineAsString :: Parser String
+newLineAsString = do
+    parsedNewLineCharacter <- char '\n'
+    return [ parsedNewLineCharacter ]
     
 nonSpace :: Char -> Bool
 nonSpace = not . isSpace

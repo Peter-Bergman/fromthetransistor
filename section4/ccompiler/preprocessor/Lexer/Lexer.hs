@@ -4,15 +4,16 @@ import Text.Parsec hiding (try)
 import Text.ParserCombinators.Parsec
 import PreprocessingToken
  
-deleteBackSlashedNewLines :: Parser String
+deleteBackSlashedNewLines :: Parser Char
 deleteBackSlashedNewLines = do
-    parsedStrings <- many ((try (string "\\\n") >> return "") <|> anyCharAsString)
+    parsedStrings <- many1 ((try (string "\\\n") >> return ""))
     let parsedStringsFlattened = intercalate "" parsedStrings
     -- Technically, the line below is an oversimplification.
     -- Only NEED to append a newline if the source does not already end with one.
     -- Adding either way for simplicity
     let newLinedString = parsedStringsFlattened ++ "\n"
-    return newLinedString
+    --return newLinedString
+    return ' '
 
 
 removeString :: String -> Parser String
@@ -27,16 +28,14 @@ anyCharAsString = do
     parsedChar <- anyChar
     return $ parsedChar : ""
 
-spacingCompressedLexer :: Parser String
-spacingCompressedLexer = do
-    parsedSpaces <- many ((char ' ') <|> (char ' '))
-    return " "
+spacingCompressionLexer :: Parser String
+spacingCompressionLexer = (do
+    parsedSpaces <- skipMany1 (((char ' ') <|> (char '\t') <|> (try deleteBackSlashedNewLines)) <?> "Spacing")
+    return " ") <?> ""
     
-
 
 lexC :: Parser [String]
 lexC = do
-    tokenList <- many (spaces >> preprocessingToken)
-    spaces
+    tokenList <- many $ spacingCompressionLexer <|> preprocessingToken
     return tokenList
-    
+
