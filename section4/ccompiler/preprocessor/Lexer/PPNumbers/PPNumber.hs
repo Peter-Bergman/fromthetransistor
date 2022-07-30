@@ -6,12 +6,12 @@ import Text.ParserCombinators.Parsec
 
 
 ppNumber :: Parser String
-ppNumber = do
+ppNumber = (do
     parsedDot <- option "" dotAsString
     initialDigit <- digit
     tail <- many ppNumberSuffix
     let tailString = intercalate "" tail
-    return $ parsedDot ++ initialDigit : tailString
+    return $ parsedDot ++ initialDigit : tailString) <?> "Preprocessing Number"
 
 ppNumberSuffix :: Parser String
 ppNumberSuffix = 

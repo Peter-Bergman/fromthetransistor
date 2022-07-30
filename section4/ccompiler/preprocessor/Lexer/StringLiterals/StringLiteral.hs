@@ -5,12 +5,12 @@ import Text.ParserCombinators.Parsec
 import Text.Parsec hiding (try)
 
 stringLiteral :: Parser String
-stringLiteral = do
+stringLiteral = (do
     prefix <- option "" encodingPrefix
     char '"'
     stringCharacterSequence <- option "" sCharSequence
     char '"'
-    return $ prefix ++ (quoted stringCharacterSequence)
+    return $ prefix ++ (quoted stringCharacterSequence)) <?> "String Literal"
     
 
 quoted :: String -> String

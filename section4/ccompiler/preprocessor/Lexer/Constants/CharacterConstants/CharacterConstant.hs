@@ -8,12 +8,12 @@ import Text.ParserCombinators.Parsec
 
 
 characterConstant :: Parser String
-characterConstant = do
+characterConstant = (do
     prefix <- characterPrefix
     openingQuote <- char '\''
     parsedCCharSequence <- cCharSequence
     closingQuote <- char '\'' <?> "closing quote"
-    return $ prefix ++ [openingQuote] ++  parsedCCharSequence ++ [closingQuote]
+    return $ prefix ++ [openingQuote] ++  parsedCCharSequence ++ [closingQuote]) <?> "Character Constant"
 
 
 characterPrefix :: Parser String

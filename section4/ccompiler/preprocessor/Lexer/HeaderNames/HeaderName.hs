@@ -14,7 +14,7 @@ headerName = do
         headerName <- qCharSequence
         char '\"'
         return $ "\"" ++ headerName ++ "\""
-    hHeaderName <|> qHeaderName
+    (hHeaderName <|> qHeaderName) <?> "Header Name"
         
 
 
