@@ -1,9 +1,10 @@
 module PPNumbers.PPNumber where
 import Data.List
 import System.Environment
+import Text.Parsec
 import Text.Parsec.Char
-import Text.ParserCombinators.Parsec
-
+import Text.Parsec.Combinator
+import Text.Parsec.Text
 
 ppNumber :: Parser String
 ppNumber = (do

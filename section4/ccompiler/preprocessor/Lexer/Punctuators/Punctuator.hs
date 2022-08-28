@@ -1,5 +1,7 @@
 module Punctuators.Punctuator where
-import Text.ParserCombinators.Parsec
+import Text.Parsec
+import Text.Parsec.Combinator
+import Text.Parsec.Text
 
 punctuator :: Parser String
 punctuator = 

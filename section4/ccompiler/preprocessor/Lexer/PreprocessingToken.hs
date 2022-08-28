@@ -6,8 +6,8 @@ import Identifiers.Identifier
 import PPNumbers.PPNumber
 import Punctuators.Punctuator
 import StringLiterals.StringLiteral
-import Text.ParserCombinators.Parsec
-import Text.Parsec hiding (try)
+import Text.Parsec
+import Text.Parsec.Text
 
 
 preprocessingToken :: Parser String

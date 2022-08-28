@@ -1,18 +1,16 @@
 module Lexer where
 import Data.List
-import Text.Parsec hiding (try)
-import Text.ParserCombinators.Parsec
+import Data.Text
+import Text.Parsec
+import Text.Parsec.Combinator
+import Text.Parsec.Text
 import PreprocessingToken
- 
-deleteBackSlashedNewLines :: Parser Char
-deleteBackSlashedNewLines = do
+import System.Environment
+
+-- change name to lexBackSlashedNewLinesAsSpace 
+lexBackSlashedNewLinesAsSpace :: Parser Char
+lexBackSlashedNewLinesAsSpace = do
     parsedStrings <- many1 ((try (string "\\\n") >> return ""))
-    let parsedStringsFlattened = intercalate "" parsedStrings
-    -- Technically, the line below is an oversimplification.
-    -- Only NEED to append a newline if the source does not already end with one.
-    -- Adding either way for simplicity
-    let newLinedString = parsedStringsFlattened ++ "\n"
-    --return newLinedString
     return ' '
 
 
@@ -30,7 +28,7 @@ anyCharAsString = do
 
 spacingCompressionLexer :: Parser String
 spacingCompressionLexer = (do
-    parsedSpaces <- skipMany1 (((char ' ') <|> (char '\t') <|> (try deleteBackSlashedNewLines)) <?> "Spacing")
+    parsedSpaces <- skipMany1 (((char ' ') <|> (char '\t') <|> (try lexBackSlashedNewLinesAsSpace)) <?> "Spacing")
     return " ") <?> ""
     
 
@@ -39,3 +37,9 @@ lexC = do
     tokenList <- many $ spacingCompressionLexer <|> preprocessingToken
     return tokenList
 
+
+lexToFile :: String -> Text -> IO ()
+lexToFile fileName stringToBeParsed = do
+    case parse lexC "" stringToBeParsed of
+        Left err -> putStrLn $ "Parse Failure:\n" ++ show err
+        Right val -> writeFile fileName $ show val

@@ -1,6 +1,8 @@
 module PrimitiveParsers.EscapeSequence where
 import PrimitiveParsers.UniversalCharacterName
-import Text.ParserCombinators.Parsec
+import Text.Parsec
+import Text.Parsec.Combinator
+import Text.Parsec.Text
 
 
 

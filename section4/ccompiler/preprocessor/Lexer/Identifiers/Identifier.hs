@@ -2,8 +2,9 @@ module Identifiers.Identifier where
 import Data.List
 import Numeric
 import PrimitiveParsers.UniversalCharacterName
+import Text.Parsec
 import Text.Parsec.Char
-import Text.ParserCombinators.Parsec
+import Text.Parsec.Text
 
 
 identifier :: Parser String

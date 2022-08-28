@@ -1,6 +1,8 @@
 module PrimitiveParsers.UniversalCharacterName where
 import Numeric
-import Text.ParserCombinators.Parsec
+import Text.Parsec
+import Text.Parsec.Combinator
+import Text.Parsec.Text
 
 
 

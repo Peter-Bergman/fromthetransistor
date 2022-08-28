@@ -1,8 +1,9 @@
 module StringLiterals.StringLiteral where
 import Data.List
 import PrimitiveParsers.EscapeSequence
-import Text.ParserCombinators.Parsec
-import Text.Parsec hiding (try)
+import Text.Parsec
+import Text.Parsec.Combinator
+import Text.Parsec.Text
 
 stringLiteral :: Parser String
 stringLiteral = (do
