@@ -3,7 +3,7 @@ import Data.List
 import PrimitiveParsers.EscapeSequence
 import Text.Parsec
 import Text.Parsec.Combinator
-import Text.Parsec.Text
+import Text.Parsec.String
 
 stringLiteral :: Parser String
 stringLiteral = (do

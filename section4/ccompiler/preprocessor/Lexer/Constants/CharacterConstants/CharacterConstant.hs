@@ -6,7 +6,7 @@ import PrimitiveParsers.EscapeSequence
 import Text.Parsec
 import Text.Parsec.Char
 import Text.Parsec.Combinator
-import Text.Parsec.Text
+import Text.Parsec.String
 
 characterConstant :: Parser String
 characterConstant = (do

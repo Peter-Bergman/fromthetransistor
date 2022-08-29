@@ -4,7 +4,7 @@ import System.Environment
 import Text.Parsec
 import Text.Parsec.Char
 import Text.Parsec.Combinator
-import Text.Parsec.Text
+import Text.Parsec.String
 
 ppNumber :: Parser String
 ppNumber = (do

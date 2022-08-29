@@ -2,7 +2,7 @@ module HeaderNames.HeaderName where
 import System.Environment
 import Text.Parsec
 import Text.Parsec.Char
-import Text.Parsec.Text
+import Text.Parsec.String
 
 headerName = do
     let hHeaderName = do

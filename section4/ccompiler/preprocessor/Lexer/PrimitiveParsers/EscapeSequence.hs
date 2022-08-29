@@ -2,7 +2,7 @@ module PrimitiveParsers.EscapeSequence where
 import PrimitiveParsers.UniversalCharacterName
 import Text.Parsec
 import Text.Parsec.Combinator
-import Text.Parsec.Text
+import Text.Parsec.String
 
 
 

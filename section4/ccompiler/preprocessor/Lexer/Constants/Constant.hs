@@ -1,8 +1,9 @@
 module Main where
 import System.Environment
+import Text.Parsec
 import Text.Parsec.Char
-import Text.ParserCombinators.Parsec
-
+import Text.Parsec.Combinator
+import Text.Parsec.String
 
 main :: IO()
 main = do
@@ -27,11 +28,11 @@ data Constant =
 constantParser :: Parser Constant
 constantParser = do
     constant <-
-    	try (integerParser <|>
-    	try (FloatingParser) <|>
-    	try (EnumerationParser) <|>
-    	CharacterConstant
+        try (integerParser <|>
+        try (FloatingParser) <|>
+        try (EnumerationParser) <|>
+        CharacterConstant)
     return constant
 
 
-integerConstant :: Parser 
+--integerConstant :: Parser String

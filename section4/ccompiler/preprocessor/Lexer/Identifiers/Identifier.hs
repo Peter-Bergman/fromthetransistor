@@ -4,7 +4,7 @@ import Numeric
 import PrimitiveParsers.UniversalCharacterName
 import Text.Parsec
 import Text.Parsec.Char
-import Text.Parsec.Text
+import Text.Parsec.String
 
 
 identifier :: Parser String

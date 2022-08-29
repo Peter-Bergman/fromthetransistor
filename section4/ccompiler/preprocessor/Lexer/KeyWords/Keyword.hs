@@ -1,6 +1,9 @@
 module Main where
 import System.Environment
-import Text.ParserCombinators.Parsec
+import Text.Parsec
+import Text.Parsec.Combinator
+import Text.Parsec.String
+
 
 main :: IO()
 main = do

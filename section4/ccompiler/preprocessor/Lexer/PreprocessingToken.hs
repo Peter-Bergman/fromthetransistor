@@ -7,7 +7,7 @@ import PPNumbers.PPNumber
 import Punctuators.Punctuator
 import StringLiterals.StringLiteral
 import Text.Parsec
-import Text.Parsec.Text
+import Text.Parsec.String
 
 
 preprocessingToken :: Parser String

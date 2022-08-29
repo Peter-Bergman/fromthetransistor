@@ -1,10 +1,9 @@
 module Lexer where
 import Data.List
-import Data.Text
+import PreprocessingToken
 import Text.Parsec
 import Text.Parsec.Combinator
-import Text.Parsec.Text
-import PreprocessingToken
+import Text.Parsec.String
 import System.Environment
 
 -- change name to lexBackSlashedNewLinesAsSpace 
@@ -38,7 +37,7 @@ lexC = do
     return tokenList
 
 
-lexToFile :: String -> Text -> IO ()
+lexToFile :: String -> String -> IO ()
 lexToFile fileName stringToBeParsed = do
     case parse lexC "" stringToBeParsed of
         Left err -> putStrLn $ "Parse Failure:\n" ++ show err
