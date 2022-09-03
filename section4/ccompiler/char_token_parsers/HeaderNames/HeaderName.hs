@@ -1,4 +1,4 @@
-module HeaderNames.HeaderName where
+module CharTokenParsers.HeaderNames.HeaderName where
 import System.Environment
 import Text.Parsec
 import Text.Parsec.Char

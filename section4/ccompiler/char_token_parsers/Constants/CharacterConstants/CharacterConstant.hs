@@ -1,8 +1,8 @@
-module Constants.CharacterConstants.CharacterConstant where
+module CharTokenParsers.Constants.CharacterConstants.CharacterConstant where
 import Data.List
 import Numeric
-import PrimitiveParsers.UniversalCharacterName
-import PrimitiveParsers.EscapeSequence
+import CharTokenParsers.PrimitiveParsers.UniversalCharacterName
+import CharTokenParsers.PrimitiveParsers.EscapeSequence
 import Text.Parsec
 import Text.Parsec.Char
 import Text.Parsec.Combinator

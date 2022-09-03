@@ -1,4 +1,4 @@
-module PPNumbers.PPNumber where
+module CharTokenParsers.PPNumbers.PPNumber where
 import Data.List
 import System.Environment
 import Text.Parsec

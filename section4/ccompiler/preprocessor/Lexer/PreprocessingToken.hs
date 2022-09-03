@@ -1,11 +1,11 @@
-module PreprocessingToken where
-import Constants.CharacterConstants.CharacterConstant
+module Lexer.PreprocessingToken where
+import CharTokenParsers.Constants.CharacterConstants.CharacterConstant
+import CharTokenParsers.HeaderNames.HeaderName
+import CharTokenParsers.Identifiers.Identifier
+import CharTokenParsers.PPNumbers.PPNumber
+import CharTokenParsers.Punctuators.Punctuator
+import CharTokenParsers.StringLiterals.StringLiteral
 import Data.Char
-import HeaderNames.HeaderName
-import Identifiers.Identifier
-import PPNumbers.PPNumber
-import Punctuators.Punctuator
-import StringLiterals.StringLiteral
 import Text.Parsec
 import Text.Parsec.String
 
@@ -18,18 +18,13 @@ preprocessingToken =
     try (characterConstant) <|>
     try (stringLiteral) <|>
     try (punctuator) <|>
-    newLineAsString <|>
     otherCharacter
 
 otherCharacter :: Parser String
 otherCharacter = do
     parsedCharacter <- satisfy nonSpace
     return $ parsedCharacter : ""
-
-newLineAsString :: Parser String
-newLineAsString = do
-    parsedNewLineCharacter <- char '\n'
-    return [ parsedNewLineCharacter ]
     
 nonSpace :: Char -> Bool
 nonSpace = not . isSpace
+

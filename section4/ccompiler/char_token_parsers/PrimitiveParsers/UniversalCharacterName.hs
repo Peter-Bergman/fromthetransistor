@@ -1,4 +1,4 @@
-module PrimitiveParsers.UniversalCharacterName where
+module CharTokenParsers.PrimitiveParsers.UniversalCharacterName where
 import Numeric
 import Text.Parsec
 import Text.Parsec.Combinator

@@ -1,6 +1,6 @@
-module StringLiterals.StringLiteral where
+module CharTokenParsers.StringLiterals.StringLiteral where
+import CharTokenParsers.PrimitiveParsers.EscapeSequence
 import Data.List
-import PrimitiveParsers.EscapeSequence
 import Text.Parsec
 import Text.Parsec.Combinator
 import Text.Parsec.String

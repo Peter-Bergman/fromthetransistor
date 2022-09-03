@@ -1,7 +1,7 @@
-module Identifiers.Identifier where
+module CharTokenParsers.Identifiers.Identifier where
+import CharTokenParsers.PrimitiveParsers.UniversalCharacterName
 import Data.List
 import Numeric
-import PrimitiveParsers.UniversalCharacterName
 import Text.Parsec
 import Text.Parsec.Char
 import Text.Parsec.String

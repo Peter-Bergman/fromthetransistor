@@ -1,4 +1,4 @@
-module Punctuators.Punctuator where
+module CharTokenParsers.Punctuators.Punctuator where
 import Text.Parsec
 import Text.Parsec.Combinator
 import Text.Parsec.String
