@@ -1,0 +1,78 @@
+I need to decide what kind of parser I am going to use to process directives.
+
+I will do something along one of the following lines:
+ 1.  Make some kind of transformer from Parser String type to 
+	GenParser String SymbolTable [String] where SymbolTable is some
+	kind of Dictionary with Get and Set operations.
+ 2. Flatten out list of Strings returned from lexer, then use 
+	CharParser SymbolTable String when processing directives.
+
+
+I strongly gravitate toward 2 more. It seems like the code would be cleaner.
+I don't want to deal with skipping tons of whitespace.
+I don't want to have to intercalate.
+Plus, I think it will help me understand Parsec better if I try using GenParser.
+Actually, intercalating wouldn't even be much of a hastle.
+And skipping spaces is not necessarily worse than using function constructors.
+
+I looked through a paper I read a while ago.
+It's called "Monadic Parser Combinators" by Graham Hutton and Erik Meijer. 
+I wanted to look at their definition of the sat parser again.
+I think it could help me create some kind of transformer from 
+	Parser String to a desired GenParser.
+In the paper, sat is defined as follows.
+
+sat :: (Char -> Bool) -> Parser Char
+sat p = item 'bind' \x ->
+	if p x then result x else zero
+
+In my case I would need a similar type signature.
+stringSat :: (String -> Bool) -> Parser String
+or
+stringSat :: (String -> Bool) -> Parser [String]
+
+Realistically, I could simply use substitution on the sat definition.
+I would have to make sure that I have an implementation of item.
+I think it would be helpful to have some kind of function
+stringParserToStringChecker :: Parser String -> (String -> Bool)
+I could use that function to create input for stringSat.
+
+stringParserToStringChecker :: Parser String -> (String -> Bool)
+stringParserToStringChecker parser inputString = 
+	case (parsedString) of
+		Left err -> False
+		Right xs -> xs == inputString
+	where
+		parsedString = parse parser "" inputString
+
+works
+
+I'm using stringParserToStringChecker now in the ParserStringTransformer module.
+
+I just found the getState, setState, and updateState functions in ParsecPrim.
+
+I now need some definition for stringSat.
+This could work, I think.
+stringSat stringToBool = item >>= \x ->
+	if stringToBool x then return x else fail ""
+
+item = do
+	input <- getInput
+	let nextToken = head input
+	return nextToken
+	could work as an implementation of item
+return nextToken could work as an implementation of item.
+
+I am reading through the paper "Parsec, a fast combinator parser" by Daan Leijen.
+I think I'm going to scratch the definition of item above.
+I have found the token and tokenPrim GenParser constructors in ParsecPrim.
+I don't think that my above definition will update the source position.
+
+
+item = tokenPrim show nextPos testString
+	where
+		nextPos pos x xs = updatePosString pos x
+		testString x = true
+
+Me likey.
+I will try compiling and testing this tomorrow.
