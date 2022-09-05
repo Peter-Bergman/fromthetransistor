@@ -1,4 +1,4 @@
-module ReplacementList where
+module ReplacementList (replacementList) where
 import PreprocessingParser
 import PPTokens
 import Text.Parsec.Combinator
