@@ -10,6 +10,6 @@ ppToken = stringParserSatisfy LPPT.preprocessingToken
 
 ppTokens :: PreprocessingParser
 ppTokens = do
-    tokens <- many ppToken
+    tokens <- many1 ppToken
     return $ foldl (++) [] tokens
 

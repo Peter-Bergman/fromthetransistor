@@ -7,6 +7,7 @@ import Text.Parsec.String
 
 textLine :: PreprocessingParser
 textLine = do
-    parsedTokens <- ppTokens
+    parsedTokens <- option [] ppTokens
     parsedNewLine <- newLine
     return $ parsedTokens ++ parsedNewLine
+
