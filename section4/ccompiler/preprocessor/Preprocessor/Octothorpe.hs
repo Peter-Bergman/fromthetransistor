@@ -1,4 +1,4 @@
-module Octothorpe where
+module Octothorpe (octothorpe) where
 import PreprocessingParser
 import Text.Parsec
 import Text.Parsec.String
