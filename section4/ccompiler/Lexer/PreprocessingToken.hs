@@ -1,4 +1,12 @@
-module Lexer.PreprocessingToken where
+module Lexer.PreprocessingToken 
+( preprocessingToken
+, headerName
+, identifier
+, characterConstant
+, stringLiteral
+, punctuator
+, otherCharacter
+) where
 import CharTokenParsers.Constants.CharacterConstants.CharacterConstant
 import CharTokenParsers.HeaderNames.HeaderName
 import CharTokenParsers.Identifiers.Identifier

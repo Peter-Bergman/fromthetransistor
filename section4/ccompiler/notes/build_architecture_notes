@@ -1,0 +1,28 @@
+I'd like to be able to use ghci or ghc when I build parsers.
+I'd like to be able to build small sections of the project as well as the
+    project as a whole.
+I demand a way to clean up all .o and .hi files generated from ghc.
+
+
+I think I will have a Makefile per directory with Haskell modules.
+At the time of writing, I have soft links pointing to directories that I want to include
+    in the -i argument (see "Finding imports" in ghc man page).
+In each directory's Makefile, I could specify a variable that holds the 
+    directories to add to the import path.
+I think I'm going to use a bin folder to hold all object files.
+Fuck using make for ghci.
+I don't need to do that.
+I can just add directories with the -i CLA for ghci.
+I just checked the /bin/ directory on my box.
+There were no directories nor symlinks to directories.
+I guess I will do the same thing for my bin folder for the compiler.
+
+I think I may take a simpler approach.
+I think I will take each package and put them all in one folder.
+That folder will have one make file.
+Each package will have its own makefile.
+The makefiles will reference other packages by simply adding -i../ CLA
+    to ghc when they build a module.
+There will be one single bin directory inside the directory holding 
+    all the different haskell packages.
+
