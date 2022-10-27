@@ -7,8 +7,6 @@ import Data.List
     )
 import GroupPart
     (groupPart)
-import IfSection
-    (ifSection)
 import NewLine
     (newLine)
 import NonDirective
