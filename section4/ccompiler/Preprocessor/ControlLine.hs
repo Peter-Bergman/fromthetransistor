@@ -1,4 +1,10 @@
 module ControlLine (controlLine) where
+import Data.List
+    (intercalate)
+import HeaderName
+    (headerName)
+import IdentifierList
+    (identifierList)
 import Lexer.PreprocessingToken
     (identifier)
 import LParen
@@ -12,15 +18,19 @@ import PPTokens
 import PreprocessingParser
     ( anyStringToken
     , PreprocessingParser
+    , PreprocessingParserX
     , stringSatisfy
     , stringParserSatisfy
+    , tryMaybe
     )
 import ReplacementList
     (replacementList)
 import Text.Parsec 
     (string)
 import Text.Parsec.Combinator
-    (option)
+    ( option
+    , optionMaybe
+    )
 import Text.Parsec.Prim
     ( getInput
     , setInput
@@ -32,19 +42,20 @@ import Text.Parsec.String
 
 controlLine :: PreprocessingParser
 controlLine = 
-    try (includeDirective) <|>
+    includeDirective <|>
     try (defineDirective) <|>
     try (undefDirective) <|>
     try (lineDirective) <|>
-    try (errorDirective) <|>
-    try (pragmaDirective) <|>
-    nullDirective <?>
+    errorDirective <|>
+    pragmaDirective <|>
+    try (nullDirective) <?>
     "Control Line"
 
 includeDirective :: PreprocessingParser
 includeDirective = do
     parsedOctothorpe <- octothorpe
     parsedInclude <- include
+    parsedHeaderName <- headerName
     parsedNewLine <- newLine
     includeFile
     return $ parsedOctothorpe ++ parsedInclude ++ parsedNewLine
@@ -53,6 +64,9 @@ includeDirective = do
         -- update stream to include lexed stream from included file
         -- use getInput and setInput functions from Text.Parsec.Prim
         includeFile = return ()
+
+includeDirectiveInner :: PreprocessingParser
+includeDirectiveInner = do
 
 include :: PreprocessingParser
 include = stringSatisfy (=="include")
@@ -108,25 +122,32 @@ defineDirectiveArgumentList precedingString = do
     parsedIdentifierList <- argumentList
     parsedRParen <- stringSatisfy (==")")
     return $ parsedLParen ++ parsedIdentifierList ++ parsedRParen
+            
+argumentList :: PreprocessingParser
+argumentList = 
+    try (complexArguments) <|>
+    ellipsis <|>
+    simpleArguments
+    
+complexArguments :: PreprocessingParser
+complexArguments = do
+    parsedSimpleArguments <- simpleArguments
+    gotArguments parsedSimpleArguments
+    parsedComma <- stringSatisfy (==",")
+    parsedEllipsis <- ellipsis
+    return $ 
+        parsedSimpleArguments ++ parsedComma ++ parsedEllipsis
     where
-        argumentList = 
-            try (complexArguments) <|>
-            ellipsis <|>
-            simpleArguments
-        simpleArguments = option [] identifierList
-        ellipsis = stringSatisfy (=="...")
-        complexArguments = do
-            parsedSimpleArguments <- simpleArguments
-            gotArguments parsedSimpleArguments
-            parsedComma <- stringSatisfy (==",")
-            parsedEllipsis <- ellipsis
-            return $ 
-                parsedSimpleArguments ++ parsedComma ++ parsedEllipsis
         gotArguments parsedArgumentList = if parsedArgumentList == []
             then fail "Expected argument list"
             else return ()
-            
-    
+
+simpleArguments :: PreprocessingParser
+simpleArguments = option [""] identifierList
+
+ellipsis :: PreprocessingParser
+ellipsis = stringSatisfy (=="...")
+
 definePrefix :: PreprocessingParser
 definePrefix = do
     parsedOctothorpe <- octothorpe
@@ -151,45 +172,78 @@ undefDirective = do
 
 lineDirective :: PreprocessingParser
 lineDirective = do
-    parsedOctothorpe <- octothorpe
-    parsedLine <- stringSatisfy $ (=="line")
+    parsedMaybeLineDirectiveTokens <- lineDirectiveInner
+    case parsedMaybeLineDirectiveTokens of
+        Just tokens -> handleLineDirective
+        Nothing -> fail ""
+
+lineDirectiveInner :: PreprocessingParser
+lineDirectiveInner = do
+    octothorpe
+    stringSatisfy $ (=="line")
     parsedPPTokens <- ppTokens
-    parsedNewLine <- newLine
-    handlePPTokens
-    return $ 
-        parsedOctothorpe ++ parsedLine ++ parsedPPTokens
-    where
-        -- should change line or something in the future
-        handlePPTokens = return ()
+    newLine
+    return parsedPPTokens
+
+handleLineDirective :: [String] -> PreprocessingParser
+handleLineDirective = do
+    -- checkback and implement
+    return ()
+
+handleLineDirective :: [String] -> PreprocessingParser
+handleLineDirective tokens = do
+    let numTokens = length tokens
+    case numTokens of
+        [] -> fail "fuck you; you gave no preprocessing tokens to process"
+        x:[] -> fail "..."
+        x:y:[] -> fail "..."
+        x:xs -> fail "..."
+    return ()
 
 errorDirective :: PreprocessingParser
 errorDirective = do
-    parsedOctothorpe <- octothorpe
-    parsedError <- stringSatisfy (=="error")
-    parsedPPTokens <- ppTokens
-    handleTokens
-    return $ 
-        parsedOctothorpe ++ parsedError ++ parsedPPTokens
+    parsedMaybeErrorDirectiveTokens <- tryMaybe errorDirectiveInner
+    -- This should throw an error that will
+    -- propagate through any parsers constructed with try
+    -- in the future
+    case parsedMaybeErrorDirectiveTokens of
+        Just tokens -> handleErrorDirective tokens
+        Nothing -> fail "" -- This fail is a fail that does not consume any input and thus can be <|>ed out of without try
+
+errorDirectiveInner :: PreprocessingParser
+errorDirectiveInner = do
+    octothorpe
+    stringSatisfy (=="error")
+    parsedPPTokens <- option [] ppTokens 
+    newLine
+    return parsedPPTokens
+
+
+handleErrorDirective :: [String] -> PreprocessingParser
+handleErrorDirective tokens = fail tokensCombined
     where
-        -- This should throw an error that will
-        -- propagate through any parsers constructed with try
-        -- in the future
-        handleTokens = return ()
+        tokensCombined = intercalate " " tokens
 
 pragmaDirective :: PreprocessingParser
 pragmaDirective = do
-    parsedOctothorpe <- octothorpe
-    parsedPragma <- stringSatisfy (=="pragma")
+    parsedMaybePragmaDirectiveTokens <- tryMaybe pragmaDirectiveInner
+    case parsedMaybePragmaDirectiveTokens of
+        Just tokens -> handlePragmaDirective tokens
+        Nothing -> fail ""
+
+pragmaDirectiveInner :: PreprocessingParser
+pragmaDirectiveInner = do
+    octothorpe
+    stringSatisfy (=="pragma")
     parsedPPTokens <- ppTokens
-    parsedNewLine <- newLine
-    handlePPTokens parsedPPTokens
-    return $ parsedOctothorpe ++ parsedPragma ++ parsedPPTokens ++
-        parsedNewLine
-    where
-        -- might decide to add some implementation specific 
-        -- functionality in the future
-        handlePPTokens tokens = return ()
-    
+    newLine
+    return parsedPPTokens
+
+-- The implementation below may be temporary. The type signature is will stay the same, though.
+handlePragmaDirective :: [String] -> PreprocessingParser
+handlePragmaDirective _ = handleErrorDirective ["Pragma Directive...throwing error cause I'm not implementing more shit"]
+
+ 
 nullDirective :: PreprocessingParser
 nullDirective = octothorpe >> newLine
 
