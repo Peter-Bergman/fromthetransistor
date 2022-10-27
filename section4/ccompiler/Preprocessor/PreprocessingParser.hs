@@ -10,7 +10,9 @@ import Data.List
 
 type Dictionary = Map String String
 
-type PreprocessingParser = GenParser String Dictionary [String]
+type PreprocessingParser = PreprocessingParserX [String]
+-- PreprocessingParserX has kind * -> *
+type PreprocessingParserX = GenParser String Dictionary
 
 
 anyStringToken :: PreprocessingParser
@@ -27,7 +29,7 @@ stringSatisfy stringCheck = tokenPrim show nextPosition maybeList
 
 -- Note that the resulting PreprocessingParser will always fail if the input
 -- parser skips any characters.
-stringParserSatisfy :: (Parser String) -> PreprocessingParser
+stringParserSatisfy :: Parser String -> PreprocessingParser
 stringParserSatisfy parser = stringSatisfy (stringParserToStringChecker parser)
 
 stringParserToStringChecker :: Parser String -> (String -> Bool)
@@ -38,8 +40,10 @@ stringParserToStringChecker parser inputString =
     where
         parsedString = parse parser "" inputString
 
-testParse :: PreprocessingParser -> [String] -> IO ()
+testParse :: Show t => PreprocessingParserX t -> [String] -> IO ()
 testParse parser tokenList = case (runParser parser empty "" tokenList) of
     Left err -> putStr "parse error at " >> print err
     Right value -> print value
 
+tryMaybe :: PreprocessingParserX t -> PreprocessingParserX (Maybe t)
+tryMaybe inputParser = try (optionMaybe inputParser) <|> return Nothing
