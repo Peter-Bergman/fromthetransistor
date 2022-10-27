@@ -1,4 +1,4 @@
-module CharTokenParsers.Identifiers.Identifier where
+module CharTokenParsers.Identifiers.Identifier (identifier) where
 import CharTokenParsers.PrimitiveParsers.UniversalCharacterName
 import Data.List
 import Numeric
