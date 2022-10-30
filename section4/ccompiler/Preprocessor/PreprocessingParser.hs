@@ -27,10 +27,20 @@ stringSatisfy stringCheck = tokenPrim show nextPosition maybeList
         nextPosition position x xs = updatePosString position x
         maybeList x = if (stringCheck x) then Just [x] else Nothing
 
+stringSatisfyT :: (String -> Bool) -> (String -> t) -> PreprocessingParserX t
+stringSatisfyT stringCheck stringToT = tokenPrim show nextPosition maybeList
+    where
+        nextPosition position x xs = updatePosString position x
+        maybeList x = if (stringCheck x) then Just $ stringToT x else Nothing
+
 -- Note that the resulting PreprocessingParser will always fail if the input
 -- parser skips any characters.
 stringParserSatisfy :: Parser String -> PreprocessingParser
 stringParserSatisfy parser = stringSatisfy (stringParserToStringChecker parser)
+
+-- Abstracted version of stringParserSatisfy that has return type PreprocessingParserX t
+stringParserSatisfyT :: Parser String -> (String -> t) -> PreprocessingParserX t
+stringParserSatisfyT parser stringToT = stringSatisfyT (stringParserToStringChecker parser) stringToT
 
 stringParserToStringChecker :: Parser String -> (String -> Bool)
 stringParserToStringChecker parser inputString = 
@@ -47,3 +57,4 @@ testParse parser tokenList = case (runParser parser empty "" tokenList) of
 
 tryMaybe :: PreprocessingParserX t -> PreprocessingParserX (Maybe t)
 tryMaybe inputParser = try (optionMaybe inputParser) <|> return Nothing
+
