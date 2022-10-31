@@ -2,7 +2,9 @@ module ControlLine (controlLine) where
 import Data.List
     (intercalate)
 import HeaderName
-    (headerName)
+    ( HeaderName
+    , headerName
+    )
 import IdentifierList
     (identifierList)
 import Lexer.PreprocessingToken
@@ -53,20 +55,31 @@ controlLine =
 
 includeDirective :: PreprocessingParser
 includeDirective = do
-    parsedOctothorpe <- octothorpe
-    parsedInclude <- include
-    parsedHeaderName <- headerName
-    parsedNewLine <- newLine
-    includeFile
-    return $ parsedOctothorpe ++ parsedInclude ++ parsedNewLine
-    where
-        -- find and lex the included file
-        -- update stream to include lexed stream from included file
-        -- use getInput and setInput functions from Text.Parsec.Prim
-        includeFile = return ()
+    parsedMaybeHeaderName <- tryMaybe includeDirectiveInner
+    case parsedMaybeHeaderName of
+        Just parsedHeaderName -> handleIncludeDirective parsedHeaderName
+        Nothing -> fail ""
 
-includeDirectiveInner :: PreprocessingParser
+includeDirectiveInner :: PreprocessingParserX HeaderName
 includeDirectiveInner = do
+    octothorpe
+    include
+    parsedHeaderName <- headerName
+    newLine
+    return parsedHeaderName
+
+handleIncludeDirective :: HeaderName -> PreprocessingParser
+handleIncludeDirective headerFileName = case headerFileName of
+    HHeaderName fileName -> includeHHeaderName
+    QHeaderName fileName -> includeQHeaderName
+
+includeHHeaderName :: HeaderName -> PreprocessingParser
+includeHHeaderName = do
+    return ()
+
+includeQHeaderName :: HeaderName -> PreprocessingParser
+includeQHeaderName = do
+    return ()
 
 include :: PreprocessingParser
 include = stringSatisfy (=="include")
@@ -172,7 +185,7 @@ undefDirective = do
 
 lineDirective :: PreprocessingParser
 lineDirective = do
-    parsedMaybeLineDirectiveTokens <- lineDirectiveInner
+    parsedMaybeLineDirectiveTokens <- tryMaybe lineDirectiveInner
     case parsedMaybeLineDirectiveTokens of
         Just tokens -> handleLineDirective
         Nothing -> fail ""
@@ -213,7 +226,7 @@ errorDirective = do
 errorDirectiveInner :: PreprocessingParser
 errorDirectiveInner = do
     octothorpe
-    stringSatisfy (=="error")
+    error_
     parsedPPTokens <- option [] ppTokens 
     newLine
     return parsedPPTokens
@@ -223,6 +236,9 @@ handleErrorDirective :: [String] -> PreprocessingParser
 handleErrorDirective tokens = fail tokensCombined
     where
         tokensCombined = intercalate " " tokens
+
+error_ :: PreprocessingParser
+error_ = stringSatisfy (=="error")
 
 pragmaDirective :: PreprocessingParser
 pragmaDirective = do
@@ -234,7 +250,7 @@ pragmaDirective = do
 pragmaDirectiveInner :: PreprocessingParser
 pragmaDirectiveInner = do
     octothorpe
-    stringSatisfy (=="pragma")
+    pragma
     parsedPPTokens <- ppTokens
     newLine
     return parsedPPTokens
@@ -242,6 +258,9 @@ pragmaDirectiveInner = do
 -- The implementation below may be temporary. The type signature is will stay the same, though.
 handlePragmaDirective :: [String] -> PreprocessingParser
 handlePragmaDirective _ = handleErrorDirective ["Pragma Directive...throwing error cause I'm not implementing more shit"]
+
+pragma :: PreprocessingParser
+pragma = stringSatisfy (=="pragma")
 
  
 nullDirective :: PreprocessingParser

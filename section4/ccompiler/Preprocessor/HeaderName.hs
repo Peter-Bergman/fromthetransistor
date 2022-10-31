@@ -16,7 +16,7 @@ data HeaderName =
 
 headerNameStringToHeaderName :: String -> HeaderName
 headerNameStringToHeaderName inputString
-    | head inputString == '>' = HHeaderName inputString
-    | head inputString == '"' = QHeaderName inputString
+    | head inputString == '<' && tail inputString == '>' = HHeaderName inputString
+    | head inputString == '"' && tail inputString == '"' = QHeaderName inputString
     | otherwise = error "Could not convert \"" ++ inputString ++ "\" to a HeaderName"
 
