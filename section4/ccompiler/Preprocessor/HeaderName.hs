@@ -16,7 +16,12 @@ data HeaderName =
 
 headerNameStringToHeaderName :: String -> HeaderName
 headerNameStringToHeaderName inputString
-    | head inputString == '<' && tail inputString == '>' = HHeaderName inputString
-    | head inputString == '"' && tail inputString == '"' = QHeaderName inputString
-    | otherwise = error "Could not convert \"" ++ inputString ++ "\" to a HeaderName"
+    | (head inputString) == '<' && (last inputString) == '>' = HHeaderName sourceFileName
+    | (head inputString) == '"' && (last inputString) == '"' = QHeaderName sourceFileName
+    | otherwise = error $ "Could not convert \"" ++ inputString ++ "\" to a HeaderName"
+    where
+        sourceFileName = extractFileNameFromHeaderNameString inputString
+
+extractFileNameFromHeaderNameString :: String -> String
+extractFileNameFromHeaderNameString headerNameString = init $ tail headerNameString
 
