@@ -53,36 +53,6 @@ controlLine =
     try (nullDirective) <?>
     "Control Line"
 
-includeDirective :: PreprocessingParser
-includeDirective = do
-    parsedMaybeHeaderName <- tryMaybe includeDirectiveInner
-    case parsedMaybeHeaderName of
-        Just parsedHeaderName -> handleIncludeDirective parsedHeaderName
-        Nothing -> fail ""
-
-includeDirectiveInner :: PreprocessingParserX HeaderName
-includeDirectiveInner = do
-    octothorpe
-    include
-    parsedHeaderName <- headerName
-    newLine
-    return parsedHeaderName
-
-handleIncludeDirective :: HeaderName -> PreprocessingParser
-handleIncludeDirective headerFileName = case headerFileName of
-    HHeaderName fileName -> includeHHeaderName
-    QHeaderName fileName -> includeQHeaderName
-
-includeHHeaderName :: HeaderName -> PreprocessingParser
-includeHHeaderName = do
-    return ()
-
-includeQHeaderName :: HeaderName -> PreprocessingParser
-includeQHeaderName = do
-    return ()
-
-include :: PreprocessingParser
-include = stringSatisfy (=="include")
 -- could left factor this at some point
 -- would like to think of good variable names before doing that
 defineDirective :: PreprocessingParser
