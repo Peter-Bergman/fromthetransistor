@@ -21,13 +21,13 @@ data IfSection =
     ElseGroup (Maybe ElseGroup)
 
 data IfGroup = 
-    IfConstantExpression ConstantExpressionC (Maybe Group) |
+    IfConstantExpression ConstantExpression (Maybe Group) |
     IfDef Identifier (Maybe Group) |
     IfNDef Identifier (Maybe Group)
     
 type ElifGroups = [ElifGroup]
 
-data ElifGroup = ElifGroup ConstantExpressionC (Maybe Group)
+data ElifGroup = ElifGroup ConstantExpression (Maybe Group)
 
 type ElseGroup = Maybe Group
 
@@ -53,73 +53,73 @@ data DefineDirective =
 type ReplacementList = Maybe PPTokens
 type IdentifierList = [Identifier]
 
-data ConstantExpressionC =
-    ConditionalExpressionC
+data ConstantExpression =
+    ConditionalExpression
 
-data ConditionalExpressionC =
-    SimpleConditionalExpressionC LogicalOrExpressionC |
-    ComplexConditionalExpressionC LogicalOrExpressionC ConstantExpressionC ConditionalExpressionC
+data ConditionalExpression =
+    SimpleConditionalExpression LogicalOrExpression |
+    ComplexConditionalExpression LogicalOrExpression ConstantExpression ConditionalExpression
 
-data LogicalOrExpressionC =
-    SimpleLogicalOrExpressionC LogicalAndExpressionC |
-    ComplexLogicalOrExpressionC LogicalOrExpressionC LogicalAndExpressionC
+data LogicalOrExpression =
+    SimpleLogicalOrExpression LogicalAndExpression |
+    ComplexLogicalOrExpression LogicalOrExpression LogicalAndExpression
 
-data LogicalAndExpressionC =
-    SimpleLogicalAndExpressionC InclusiveOrExpressionC |
-    ComplexLogicalAndExpressionC LogicalAndExpressionC InclusiveOrExpressionC
+data LogicalAndExpression =
+    SimpleLogicalAndExpression InclusiveOrExpression |
+    ComplexLogicalAndExpression LogicalAndExpression InclusiveOrExpression
 
-data InclusiveOrExpressionC =
-    SimpleInclusiveOrExpressionC ExclusiveOrExpressionC |
-    ComplexInclusiveOrExpressionC InclusiveOrExpressionC ExclusiveOrExpressionC
+data InclusiveOrExpression =
+    SimpleInclusiveOrExpression ExclusiveOrExpression |
+    ComplexInclusiveOrExpression InclusiveOrExpression ExclusiveOrExpression
 
-data ExclusiveOrExpressionC =
-    SimpleExclusiveOrExpressionC AndExpressionC |
-    ComplexExclusiveOrExpressionC ExclusiveOrExpressionC AndExpressionC
+data ExclusiveOrExpression =
+    SimpleExclusiveOrExpression AndExpression |
+    ComplexExclusiveOrExpression ExclusiveOrExpression AndExpression
 
-data AndExpressionC =
-    SimpleAndExpressionC EqualityExpressionC |
-    ComplexAndExpressionC AndExpressionC EqualityExpressionC
+data AndExpression =
+    SimpleAndExpression EqualityExpression |
+    ComplexAndExpression AndExpression EqualityExpression
 
-data EqualityExpressionC =
-    RelationalExpressionC RelationalExpressionC |
-    EqualityExpressionC EqualityExpressionC RelationalExpressionC |
-    InequalityExpressionC EqualityExpressionC RelationalExpressionC
+data EqualityExpression =
+    RelationalExpression RelationalExpression |
+    EqualityExpression EqualityExpression RelationalExpression |
+    InequalityExpression EqualityExpression RelationalExpression
 
-data RelationalExpressionC =
-    SimpleRelationalExpressionC ShiftExpressionC |
-    LessThanExpressionC RelationalExpressionC ShiftExpressionC |
-    GreaterThanExpressionC RelationalExpressionC ShiftExpressionC |
-    LessThanOrEqualToExpressionC RelationalExpressionC ShiftExpressionC |
-    GreaterThanOrEqualToExpressionC RelationalExpressionC ShiftExpressionC
+data RelationalExpression =
+    SimpleRelationalExpression ShiftExpression |
+    LessThanExpression RelationalExpression ShiftExpression |
+    GreaterThanExpression RelationalExpression ShiftExpression |
+    LessThanOrEqualToExpression RelationalExpression ShiftExpression |
+    GreaterThanOrEqualToExpression RelationalExpression ShiftExpression
 
-data ShiftExpressionC =
-    SimpleShiftExpressionC AdditiveExpressionC |
-    LeftShiftExpressionC ShiftExpressionC AdditiveExpressionC |
-    RightShiftExpressionC ShiftExpressionC AdditiveExpressionC
+data ShiftExpression =
+    SimpleShiftExpression AdditiveExpression |
+    LeftShiftExpression ShiftExpression AdditiveExpression |
+    RightShiftExpression ShiftExpression AdditiveExpression
 
-data AdditiveExpressionC =
-    SimpleAdditiveExpressionC MultiplicativeExpressionC |
-    AdditiveExpressionC AdditiveExpressionC MultiplicativeExpressionC |
-    SubtractiveExpressionC AdditiveExpressionC MultiplicativeExpressionC
+data AdditiveExpression =
+    SimpleAdditiveExpression MultiplicativeExpression |
+    AdditiveExpression AdditiveExpression MultiplicativeExpression |
+    SubtractiveExpression AdditiveExpression MultiplicativeExpression
 
-data MultiplicativeExpressionC =
-    SimpleMultiplicativeExpressionC CastExpressionC |
-    MultiplicativeExpressionC MultiplicativeExpressionC CastExpressionC |
-    DivisionExpressionC MultiplicativeExpressionC CastExpressionC |
-    ModuloExpression MultiplicativeExpressionC CastExpressionC
+data MultiplicativeExpression =
+    SimpleMultiplicativeExpression CastExpression |
+    MultiplicativeExpression MultiplicativeExpression CastExpression |
+    DivisionExpression MultiplicativeExpression CastExpression |
+    ModuloExpression MultiplicativeExpression CastExpression
 
-data CastExpressionC =
-    SimpleCastExpressionC UnaryExpressionC |
-    ComplexCastExpressionC TypeName CastExpressionC
+data CastExpression =
+    SimpleCastExpression UnaryExpression |
+    ComplexCastExpression TypeName CastExpression
 
-data UnaryExpressionC =
-    PostfixExpressionC PostfixExpressionC |
-    IncrementExpressionC UnaryExpressionC |
-    DecrementExpressionC UnaryExpressionC |
-    OperatorExpressionC UnaryOperator CastExpressionC |
-    SizeOfExpressionC UnaryExpressionC |
-    SizeOfTypeC TypeName |
-    AlignOfC TypeName
+data UnaryExpression =
+    PostfixExpression PostfixExpression |
+    IncrementExpression UnaryExpression |
+    DecrementExpression UnaryExpression |
+    OperatorExpression UnaryOperator CastExpression |
+    SizeOfExpression UnaryExpression |
+    SizeOfType TypeName |
+    AlignOf TypeName
 
 data UnaryOperator =
     Ampersand |
@@ -129,23 +129,23 @@ data UnaryOperator =
     Tilde |
     ExclamationPoint
 
-data PostfixExpressionC =
-    SimplePostfixExpressionC PrimaryExpressionC |
-    IndexExpression PostfixExpressionC ConstantExpressionC |
-    FunctionCallExpression PostfixExpressionC (Maybe ArgumentExpressionListC) |
-    DotSelectorExpression PostfixExpressionC Identifier |
-    ArrowSelectorExpression PostfixExpressionC Identifier |
-    PostfixIncrementExpressionC PostfixExpressionC |
-    PostfixDecrementExpressionC PostfixExpressionC |
-    PostfixInitializerListExpressionC TypeName InitializerListC
+data PostfixExpression =
+    SimplePostfixExpression PrimaryExpression |
+    IndexExpression PostfixExpression ConstantExpression |
+    FunctionCallExpression PostfixExpression (Maybe ArgumentExpressionList) |
+    DotSelectorExpression PostfixExpression Identifier |
+    ArrowSelectorExpression PostfixExpression Identifier |
+    PostfixIncrementExpression PostfixExpression |
+    PostfixDecrementExpression PostfixExpression |
+    PostfixInitializerListExpression TypeName InitializerList
 
-data ArgumentExpressionListC =
-    SimpleArgumentExpressionListC AssignmentExpressionC |
-    ComplexExpressionListC ArgumentExpressionListC AssignmentExpressionC
+data ArgumentExpressionList =
+    SimpleArgumentExpressionList AssignmentExpression |
+    ComplexExpressionList ArgumentExpressionList AssignmentExpression
 
-data AssignmentExpressionC =
-    SimpleAssignmentExpressionC ConditionalExpressionC |
-    ComplexAssignmentExpressionC AssignmentExpressionC AssignmentOperator ConditionalExpressionC
+data AssignmentExpression =
+    SimpleAssignmentExpression ConditionalExpression |
+    ComplexAssignmentExpression AssignmentExpression AssignmentOperator ConditionalExpression
 
 data AssignmentOperator =
     EqualSign |
@@ -160,30 +160,30 @@ data AssignmentOperator =
     CaretEqual |
     PipeEqual
 
-data InitializerListC =
-    SimpleInitializerListC (Maybe DesignationC) InitializerC |
-    ComplexInitializerListC InitializerListC (Maybe DesignationC) InitializerC
+data InitializerList =
+    SimpleInitializerList (Maybe Designation) Initializer |
+    ComplexInitializerList InitializerList (Maybe Designation) Initializer
 
-type DesignationC = DesignatorListC
+type Designation = DesignatorList
 
-data DesignatorListC =
-    SimpleDesignatorListC DesignatorC |
-    ComplexDesignatorListC DesignatorListC DesignatorC
+data DesignatorList =
+    SimpleDesignatorList Designator |
+    ComplexDesignatorList DesignatorList Designator
 
-data DesignatorC =
-    BracketDesignator ConstantExpressionC |
+data Designator =
+    BracketDesignator ConstantExpression |
     DotDesignator Identifier
 
-data InitializerC =
-    SimpleInitializerC AssignmentExpressionC |
-    ComplexInitializerC InitializerListC
+data Initializer =
+    SimpleInitializer AssignmentExpression |
+    ComplexInitializer InitializerList
 
-data PrimaryExpressionC =
-    IdentifierPrimaryExpressionC Identifier |
-    ConstantPrimaryExpressionC Constant |
-    StringLiteralPrimaryExpressionC String |
-    ExpressionPrimaryExpressionC ExpressionC |
-    GenericSelectionPrimaryExpressionC GenericSelectionC
+data PrimaryExpression =
+    IdentifierPrimaryExpression Identifier |
+    ConstantPrimaryExpression Constant |
+    StringLiteralPrimaryExpression String |
+    ExpressionPrimaryExpression Expression |
+    GenericSelectionPrimaryExpression GenericSelection
 
 data Constant =
     IntegerConstant Integer |
@@ -191,68 +191,68 @@ data Constant =
     EnumerationConstant Int |
     CharacterConstant Char
 
-data ExpressionC =
-    SimpleExpressionC AssignmentExpressionC |
-    ComplexExpressionC ExpressionC AssignmentExpressionC
+data Expression =
+    SimpleExpression AssignmentExpression |
+    ComplexExpression Expression AssignmentExpression
 
-newtype GenericSelectionC = GenericSelectionC AssignmentExpressionC GenericAssocListC
+data GenericSelection = GenericSelection AssignmentExpression GenericAssocList
 
-data GenericAssocListC =
-    SimpleGenericAssocListC GenericAssociationC |
-    ComplexGenericAssocListC GenericAssocListC GenericAssociationC
+data GenericAssocList =
+    SimpleGenericAssocList GenericAssociation |
+    ComplexGenericAssocList GenericAssocList GenericAssociation
 
-data GenericAssociationC =
-    TypedGenericAssociation TypeName AssignmentExpressionC |
-    DefaultGenericAssociation AssignmentExpressionC
+data GenericAssociation =
+    TypedGenericAssociation TypeName AssignmentExpression |
+    DefaultGenericAssociation AssignmentExpression
 
-newtype TypeName = TypeName SpecifierQualifierListC (Maybe AbstractDeclaratorC)
+data TypeName = TypeName SpecifierQualifierList (Maybe AbstractDeclarator)
 
-data AbstractDeclaratorC =
-    SimpleAbstractDeclaratorC PointerC |
-    ComplexAbstractDeclaratorC (Maybe PointerC) DirectAbstractDeclaratorC
+data AbstractDeclarator =
+    SimpleAbstractDeclarator Pointer |
+    ComplexAbstractDeclarator (Maybe Pointer) DirectAbstractDeclarator
 
-data PointerC =
-    SimplePointerC (Maybe TypeQualifierListC) |
-    ComplexPointerC (Maybe TypeQualifierListC) PointerC
+data Pointer =
+    SimplePointer (Maybe TypeQualifierList) |
+    ComplexPointer (Maybe TypeQualifierList) Pointer
 
-data DirectAbstractDeclaratorC =
-    SimpleDirectAbstractDeclaratorC AbstractDeclaratorC |
-    MaybeAssignmentDirectAbstractDeclaratorC (Maybe DirectAbstractDeclaratorC) (Maybe TypeQualifierListC) (Maybe AssignmentExpressionC) |
-    StaticFirstDirectAbstractDeclaratorC (Maybe DirectAbstractDeclaratorC) (Maybe TypeQualifierListC) AssignmentExpressionC |
-    TypeQualifierListDirectAbstractDeclaratorC (Maybe DirectAbstractDeclaratorC) TypeQualifierListC AssignmentExpressionC |
-    AsteriskDirectAbstractDeclaratorC (Maybe DirectAbstractDeclaratorC) |
-    ParameterListTypeDirectAbstractDeclaratorC (Maybe DirectAbstractDeclaratorC) (Maybe ParameterTypeListC)
+data DirectAbstractDeclarator =
+    SimpleDirectAbstractDeclarator AbstractDeclarator |
+    MaybeAssignmentDirectAbstractDeclarator (Maybe DirectAbstractDeclarator) (Maybe TypeQualifierList) (Maybe AssignmentExpression) |
+    StaticFirstDirectAbstractDeclarator (Maybe DirectAbstractDeclarator) (Maybe TypeQualifierList) AssignmentExpression |
+    TypeQualifierListDirectAbstractDeclarator (Maybe DirectAbstractDeclarator) TypeQualifierList AssignmentExpression |
+    AsteriskDirectAbstractDeclarator (Maybe DirectAbstractDeclarator) |
+    ParameterListTypeDirectAbstractDeclarator (Maybe DirectAbstractDeclarator) (Maybe ParameterTypeList)
 
-data ParameterTypeListC =
-    SimpleParameterTypeListC ParameterListC |
-    EllipsisParameterTypeListC ParameterListC
+data ParameterTypeList =
+    SimpleParameterTypeList ParameterList |
+    EllipsisParameterTypeList ParameterList
 
-data ParameterListC =
-    SimpleParameterListC ParameterDeclarationC |
-    ComplexParameterListC ParameterListC ParameterDeclarationC
+data ParameterList =
+    SimpleParameterList ParameterDeclaration |
+    ComplexParameterList ParameterList ParameterDeclaration
 
-data ParameterDeclarationC =
-    SimpleParameterDeclarationC DeclarationSpecifiersC DeclaratorC |
-    AbstractParameterDeclarationC DeclarationSpecifiersC (Maybe AbstractDeclaratorC)
+data ParameterDeclaration =
+    SimpleParameterDeclaration DeclarationSpecifiers Declarator |
+    AbstractParameterDeclaration DeclarationSpecifiers (Maybe AbstractDeclarator)
 
-newtype DeclaratorC = DeclaratorC (Maybe PointerC) DirectDeclaratorC
+data Declarator = Declarator (Maybe Pointer) DirectDeclarator
 
-data DirectDeclaratorC =
+data DirectDeclarator =
     IdentifierDirectDeclarator Identifier |
-    SimpleDirectDeclarator DeclaratorC |
-    MaybeAssignmentDirectDeclarator DirectDeclaratorC (Maybe TypeQualifierListC) (Maybe AssignmentExpressionC) |
-    StaticFirstDirectDeclaratorC DirectDeclaratorC (Maybe TypeQualifierListC) AssignmentExpressionC |
-    TypeQualifierListDirectDeclaratorC DirectDeclaratorC (Maybe TypeQualifierListC) |
-    AsteriskDirectDeclaratorC DirectDeclaratorC (Maybe TypeQualifierListC) |
-    ParameterListDirectDeclaratorC (Maybe ParameterTypeListC) |
-    IdentifierListDirectDeclaratorC DirectDeclaratorC (Maybe IdentifierList)
+    SimpleDirectDeclarator Declarator |
+    MaybeAssignmentDirectDeclarator DirectDeclarator (Maybe TypeQualifierList) (Maybe AssignmentExpression) |
+    StaticFirstDirectDeclarator DirectDeclarator (Maybe TypeQualifierList) AssignmentExpression |
+    TypeQualifierListDirectDeclarator DirectDeclarator (Maybe TypeQualifierList) |
+    AsteriskDirectDeclarator DirectDeclarator (Maybe TypeQualifierList) |
+    ParameterListDirectDeclarator (Maybe ParameterTypeList) |
+    IdentifierListDirectDeclarator DirectDeclarator (Maybe IdentifierList)
 
 
-data SpecifierQualifierListC =
-    SpecifierSpecifierQualifierListC TypeSpecifierC SpecifierQualifierListC |
-    QualifierSpecifierQualifierListC TypeQualifierC SpecifierQualifierListC
+data SpecifierQualifierList =
+    SpecifierSpecifierQualifierList TypeSpecifier SpecifierQualifierList |
+    QualifierSpecifierQualifierList TypeQualifier SpecifierQualifierList
 
-data TypeSpecifierC =
+data TypeSpecifier =
     Void |
     Char_ |
     Short |
@@ -264,16 +264,16 @@ data TypeSpecifierC =
     Unsigned |
     Bool_ |
     Complex_ |
-    AtomicTypeSpecifierTypeSpecifier AtomicTypeSpecifierC |
-    StructOrUnionSpecifierC |
-    EnumSpecifierC |
-    TypeDefNameSpecifierC
+    AtomicTypeSpecifierTypeSpecifier AtomicTypeSpecifier |
+    StructOrUnionSpecifier |
+    EnumSpecifier |
+    TypeDefNameSpecifier
 
-newtype AtomicTypeSpecifierC = AtomicTypeSpecifierC TypeName
+newtype AtomicTypeSpecifier = AtomicTypeSpecifier TypeName
 
-data StructOrUnionSpecifierC =
-    IdentifierStructOrUnionSpecifierC StructOrUnion Identifier |
-    BracesStructOrUnionSpecifierC (Maybe Identifier) StructDeclarationListC
+data StructOrUnionSpecifier =
+    IdentifierStructOrUnionSpecifier StructOrUnion Identifier |
+    BracesStructOrUnionSpecifier (Maybe Identifier) StructDeclarationList
 
 data StructOrUnion =
     Struct |
@@ -282,7 +282,46 @@ data StructOrUnion =
 type StructDeclarationList = NonEmptyList StructDeclaration
 
 data StructDeclaration =
-    SpecifierQualifierListStructDeclaration SpecifierQualifierListC (Maybe StructDeclaratorList) |
+    SpecifierQualifierListStructDeclaration SpecifierQualifierList (Maybe StructDeclaratorList) |
     AssertStructDeclaration StaticAssertDeclaration
+
+data StaticAssertDeclaration = StaticAssertDeclaration ConstantExpression String
+
+type StructDeclaratorList = NonEmptyList StructDeclarator
+
+data StructDeclarator =
+    SimpleStructDeclarator Declarator |
+    ComplexStructDeclarator (Maybe Declarator) ConstantExpression
+
+type TypeQualifierList = NonEmptyList TypeQualifier
+
+data TypeQualifier =
+    Const |
+    Restrict |
+    Volatile |
+    Atomic
+
+data DeclarationSpecifiers =
+    StorageClassDeclarationSpecifiers StorageClassSpecifier (Maybe DeclarationSpecifiers) |
+    TypeSpecifierDeclarationSpecifiers TypeSpecifier (Maybe DeclarationSpecifiers) |
+    TypeQualifierDeclarationSpecifiers TypeQualifier (Maybe DeclarationSpecifiers) |
+    FunctionSpecifierDeclarationSpecifiers FunctionSpecifier (Maybe DeclarationSpecifiers) |
+    AlignmentDeclarationSpecifiers AlignmentSpecifier (Maybe DeclarationSpecifiers)
+
+data StorageClassSpecifier =
+    TypeDef |
+    Extern |
+    Static |
+    ThreadLocal |
+    Auto |
+    Register
+
+data FunctionSpecifier =
+    Inline |
+    NoReturn
+
+data AlignmentSpecifier =
+    TypeNameAlignment TypeName |
+    ConstantAlignment ConstantExpression
 
 
