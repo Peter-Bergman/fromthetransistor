@@ -1,26 +1,21 @@
 module AbstractSyntaxTree where
-
--- Implementation Specific data constructor
--- Could use for refactors in a bit
-data NonEmptyList a =
-    Element a |
-    Elements (NonEmptyList a) a
+import Data.List.NonEmpty
 
 type AbstractSyntaxTree = Maybe Group
 type Group = [GroupPart]
 
-data GroupPart = 
+data GroupPart =
     IfSection IfSection |
-    ControlLine |
-    TextLine |
-    NonDirective
+    ControlLine ControlLine |
+    TextLine (Maybe PPTokens) |
+    NonDirective PPTokens
 
 data IfSection =
     IfGroup IfGroup |
     ElifGroups (Maybe ElifGroups) |
     ElseGroup (Maybe ElseGroup)
 
-data IfGroup = 
+data IfGroup =
     IfConstantExpression ConstantExpression (Maybe Group) |
     IfDef Identifier (Maybe Group) |
     IfNDef Identifier (Maybe Group)
@@ -41,17 +36,20 @@ data ControlLine =
     ErrorDirective (Maybe PPTokens) |
     PragmaDirective (Maybe PPTokens) |
     NullDirective
+    deriving (Show)
 
-type PPTokens = [String]
+type PPToken = String
+type PPTokens = NonEmpty PPToken
 
 data DefineDirective =
-    SimpleDefine Identifier ReplacementList |
+    ObjectLikeDefine Identifier ReplacementList |
     FunctionDefine Identifier (Maybe IdentifierList) ReplacementList |
     EllipsisFunctionDefine Identifier ReplacementList |
-    ComplexDefine Identifier IdentifierList ReplacementList
+    IdentifierListEllipsisFunctionDefine Identifier IdentifierList ReplacementList
+    deriving (Show)
 
 type ReplacementList = Maybe PPTokens
-type IdentifierList = [Identifier]
+type IdentifierList = NonEmpty Identifier
 
 data ConstantExpression =
     ConditionalExpression
@@ -119,7 +117,9 @@ data UnaryExpression =
     OperatorExpression UnaryOperator CastExpression |
     SizeOfExpression UnaryExpression |
     SizeOfType TypeName |
-    AlignOf TypeName
+    AlignOf TypeName |
+    Defined Identifier -- This is only for constant expressions handled by the preprocessor
+    
 
 data UnaryOperator =
     Ampersand |
@@ -279,7 +279,7 @@ data StructOrUnion =
     Struct |
     Union
 
-type StructDeclarationList = NonEmptyList StructDeclaration
+type StructDeclarationList = NonEmpty StructDeclaration
 
 data StructDeclaration =
     SpecifierQualifierListStructDeclaration SpecifierQualifierList (Maybe StructDeclaratorList) |
@@ -287,13 +287,13 @@ data StructDeclaration =
 
 data StaticAssertDeclaration = StaticAssertDeclaration ConstantExpression String
 
-type StructDeclaratorList = NonEmptyList StructDeclarator
+type StructDeclaratorList = NonEmpty StructDeclarator
 
 data StructDeclarator =
     SimpleStructDeclarator Declarator |
     ComplexStructDeclarator (Maybe Declarator) ConstantExpression
 
-type TypeQualifierList = NonEmptyList TypeQualifier
+type TypeQualifierList = NonEmpty TypeQualifier
 
 data TypeQualifier =
     Const |
