@@ -1,8 +1,13 @@
 module NewLine where
 import PreprocessingParser
-import Lexer.Lexer (newLineAsString)
-import Text.Parsec.String
+    ( PreprocessingParser
+    , stringParserSatisfy
+    )
+import Lexer.Lexer
+    (newLineAsString)
+import Text.Parsec.Prim
+    ((<?>))
 
 newLine :: PreprocessingParser
-newLine = stringParserSatisfy newLineAsString
+newLine = stringParserSatisfy newLineAsString <?> "Newline"
 

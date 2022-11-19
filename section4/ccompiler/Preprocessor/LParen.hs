@@ -1,13 +1,18 @@
-module LParen where
+module LParen (lParen) where
 import Data.Char
+    (isSpace)
 import PreprocessingParser
-import Text.Parsec
+    ( PreprocessingParser
+    , stringSatisfy
+    )
 import Text.Parsec.Prim
-import Text.Parsec.String
+    ( (<?>)
+    , parserFail
+    )
 
 lParen :: String -> PreprocessingParser
 lParen precedingString = 
     let lastCharacter = last precedingString in
-    if (isSpace lastCharacter) then fail "Unexpected spacing before parentheses"
-        else stringParserSatisfy $ string "("
+    if (isSpace lastCharacter) then parserFail "Unexpected spacing before expected left parenthesis"
+        else (stringSatisfy (=="(")) <?> "Left Parenthesis"
 

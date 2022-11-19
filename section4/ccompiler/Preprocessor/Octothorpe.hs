@@ -4,5 +4,5 @@ import Text.Parsec
 import Text.Parsec.String
 
 octothorpe :: PreprocessingParser
-octothorpe = stringParserSatisfy (string "#")
+octothorpe = stringSatisfy (=="#") <?> "Octothorpe"
 
