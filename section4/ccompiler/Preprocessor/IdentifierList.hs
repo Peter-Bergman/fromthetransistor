@@ -1,38 +1,20 @@
 module IdentifierList (identifierList) where
-import CharTokenParsers.Identifiers.Identifier
+import AbstractSyntaxTree
+    (IdentifierList)
+import Comma
+    (comma)
+import CustomCombinators
+    (sepBy1NonConsumption)
+import Identifier
     (identifier)
-import Data.List
-    (intercalate)
+import Data.List.NonEmpty
+    (fromList)
 import PreprocessingParser
-    ( PreprocessingParser
-    , stringParserSatisfy
-    , stringSatisfy
-    )
-import Text.Parsec
-    (many)
-import Text.Parsec.Prim
-    (try)
+    (PreprocessingParserX)
 
-identifierList :: PreprocessingParser
+identifierList :: PreprocessingParserX IdentifierList
 identifierList = do
-    firstIdentifier <- identifierPreprocessingParser
-    restOfIdentifiersUnflattened <- many $ try anotherIdentifier
-
-    let identifierListRaw = firstIdentifier : restOfIdentifiersUnflattened
-    let flattenedCommaSeparatedIdentifierList = intercalate [","] identifierListRaw
-
-    return flattenedCommaSeparatedIdentifierList
-
-
-identifierPreprocessingParser :: PreprocessingParser
-identifierPreprocessingParser = stringParserSatisfy identifier
-
-anotherIdentifier :: PreprocessingParser
-anotherIdentifier = do
-    comma
-    parsedIdentifier <- identifierPreprocessingParser
-    return $ parsedIdentifier
-
-comma :: PreprocessingParser
-comma = stringSatisfy (==",")
+    listOfIdentifiers <- sepBy1NonConsumption identifier comma
+    -- Convert the list of identifiers to a non empty list
+    return $ fromList listOfIdentifiers
 
