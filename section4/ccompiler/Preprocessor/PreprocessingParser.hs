@@ -1,5 +1,7 @@
 module PreprocessingParser where
 import Data.Map
+import Lexer.Lexer
+    (lexC)
 import Text.Parsec
 import Text.Parsec.Combinator
 import Text.Parsec.Pos
@@ -15,8 +17,8 @@ type PreprocessingParser = PreprocessingParserX [String]
 type PreprocessingParserX = GenParser String Dictionary
 
 
-anyStringToken :: PreprocessingParser
-anyStringToken = stringSatisfy stringToTrue
+anyStringToken :: PreprocessingParserX String
+anyStringToken = stringSatisfyT stringToTrue id
     where
         stringToTrue :: String -> Bool
         stringToTrue x = True
@@ -33,6 +35,9 @@ stringSatisfyT stringCheck stringToT = tokenPrim show nextPosition maybeList
         nextPosition position x xs = updatePosString position x
         maybeList x = if (stringCheck x) then Just $ stringToT x else Nothing
 
+stringSatisfy_ :: (String -> Bool) -> PreprocessingParserX ()
+stringSatisfy_ stringCheck = stringSatisfyT stringCheck $ \_ -> ()
+
 -- Note that the resulting PreprocessingParser will always fail if the input
 -- parser skips any characters.
 stringParserSatisfy :: Parser String -> PreprocessingParser
@@ -41,6 +46,9 @@ stringParserSatisfy parser = stringSatisfy (stringParserToStringChecker parser)
 -- Abstracted version of stringParserSatisfy that has return type PreprocessingParserX t
 stringParserSatisfyT :: Parser String -> (String -> t) -> PreprocessingParserX t
 stringParserSatisfyT parser stringToT = stringSatisfyT (stringParserToStringChecker parser) stringToT
+
+stringParserSatisfy_ :: Parser String -> PreprocessingParserX ()
+stringParserSatisfy_ stringParser = stringParserSatisfyT stringParser $ \_ -> ()
 
 stringParserToStringChecker :: Parser String -> (String -> Bool)
 stringParserToStringChecker parser inputString = 
@@ -54,6 +62,15 @@ testParse :: Show t => PreprocessingParserX t -> [String] -> IO ()
 testParse parser tokenList = case (runParser parser empty "" tokenList) of
     Left err -> putStr "parse error at " >> print err
     Right value -> print value
+
+lexThenParse :: Show t => PreprocessingParserX t -> String -> IO ()
+lexThenParse parser inputString =
+    testParse parser lexedTokens
+    where
+        lexedTokens :: [String]
+        lexedTokens = case (runParser lexC () "" inputString) of
+            Left err -> error $ "Lex error at " ++ show err
+            Right value -> value
 
 tryMaybe :: PreprocessingParserX t -> PreprocessingParserX (Maybe t)
 tryMaybe inputParser = try (optionMaybe inputParser) <|> return Nothing
