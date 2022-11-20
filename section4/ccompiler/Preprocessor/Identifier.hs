@@ -5,7 +5,9 @@ import PreprocessingParser
     ( PreprocessingParserX
     , stringParserSatisfyT
     )
+import Text.Parsec.Prim
+    ((<?>))
 
 identifier :: PreprocessingParserX String
-identifier = stringParserSatisfyT CharTokenParsers.Identifiers.Identifier.identifier id
+identifier = stringParserSatisfyT CharTokenParsers.Identifiers.Identifier.identifier id <?> "Identifier"
 
