@@ -1,13 +1,18 @@
-module TextLine where
+module TextLine (textLine) where
+import AbstractSyntaxTree
+    ( GroupPart( TextLine ) )
 import NewLine
+    (newLine)
 import PreprocessingParser
+    (PreprocessingParserX)
 import PPTokens
+    (ppTokens)
 import Text.Parsec
-import Text.Parsec.String
+    (optionMaybe)
 
-textLine :: PreprocessingParser
+textLine :: PreprocessingParserX GroupPart
 textLine = do
-    parsedTokens <- option [] ppTokens
-    parsedNewLine <- newLine
-    return $ parsedTokens ++ parsedNewLine
+    parsedTokens <- optionMaybe ppTokens
+    newLine
+    return $ TextLine parsedTokens
 
