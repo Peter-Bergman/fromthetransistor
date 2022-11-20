@@ -1,5 +1,17 @@
-module DefineDirective (defineDirective)  where
+module DefineDirective (defineDirective) where
 import AbstractSyntaxTree --importing all the types from AbstractSyntaxTree
+    ( ControlLine
+        (DefineDirective)
+    , DefineDirective
+        ( ObjectLikeDefine
+        , FunctionDefine
+        , EllipsisFunctionDefine
+        , IdentifierListEllipsisFunctionDefine
+        )
+    , Identifier
+    , IdentifierList
+    , ReplacementList
+    )
 import Data.Char
     (isSpace)
 import IdentifierList
@@ -35,6 +47,9 @@ import Text.Parsec.Prim
     , (<|>)
     , (<?>)
     )
+
+defineDirectiveControlLine :: PreprocessingParserX ControlLine
+defineDirectiveControlLine = defineDirective >>= return . DefineDirective
 
 defineDirective :: PreprocessingParserX DefineDirective
 defineDirective = do
