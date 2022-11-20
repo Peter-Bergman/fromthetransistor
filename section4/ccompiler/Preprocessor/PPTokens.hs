@@ -1,15 +1,26 @@
-module PPTokens where 
-import Data.List
+module PPTokens 
+    ( ppToken
+    , ppTokens
+    ) where
+import AbstractSyntaxTree
+    ( PPToken
+    , PPTokens
+    )
+import Data.List.NonEmpty
+    (fromList)
 import Lexer.PreprocessingToken as LPPT
 import PreprocessingParser
+    ( PreprocessingParserX
+    , stringParserSatisfyT
+    )
 import Text.Parsec
 import Text.Parsec.Combinator
 
-ppToken :: PreprocessingParser
-ppToken = stringParserSatisfy LPPT.preprocessingToken
+ppToken :: PreprocessingParserX PPToken
+ppToken = stringParserSatisfyT LPPT.preprocessingToken id <?> "PPToken"
 
-ppTokens :: PreprocessingParser
+ppTokens :: PreprocessingParserX PPTokens
 ppTokens = do
-    tokens <- many1 ppToken
-    return $ foldl (++) [] tokens
+    tokens <- many1 ppToken <?> "PPTokens"
+    return $ fromList tokens
 
