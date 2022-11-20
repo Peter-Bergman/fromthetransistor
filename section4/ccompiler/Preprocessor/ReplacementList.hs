@@ -1,8 +1,13 @@
 module ReplacementList (replacementList) where
+import AbstractSyntaxTree
+    (ReplacementList)
 import PreprocessingParser
+    ( PreprocessingParserX
+    , tryMaybe
+    )
 import PPTokens
-import Text.Parsec.Combinator
+    (ppTokens)
 
-replacementList :: PreprocessingParser
-replacementList = option [] ppTokens
+replacementList :: PreprocessingParserX ReplacementList
+replacementList = tryMaybe ppTokens
 
