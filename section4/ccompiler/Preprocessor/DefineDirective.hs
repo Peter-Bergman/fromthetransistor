@@ -12,6 +12,8 @@ import AbstractSyntaxTree --importing all the types from AbstractSyntaxTree
     , IdentifierList
     , ReplacementList
     )
+import Comma
+    (comma)
 import Data.Char
     (isSpace)
 import IdentifierList
@@ -38,8 +40,8 @@ import ReplacementList
 import Text.Parsec
     (string)
 import Text.Parsec.Combinator
-    ( notFollowedBy
-    , option
+    ( between
+    , notFollowedBy
     , optionMaybe
     )
 import Text.Parsec.Prim
@@ -48,16 +50,11 @@ import Text.Parsec.Prim
     , (<?>)
     )
 
-defineDirectiveControlLine :: PreprocessingParserX ControlLine
-defineDirectiveControlLine = defineDirective >>= return . DefineDirective
+defineDirective :: PreprocessingParserX ControlLine
+defineDirective = defineDirectiveProper >>= return . DefineDirective
 
-defineDirective :: PreprocessingParserX DefineDirective
-defineDirective = do
-    definePrefix
-    defineDirectiveBody
-
-definePrefix :: PreprocessingParserX ()
-definePrefix = octothorpe >> define
+defineDirectiveProper :: PreprocessingParserX DefineDirective
+defineDirectiveProper = between definePrefix newLine defineDirectiveBody
 
 defineDirectiveBody :: PreprocessingParserX DefineDirective
 defineDirectiveBody = do
@@ -69,7 +66,6 @@ defineDirectiveBody = do
 objectLikeMacroDefinitionBody :: Identifier -> PreprocessingParserX DefineDirective
 objectLikeMacroDefinitionBody parsedIdentifier = do
     parsedReplacementList <- replacementList
-    newLine
     return $ ObjectLikeDefine parsedIdentifier parsedReplacementList
 
 functionLikeMacroDefinitionBody :: Identifier -> PreprocessingParserX DefineDirective
@@ -98,14 +94,6 @@ constructDefineDirective parsedIdentifier parsedDefineDirectiveArgumentList pars
          EllipsisArgumentList -> EllipsisFunctionDefine parsedIdentifier parsedReplacementList
          IdentifierArgumentList parsedIdentifierList -> IdentifierListEllipsisFunctionDefine parsedIdentifier parsedIdentifierList parsedReplacementList
 
-{-
-    let defineDirectiveResult = case parsedDefineDirectiveArgumentList of
-         MaybeIdentifierList parsedMaybeIdentifierList -> FunctionDefine parsedIdentifier parsedMaybeIdentifierList parsedReplacementList
-         EllipsisArgumentList -> EllipsisFunctionDefine parsedIdentifier parsedReplacementList
-         IdentifierArgumentList parsedIdentifierList -> IdentifierListEllipsisFunctionDefine parsedIdentifier parsedIdentifierList parsedReplacementList
--}
-
-
 functionLikeMacroDefinitionArgumentList :: PreprocessingParserX DefineDirectiveArgumentList
 functionLikeMacroDefinitionArgumentList =
     try (identifierArgumentList) <|>
@@ -133,9 +121,10 @@ noWhiteSpaceString = stringSatisfy_ $ isSpacingInString
 isSpacingInString :: String -> Bool
 isSpacingInString = any isSpace
 
+definePrefix :: PreprocessingParserX ()
+definePrefix = octothorpe >> define
+
 -- Here are all of the simple parsers whose condition is simply a string comparison
-comma :: PreprocessingParserX ()
-comma = stringSatisfy_ (==",")
 
 ellipsis :: PreprocessingParserX ()
 ellipsis = stringSatisfy_ (=="...")
