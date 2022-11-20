@@ -1,51 +1,28 @@
-module IncludeDirective where
-import Lexer
-    (lexC)
+module IncludeDirective (includeDirective) where
+import AbstractSyntaxTree
+    ( ControlLine( IncludeDirective ) )
 import NewLine
     (newLine)
 import Octothorpe
     (octothorpe)
-import PreprocessingProcessor
+import PPTokens
+    (ppTokens)
+import PreprocessingParser
     ( PreprocessingParser
     , PreprocessingParserX
-    , tryMaybe
+    , stringSatisfy_
     )
-import HeaderName
-    ( headerName
-    , HeaderName
-    )
-import System.IO
 
-
-includeDirective :: PreprocessingParser
+includeDirective :: PreprocessingParserX ControlLine
 includeDirective = do
-    parsedMaybeHeaderName <- tryMaybe includeDirectiveInner
-    case parsedMaybeHeaderName of
-        Just parsedHeaderName -> handleIncludeDirective parsedHeaderName
-        Nothing -> fail ""
-
-includeDirectiveInner :: PreprocessingParserX HeaderName
-includeDirectiveInner = do
-    octothorpe
-    include
-    parsedHeaderName <- headerName
+    includePrefix
+    parsedPPTokens <- ppTokens
     newLine
-    return parsedHeaderName
+    return $ IncludeDirective parsedPPTokens
 
-handleIncludeDirective :: HeaderName -> PreprocessingParser
-handleIncludeDirective headerNameInput = let headerFileName = extractFileNameFromHeaderName headerNameInput in
-    case headerFileName of
-        HHeaderName fileName -> includeHHeaderName headerFileName
-        QHeaderName fileName -> includeQHeaderName headerFileName
+includePrefix :: PreprocessingParserX ()
+includePrefix = octothorpe >> include
 
-includeHSourceFile :: HeaderName -> PreprocessingParser
-includeHSourceFile = do
-    return ()
-
-includeQSourceFile :: HeaderName -> PreprocessingParser
-includeQSourceFile = do
-    return ()
-
-include :: PreprocessingParser
-include = stringSatisfy (=="include")
+include :: PreprocessingParserX ()
+include = stringSatisfy_ (=="include")
 
