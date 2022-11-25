@@ -1,6 +1,8 @@
 module NullDirective (nullDirective) where
 import AbstractSyntaxTree
-    ( ControlLine( NullDirective ) )
+    ( ControlLine
+        (NullDirective)
+    )
 import NewLine
     (newLine)
 import Octothorpe

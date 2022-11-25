@@ -1,6 +1,8 @@
 module TextLine (textLine) where
 import AbstractSyntaxTree
-    ( GroupPart( TextLine ) )
+    ( GroupPart
+        (TextLine) 
+    )
 import NewLine
     (newLine)
 import PreprocessingParser

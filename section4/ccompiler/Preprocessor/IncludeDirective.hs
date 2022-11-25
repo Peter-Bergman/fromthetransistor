@@ -1,6 +1,8 @@
 module IncludeDirective (includeDirective) where
 import AbstractSyntaxTree
-    ( ControlLine( IncludeDirective ) )
+    ( ControlLine
+        (IncludeDirective)
+    )
 import NewLine
     (newLine)
 import Octothorpe

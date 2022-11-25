@@ -1,6 +1,8 @@
 module PragmaDirective (pragmaDirective) where
 import AbstractSyntaxTree
-    ( ControlLine( PragmaDirective ) )
+    ( ControlLine
+        (PragmaDirective)
+    )
 import NewLine
     (newLine)
 import Octothorpe

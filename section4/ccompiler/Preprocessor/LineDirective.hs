@@ -1,6 +1,8 @@
 module LineDirective (lineDirective) where
 import AbstractSyntaxTree
-    ( ControlLine( LineDirective ) )
+    ( ControlLine
+        (LineDirective)
+    )
 import Octothorpe
     (octothorpe)
 import NewLine

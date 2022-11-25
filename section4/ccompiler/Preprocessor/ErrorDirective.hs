@@ -1,6 +1,8 @@
 module ErrorDirective (errorDirective) where
 import AbstractSyntaxTree
-    ( ControlLine( ErrorDirective ) )
+    ( ControlLine
+        (ErrorDirective)
+    )
 import NewLine
     (newLine)
 import Octothorpe

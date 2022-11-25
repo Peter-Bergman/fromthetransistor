@@ -1,6 +1,8 @@
 module UndefDirective where
 import AbstractSyntaxTree
-    (ControlLine( UndefDirective ))
+    ( ControlLine
+        (UndefDirective)
+    )
 import Identifier
     (identifier)
 import NewLine
