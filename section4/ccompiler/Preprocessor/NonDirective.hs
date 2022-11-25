@@ -1,11 +1,18 @@
-module NonDirective where
+module NonDirective (nonDirective) where
+import AbstractSyntaxTree
+    ( GroupPart
+        (NonDirective)
+    )
 import NewLine
+    (newLine)
 import PPTokens
+    (ppTokens)
 import PreprocessingParser
+    (PreprocessingParserX)
 
-nonDirective :: PreprocessingParser
+nonDirective :: PreprocessingParserX GroupPart
 nonDirective = do
     parsedTokens <- ppTokens
-    parsedNewLine <- newLine
-    return $ parsedTokens ++ parsedNewLine
+    newLine
+    return $ NonDirective parsedTokens
 
