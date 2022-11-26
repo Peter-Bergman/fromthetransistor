@@ -70,9 +70,7 @@ objectLikeMacroDefinitionBody parsedIdentifier = do
 
 functionLikeMacroDefinitionBody :: Identifier -> PreprocessingParserX DefineDirective
 functionLikeMacroDefinitionBody parsedIdentifier = do
-    -- See definition of lparen in ISO N1570 pdf to understand the next two lines
-    notFollowedBy $ noWhiteSpaceString
-    lParen parsedIdentifier
+    lParen
     functionLikeMacroDefinitionSuffix parsedIdentifier
 
 data DefineDirectiveArgumentList =

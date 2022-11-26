@@ -1,4 +1,5 @@
 module Lexer.Lexer where
+import Data.Char
 import Data.List
 import Lexer.PreprocessingToken
 import Text.Parsec
@@ -6,45 +7,38 @@ import Text.Parsec.Combinator
 import Text.Parsec.String
 import System.Environment
 
--- change name to lexBackSlashedNewLinesAsSpace 
-lexBackSlashedNewLinesAsSpace :: Parser Char
-lexBackSlashedNewLinesAsSpace = do
-    parsedStrings <- many1 ((try (string "\\\n") >> return ""))
-    return ' '
 
+backSlashedNewLines :: Parser Char
+backSlashedNewLines = try (string"\\\n") >> return ' '
 
-removeString :: String -> Parser String
-removeString inputString = do
-    parsedString <- try (string inputString) <|> anyCharAsString
-    if parsedString == inputString
-        then return ""
-        else return inputString
+horizontalSpacing :: Parser String
+horizontalSpacing = many1 (horizontalSpace <|> backSlashedNewLines) <?> "Horzontal Spacing"
 
-anyCharAsString :: Parser String
-anyCharAsString = do
-    parsedChar <- anyChar
-    return $ parsedChar : ""
+horizontalSpace :: Parser Char
+horizontalSpace = satisfy (isHorizontalSpace)
 
-spacingCompressionLexer :: Parser String
-spacingCompressionLexer = (do
-    parsedSpaces <- skipMany1 (((char ' ') <|> (char '\t') <|> (try lexBackSlashedNewLinesAsSpace)) <?> "Spacing")
-    return " ") <?> ""
-    
+isHorizontalSpace :: Char -> Bool
+isHorizontalSpace character = isSpace character && ('\n' /= character)
+
 newLineAsString :: Parser String
 newLineAsString = do
     parsedNewLineCharacter <- char '\n'
     return [ parsedNewLineCharacter ]
 
-lexC :: Parser [String]
-lexC = do
-    tokenList <- many $ spacingCompressionLexer <|> preprocessingToken <|> newLineAsString
-    let filteredTokenList = filter ( \token -> token `notElem` ["", " "] ) tokenList
-    return filteredTokenList
+lexErrorMessage :: Show t => t -> String
+lexErrorMessage error_ = "Lex error at " ++ show error_
 
+lexParser :: Parser [String]
+lexParser = many $ horizontalSpacing <|> preprocessingToken <|> newLineAsString
+
+lexString :: String -> [String]
+lexString inputString = case (runParser lexParser () "" inputString) of
+            Left err -> error $ lexErrorMessage err
+            Right value -> value
 
 lexToFile :: String -> String -> IO ()
 lexToFile fileName stringToBeParsed = do
-    case parse lexC "" stringToBeParsed of
-        Left err -> putStrLn $ "Parse Failure:\n" ++ show err
+    case parse lexParser "" stringToBeParsed of
+        Left err -> putStrLn $ lexErrorMessage err
         Right val -> writeFile fileName $ show val
 
