@@ -3,6 +3,8 @@ import AbstractSyntaxTree
     ( ControlLine
         (PragmaDirective)
     )
+import CustomCombinators
+    (tryMaybe)
 import NewLine
     (newLine)
 import Octothorpe
@@ -12,7 +14,6 @@ import PPTokens
 import PreprocessingParser
     ( PreprocessingParserX
     , stringSatisfy_
-    , tryMaybe
     )
 
 pragmaDirective :: PreprocessingParserX ControlLine

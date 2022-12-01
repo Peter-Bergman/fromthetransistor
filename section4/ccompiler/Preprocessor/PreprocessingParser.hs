@@ -79,6 +79,3 @@ lexThenParse parser inputString =
         lexedTokens :: [String]
         lexedTokens = lexString inputString
 
-tryMaybe :: PreprocessingParserX t -> PreprocessingParserX (Maybe t)
-tryMaybe inputParser = try (optionMaybe inputParser) <|> return Nothing
-

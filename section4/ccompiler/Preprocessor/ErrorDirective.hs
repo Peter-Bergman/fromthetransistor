@@ -3,6 +3,8 @@ import AbstractSyntaxTree
     ( ControlLine
         (ErrorDirective)
     )
+import CustomCombinators
+    (tryMaybe)
 import NewLine
     (newLine)
 import Octothorpe
@@ -12,8 +14,8 @@ import PPTokens
 import PreprocessingParser
     ( PreprocessingParserX
     , stringSatisfy_
-    , tryMaybe
     )
+
 
 errorDirective:: PreprocessingParserX ControlLine
 errorDirective = do

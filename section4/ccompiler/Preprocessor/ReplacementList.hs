@@ -1,10 +1,10 @@
 module ReplacementList (replacementList) where
 import AbstractSyntaxTree
     (ReplacementList)
+import CustomCombinators
+    (tryMaybe)
 import PreprocessingParser
-    ( PreprocessingParserX
-    , tryMaybe
-    )
+    (PreprocessingParserX)
 import PPTokens
     (ppTokens)
 
