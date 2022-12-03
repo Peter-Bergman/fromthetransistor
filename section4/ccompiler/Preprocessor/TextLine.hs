@@ -1,7 +1,7 @@
 module TextLine (textLine) where
 import AbstractSyntaxTree
     ( GroupPart
-        (TextLine) 
+        (TextLine)
     )
 import NewLine
     (newLine)
