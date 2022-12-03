@@ -27,8 +27,7 @@ import NewLine
 import Octothorpe
     (octothorpe)
 import PreprocessingParser
-    ( anyStringToken
-    , PreprocessingParser
+    ( PreprocessingParser
     , PreprocessingParserX
     , stringParserSatisfy
     , stringParserSatisfyT

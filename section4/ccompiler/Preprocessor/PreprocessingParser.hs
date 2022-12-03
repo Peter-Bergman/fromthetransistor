@@ -1,22 +1,38 @@
-module PreprocessingParser where
-import Data.Map
+module PreprocessingParser 
+( lexThenParse
+, PreprocessingParser
+, PreprocessingParserX
+, stringParserToStringChecker
+, stringParserSatisfy
+, stringParserSatisfy_
+, stringParserSatisfyT
+, stringSatisfy
+, stringSatisfy_
+, stringSatisfyT
+, stringSatisfyTNoPrecedingWhiteSpace
+, testParse
+) where
 import Lexer.Lexer
     ( lexString
     , horizontalSpacing
     )
-import Text.Parsec
-import Text.Parsec.Combinator
 import Text.Parsec.Pos
+    (updatePosString)
 import Text.Parsec.Prim
+    ( parse
+    , runParser
+    , tokenPrim
+    , skipMany
+    )
 import Text.Parsec.String
-import Data.List
+    ( Parser
+    , GenParser
+    )
 
-
-type Dictionary = Map String String
 
 type PreprocessingParser = PreprocessingParserX [String]
 -- PreprocessingParserX has kind * -> *
-type PreprocessingParserX = GenParser String Dictionary
+type PreprocessingParserX = GenParser String ()
 
 
 stringSatisfyTNoPrecedingWhiteSpace :: (String -> Bool) -> (String -> t) -> PreprocessingParserX t
@@ -29,12 +45,6 @@ horizontalWhiteSpace :: PreprocessingParserX Integer
 horizontalWhiteSpace = stringSatisfyTNoPrecedingWhiteSpace (stringParserToStringChecker horizontalSpacing) $ toInteger . length
 -- On the line above, I could (and probably will change tabs to be 4 white space characters.
 -- That would require me to use a different function than toInteger . length
-
-anyStringToken :: PreprocessingParserX String
-anyStringToken = stringSatisfyT stringToTrue id
-    where
-        stringToTrue :: String -> Bool
-        stringToTrue x = True
 
 stringSatisfy :: (String -> Bool) -> PreprocessingParser
 stringSatisfy stringCheck = stringSatisfyT stringCheck singleton
@@ -68,7 +78,7 @@ stringParserToStringChecker parser inputString =
         parsedString = parse parser "" inputString
 
 testParse :: Show t => PreprocessingParserX t -> [String] -> IO ()
-testParse parser tokenList = case (runParser parser empty "" tokenList) of
+testParse parser tokenList = case (runParser parser () "" tokenList) of
     Left err -> putStr "parse error at " >> print err
     Right value -> print value
 
