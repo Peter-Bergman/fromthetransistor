@@ -1,22 +1,53 @@
 module Group (group) where
+import AbstractSyntaxTree
+    ( ConstantExpression
+        (ConstantExpression)
+    , ElifGroup
+        (ElifGroup)
+    , ElifGroups
+    , ElseGroup
+    , Group
+    , GroupPart
+        ( ControlLine
+        , IfSection
+        )
+    , IfGroup
+        ( IfDefDirective
+        , IfDirective
+        , IfNDefDirective
+        )
+    )
 import ControlLine
     (controlLine)
-import Data.List
-    ( intercalate
-    , null
+import CustomCombinators
+    ( nullifyParser
+    , many1NonEmpty
+    , many1TillNonEmpty
+    , tryMaybe
     )
-import GroupPart
-    (groupPart)
+import EndIfLine
+    (endIfLine)
+import Identifier
+    (identifier)
 import NewLine
     (newLine)
-import NonDirective
-    (nonDirective)
+import NonDirectiveLine
+    (nonDirectiveLine)
+import Octothorpe
+    (octothorpe)
 import PreprocessingParser
     ( PreprocessingParser
+    , PreprocessingParserX
     , stringParserSatisfy
+    , stringSatisfy_
     )
-import Text.Parsec
-    (many)
+import Text.Parsec.Char
+    (digit)
+import Text.Parsec.Combinator
+    ( eof
+    , lookAhead
+    , many1
+    )
 import Text.Parsec.Prim
     ( try
     , (<|>)
@@ -26,136 +57,120 @@ import TextLine
     (textLine)
 
 
-group :: PreprocessingParser
-group = do
-    parsedGroupPartsUnflattened <- many groupPart
-    let parsedGroupParts = intercalate [] parsedGroupPartsUnflattened
-    return parsedGroupParts
+data ContainingGroup =
+    IfOrElif |
+    Else |
+    None
 
-optionTry :: PreprocessingParser -> PreprocessingParser
-optionTry = option [] $ try
+group :: ContainingGroup -> PreprocessingParserX Group
+group containingGroup = many1TillNonEmpty (try groupPart) $ lookAhead $ endOfInnerGroup containingGroup
 
-optionalGroup :: PreprocessingParser
-optionalGroup = optionTry group
-
-optionalElifGroups :: PreprocessingParser
-optionalElifGroups = optionTry elifGroups
-
-optionalElseGroup :: PreprocessingParser
-optionalElseGroup = optionTry elseGroup
-
-groupPart :: PreprocessingParser
+groupPart :: PreprocessingParserX GroupPart
 groupPart = 
-    try (ifSection) <|>
-    try (controlLine) <|>
-    try (textLine) <|>
-    nonDirective <?>
-    "Group Part"
+        try (ifSection) <|>
+        try (controlLineGroupPart) <|>
+        try (nonDirectiveLine) <|>
+        textLine <?>
+        "Group Part"
 
-ifSection :: PreprocessingParser
+endOfInnerGroup :: ContainingGroup -> PreprocessingParserX ()
+endOfInnerGroup containingGroup = case containingGroup of
+    IfOrElif -> try (nullifyParser elifGroup) <|> try (nullifyParser elseGroup) <|> nullifyParser endIfLine
+    Else -> nullifyParser endIfLine
+    None -> eof
+
+controlLineGroupPart :: PreprocessingParserX GroupPart
+controlLineGroupPart = controlLine >>= return . ControlLine
+
+ifSection :: PreprocessingParserX GroupPart
 ifSection = do
     parsedIfGroup <- ifGroup
-    parsedElifGroups <- optionalElifGroups
-    parsedElseGroup <- optionalElseGroup
-    parsedEndIfLine <- endIfLine
-    let fullIfSection = parsedIfGroup ++ parsedElifGroups ++ parsedElseGroup ++ parsedEndIfLine
-    return fullIfSection
+    parsedElifGroups <- tryMaybe elifGroups
+    parsedElseGroup <- tryMaybe elseGroup
+    -- parsed elseGroup
+    endIfLine
+    return $ IfSection parsedIfGroup parsedElifGroups parsedElseGroup
 
-ifGroup :: PreprocessingParser
-ifGroup = 
+ifGroup :: PreprocessingParserX IfGroup
+ifGroup =
     try (ifDirective) <|>
     try (ifDefDirective) <|>
     ifNDefDirective
 
-ifDirective :: PreprocessingParser
+ifDirective :: PreprocessingParserX IfGroup
 ifDirective = do
-    octothorpe
-    if_
-    ifBody
-
-ifDefDirective :: PreprocessingParser
-ifDefDirective = do
-    octothorpe
-    ifDef
-    ifDefBody True
-
-ifNDefDirective :: PreprocessingParser
-ifNDefDirective = do
-    octothorpe
-    ifNDef
-    ifDefBody False
-
-ifDefBody :: Bool -> PreprocessingParser
-ifDefBody defOrNDef = do
-    -- True corresponds to ifdef
-    -- False corresponds to ifndef
-    parsedIdentifier <- stringParserSatisfy identifier
-    newLine
-    parsedGroup <- optionalGroup
-    -- get the user state
-    currentState <- getState
-    -- look up the parsedIdentifier in the state dictionary
-    let isDefined = (lookup parsedIdentifier currentState) /= Nothing
-    -- if identifier's existence or lackthereof corresponds with def/ndef,
-    -- then keep the body and return parsedGroup;
-    -- otherwise, nothing in the ifDefBody is kept in the
-    -- translation unit
-    let keepBody = defOrNDef == isDefined
-    let tokensToReturn = if keepBody then parsedGroup else []
-    return tokensToReturn
-
-ifBody :: PreprocessingParser
-ifBody = do
+    ifPrefix
     parsedConstantExpression <- constantExpression
     newLine
-    parsedGroup <- optionalGroup
-    -- keepBody will be Bool equal to whether or not parsedConstantExpression is true or false
-    let keepBody = evaluate parsedConstantExpression
-    let tokensToReturn = if keepBody then parsedGroup else []
-    return tokensToReturn
+    parsedMaybeGroup <- tryMaybe $ group IfOrElif
+    return $ IfDirective parsedConstantExpression parsedMaybeGroup
 
-if_ :: PreprocessingParser
-if_ = stringSatisfy (=="if")
+ifDefDirective :: PreprocessingParserX IfGroup
+ifDefDirective = do
+    ifDefPrefix
+    parsedIdentifier <- identifier
+    newLine
+    parsedMaybeGroup <- tryMaybe $ group IfOrElif
+    return $ IfDefDirective parsedIdentifier parsedMaybeGroup
 
-ifDef :: PreprocessingParser
-ifDef = stringSatisfy (=="ifdef")
+ifNDefDirective :: PreprocessingParserX IfGroup
+ifNDefDirective = do
+    ifNDefPrefix
+    parsedIdentifier <- identifier
+    newLine
+    parsedMaybeGroup <- tryMaybe $ group IfOrElif
+    return $ IfNDefDirective parsedIdentifier parsedMaybeGroup
 
-ifNDef :: PreprocessingParser
-ifNDef = stringSatisfy (=="ifndef")
+elifGroups :: PreprocessingParserX ElifGroups
+elifGroups = many1NonEmpty $ try elifGroup
 
-elifGroups :: PreprocessingParser
-elifGroups = do
-    parsedElifGroupsUnflattened <- many elifGroup
-    let :
-    return elifGroupsFlattened
+ifPrefix :: PreprocessingParserX ()
+ifPrefix = octothorpe >> if_
 
+if_ :: PreprocessingParserX ()
+if_ = stringSatisfy_ (=="if")
 
-firstNonEmptyElementOrEmptyList :: Eq a => [[a]] -> [a]
-firstNonEmptyElementOrEmptyList inputList =
-    | null inputList = []
-    | not $ null head_ = head_
-    | otherwise = firstNonEmptyElementOrEmptyList tail_
-    where
-        head_ = head inputList
-        tail_ = tail inputList
+ifDefPrefix :: PreprocessingParserX ()
+ifDefPrefix = octothorpe >> ifDef
 
-elifGroup :: PreprocessingParser
+ifDef :: PreprocessingParserX ()
+ifDef = stringSatisfy_ (=="ifdef")
+
+ifNDefPrefix :: PreprocessingParserX ()
+ifNDefPrefix = octothorpe >> ifNDef
+
+ifNDef :: PreprocessingParserX ()
+ifNDef = stringSatisfy_ (=="ifndef")
+
+elifGroup :: PreprocessingParserX ElifGroup
 elifGroup = do
-    parsedOctothorpe <- octothorpe
-    parsedElif <- elif
-    ifBody
+    elifPrefix
+    parsedConstantExpression <- constantExpression
+    newLine
+    parsedMaybeGroup <- tryMaybe $ group IfOrElif
+    return $ ElifGroup parsedConstantExpression parsedMaybeGroup
 
-elif :: PreprocessingParser
-elif = stringSatisfy (=="elif")
+elifPrefix :: PreprocessingParserX ()
+elifPrefix = octothorpe >> elif
 
-elseGroup :: PreprocessingParser
+elif :: PreprocessingParserX ()
+elif = stringSatisfy_ (=="elif")
+
+elseGroup :: PreprocessingParserX ElseGroup
 elseGroup = do
-    parsedOctothorpe <- octothorpe
-    parsedElse <- else_
-    parsedNewLine <- newLine
-    parsedGroup <- optionalGroup
+    elsePrefix
+    newLine
+    tryMaybe $ group Else
 
-else_ :: PreprocessingParser
-else_ = stringSatisfy (=="else")
+elsePrefix :: PreprocessingParserX ()
+elsePrefix = octothorpe >> else_
 
+else_ :: PreprocessingParserX ()
+else_ = stringSatisfy_ (=="else")
+
+-- This definition is just for the sake of being able to build this module and test other parsers.
+-- THE LINES BELOW SHOULD BE REMOVED.
+-- THEY DO NOT REFLECT THE ACTUAL SYNTAX OF A CONSTANT EXPRESSION
+constantExpression :: PreprocessingParserX ConstantExpression
+constantExpression = stringParserSatisfy (many1 digit) >>= (return . ConstantExpression . (read :: String -> Integer) . head)
 

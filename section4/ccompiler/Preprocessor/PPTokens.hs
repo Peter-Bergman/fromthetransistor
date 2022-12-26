@@ -21,6 +21,6 @@ ppToken = stringParserSatisfyT LPPT.preprocessingToken id <?> "PPToken"
 
 ppTokens :: PreprocessingParserX PPTokens
 ppTokens = do
-    tokens <- many1 ppToken <?> "PPTokens"
+    tokens <- many1 (try ppToken) <?> "PPTokens"
     return $ fromList tokens
 

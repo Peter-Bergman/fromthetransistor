@@ -1,16 +1,22 @@
 module EndIfLine where
+import CustomCombinators
+    (nullifyParser)
 import NewLine
+    (newLine)
 import Octothorpe
+    (octothorpe)
 import PreprocessingParser
+    ( PreprocessingParserX
+    , stringSatisfy_
+    )
 import Text.Parsec
+    ( try
+    , (<?>)
+    )
 
-endIfLine :: PreprocessingParser
-endIfLine = do
-    parsedOctothorpe <- octothorpe
-    parsedEndIf <- endIf
-    parsedNewLine <- newLine
-    return $ parsedOctothorpe ++ parsedEndIf ++ parsedNewLine
+endIfLine :: PreprocessingParserX ()
+endIfLine = nullifyParser ( try (octothorpe >> endIf >> newLine) <?> "EndIfLine" )
 
-endIf :: PreprocessingParser
-endIf = stringParserSatisfy (string "endif")
+endIf :: PreprocessingParserX ()
+endIf = stringSatisfy_ (=="endif") <?> "endif"
 

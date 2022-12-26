@@ -3,6 +3,8 @@ import AbstractSyntaxTree
     ( ControlLine
         (UndefDirective)
     )
+import CustomCombinators
+    (nullifyParser)
 import Identifier
     (identifier)
 import NewLine
@@ -18,13 +20,14 @@ import Text.Parsec.Combinator
 import Text.Parsec.Prim
     ((<?>))
 
+
 undefDirective :: PreprocessingParserX ControlLine
 undefDirective = do
     parsedIdentifier <- between undefPrefix newLine identifier
     return $ UndefDirective parsedIdentifier
 
 undefPrefix :: PreprocessingParserX ()
-undefPrefix = octothorpe >> undef >> return ()
+undefPrefix = nullifyParser $ octothorpe >> undef
 
 undef :: PreprocessingParserX ()
 undef = stringSatisfy_ (=="undef")

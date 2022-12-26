@@ -2,28 +2,22 @@ module AbstractSyntaxTree where
 import Data.List.NonEmpty
 
 type AbstractSyntaxTree = Maybe Group
-type Group = [GroupPart]
+type Group = NonEmpty GroupPart
 
 data GroupPart =
-    IfSection IfSection |
+    IfSection IfGroup (Maybe ElifGroups) (Maybe ElseGroup) |
     ControlLine ControlLine |
     TextLine (Maybe PPTokens) |
     NonDirective PPTokens
     deriving (Show)
 
-data IfSection =
-    IfGroup IfGroup |
-    ElifGroups (Maybe ElifGroups) |
-    ElseGroup (Maybe ElseGroup)
-    deriving (Show)
-
 data IfGroup =
-    IfConstantExpression ConstantExpression (Maybe Group) |
-    IfDef Identifier (Maybe Group) |
-    IfNDef Identifier (Maybe Group)
+    IfDirective ConstantExpression (Maybe Group) |
+    IfDefDirective Identifier (Maybe Group) |
+    IfNDefDirective Identifier (Maybe Group)
     deriving (Show)
 
-type ElifGroups = [ElifGroup]
+type ElifGroups = NonEmpty ElifGroup
 
 data ElifGroup =
     ElifGroup ConstantExpression (Maybe Group)
@@ -57,8 +51,9 @@ type ReplacementList = Maybe PPTokens
 type IdentifierList = NonEmpty Identifier
 
 -- This has to be revised. There needs to be a constructor that constructs a ConstantExpression with a ConditionalExpression
-data ConstantExpression =
-    ConditionalExpression
+newtype ConstantExpression =
+    ConstantExpression Integer -- remove this line and uncomment line below. THIS IS JUST FOR TESTING
+    --ConditionalExpression ConditionalExpression
     deriving (Show)
 
 data ConditionalExpression =

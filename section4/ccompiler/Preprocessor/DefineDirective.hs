@@ -40,7 +40,6 @@ import Text.Parsec
     (string)
 import Text.Parsec.Combinator
     ( between
-    , notFollowedBy
     , optionMaybe
     )
 import Text.Parsec.Prim
