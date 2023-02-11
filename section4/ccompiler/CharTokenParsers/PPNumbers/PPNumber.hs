@@ -1,4 +1,5 @@
 module CharTokenParsers.PPNumbers.PPNumber (ppNumber) where
+import CharTokenParsers.PrimitiveParsers.UniversalCharacterName
 import Data.List
 import System.Environment
 import Text.Parsec
@@ -17,11 +18,21 @@ ppNumber = (do
 ppNumberSuffix :: Parser String
 ppNumberSuffix = 
     digitAsString <|>
+    identifierDigit <|>
     littleESign <|>
     bigESign <|>
     littlePSign <|>
     bigPSign <|>
-    dotAsString    
+    dotAsString
+
+identifierDigit :: Parser String
+identifierDigit = universalCharacterName <|> nonDigitAsString
+
+nonDigitAsString :: Parser String
+nonDigitAsString = nonDigit >>= return . (:"")
+
+nonDigit :: Parser Char
+nonDigit = letter <|> char '_'
 
 littleESign = charThenSign 'e'
 bigESign = charThenSign 'E'
