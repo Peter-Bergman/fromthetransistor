@@ -1,17 +1,20 @@
 module CustomCombinators
-( nullifyParser
+( failsIfDoesNotConsumeAllInput
+, nullifyParser
 , many1NonEmpty
 , many1Till
 , many1TillNonEmpty
 , sepBy1NonConsumption
 , tryMaybe
+, tryWithFailMessage
 ) where
 import Data.List.NonEmpty
     ( fromList
     , NonEmpty
     )
 import Text.Parsec.Combinator
-    ( many1
+    ( eof
+    , many1
     , manyTill
     , notFollowedBy
     , optionMaybe
@@ -19,9 +22,11 @@ import Text.Parsec.Combinator
 import Text.Parsec.Prim
     ( many
     , ParsecT
+    , parserFail
     , Stream
     , try
     , (<|>)
+    , (<?>)
     )
 
 sepBy1NonConsumption :: ParsecT s u m a -> ParsecT s u m sep -> ParsecT s u m [a]
@@ -53,4 +58,20 @@ many1TillNonEmpty elementParser endParser = do
 
 nullifyParser :: Stream s m t => ParsecT s u m a -> ParsecT s u m ()
 nullifyParser parser = parser >> return ()
+
+
+anyOf :: Stream s m t => [ParsecT s u m a] -> ParsecT s u m a
+anyOf parserList = case parserList of
+    [] -> parserFail "Expected parsers for anyOf"
+    x:[] -> x
+    x:xs -> (try x) <|> (anyOf xs)
+
+failsIfDoesNotConsumeAllInput :: Stream s m t1 => Show t1 => ParsecT s u m t -> ParsecT s u m t
+failsIfDoesNotConsumeAllInput parser = do
+    parsedData <- parser
+    eof
+    return parsedData
+
+tryWithFailMessage :: Stream s m t => String -> ParsecT s u m a -> ParsecT s u m a
+tryWithFailMessage failMessage parser = try parser <?> failMessage
 
