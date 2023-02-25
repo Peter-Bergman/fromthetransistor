@@ -1,4 +1,6 @@
 module Identifier (identifier) where
+import AbstractSyntaxTree
+    (Identifier)
 import qualified CharTokenParsers.Identifiers.Identifier
     (identifier)
 import PreprocessingParser
@@ -8,6 +10,6 @@ import PreprocessingParser
 import Text.Parsec.Prim
     ((<?>))
 
-identifier :: PreprocessingParserX String
+identifier :: PreprocessingParserX Identifier
 identifier = stringParserSatisfyT CharTokenParsers.Identifiers.Identifier.identifier id <?> "Identifier"
 
