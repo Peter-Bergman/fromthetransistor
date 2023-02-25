@@ -50,10 +50,8 @@ data DefineDirective =
 type ReplacementList = Maybe PPTokens
 type IdentifierList = NonEmpty Identifier
 
--- This has to be revised. There needs to be a constructor that constructs a ConstantExpression with a ConditionalExpression
 newtype ConstantExpression =
-    ConstantExpression Integer -- remove this line and uncomment line below. THIS IS JUST FOR TESTING
-    --ConditionalExpression ConditionalExpression
+    ConditionalExpression ConditionalExpression
     deriving (Show)
 
 data ConditionalExpression =
@@ -61,33 +59,28 @@ data ConditionalExpression =
     ComplexConditionalExpression LogicalOrExpression ConstantExpression ConditionalExpression
     deriving (Show)
 
-data LogicalOrExpression =
-    SimpleLogicalOrExpression LogicalAndExpression |
-    ComplexLogicalOrExpression LogicalOrExpression LogicalAndExpression
+newtype LogicalOrExpression = 
+    LogicalOrExpression (NonEmpty LogicalAndExpression)
     deriving (Show)
 
-data LogicalAndExpression =
-    SimpleLogicalAndExpression InclusiveOrExpression |
-    ComplexLogicalAndExpression LogicalAndExpression InclusiveOrExpression
+newtype LogicalAndExpression =
+    LogicalAndExpression  (NonEmpty InclusiveOrExpression)
     deriving (Show)
 
-data InclusiveOrExpression =
-    SimpleInclusiveOrExpression ExclusiveOrExpression |
-    ComplexInclusiveOrExpression InclusiveOrExpression ExclusiveOrExpression
+newtype InclusiveOrExpression =
+    InclusiveOrExpression (NonEmpty ExclusiveOrExpression)
     deriving (Show)
 
-data ExclusiveOrExpression =
-    SimpleExclusiveOrExpression AndExpression |
-    ComplexExclusiveOrExpression ExclusiveOrExpression AndExpression
+newtype ExclusiveOrExpression =
+    ExclusiveOrExpression (NonEmpty AndExpression)
     deriving (Show)
 
 data AndExpression =
-    SimpleAndExpression EqualityExpression |
-    ComplexAndExpression AndExpression EqualityExpression
+    AndExpression (NonEmpty EqualityExpression)
     deriving (Show)
 
 data EqualityExpression =
-    RelationalExpression RelationalExpression |
+    SimpleEqualityExpression RelationalExpression |
     EqualityExpression EqualityExpression RelationalExpression |
     InequalityExpression EqualityExpression RelationalExpression
     deriving (Show)
@@ -108,13 +101,13 @@ data ShiftExpression =
 
 data AdditiveExpression =
     SimpleAdditiveExpression MultiplicativeExpression |
-    AdditiveExpression AdditiveExpression MultiplicativeExpression |
-    SubtractiveExpression AdditiveExpression MultiplicativeExpression
+    AdditionExpression AdditiveExpression MultiplicativeExpression |
+    SubtractionExpression AdditiveExpression MultiplicativeExpression
     deriving (Show)
 
 data MultiplicativeExpression =
     SimpleMultiplicativeExpression CastExpression |
-    MultiplicativeExpression MultiplicativeExpression CastExpression |
+    MultiplicationExpression MultiplicativeExpression CastExpression |
     DivisionExpression MultiplicativeExpression CastExpression |
     ModuloExpression MultiplicativeExpression CastExpression
     deriving (Show)
@@ -131,22 +124,23 @@ data UnaryExpression =
     OperatorExpression UnaryOperator CastExpression |
     SizeOfExpression UnaryExpression |
     SizeOfType TypeName |
-    AlignOf TypeName |
-    Defined Identifier -- The Defined constructor is only for constant expressions handled by the preprocessor
+    AlignOfType TypeName |
+    DefinedWithParentheses Identifier -- The DefinedWithParentheses constructor is only for constant expressions handled by the preprocessor
     deriving (Show)
 
 data UnaryOperator =
-    Ampersand |
-    Asterisk |
-    PlusSign |
-    MinusSign |
-    Tilde |
-    ExclamationPoint
+    AddressOf |
+    Indirection |
+    PlusSignOperator |
+    MinusSignOperator |
+    BitwiseNot |
+    LogicalNot |
+    DefinedWithoutParentheses -- The DefinedOperator constructor is only for constant expressions handled by the preprocessor
     deriving (Show)
 
 data PostfixExpression =
     SimplePostfixExpression PrimaryExpression |
-    IndexExpression PostfixExpression ConstantExpression |
+    IndexExpression PostfixExpression Expression |
     FunctionCallExpression PostfixExpression (Maybe ArgumentExpressionList) |
     DotSelectorExpression PostfixExpression Identifier |
     ArrowSelectorExpression PostfixExpression Identifier |
@@ -179,16 +173,15 @@ data AssignmentOperator =
     PipeEqual
     deriving (Show)
 
-data InitializerList =
-    SimpleInitializerList (Maybe Designation) Initializer |
-    ComplexInitializerList InitializerList (Maybe Designation) Initializer
+newtype InitializerList = InitializerList (NonEmpty (Maybe Designation, Initializer))
     deriving (Show)
 
-type Designation = DesignatorList
+newtype Designation =
+    Designation DesignatorList
+    deriving (Show)
 
-data DesignatorList =
-    SimpleDesignatorList Designator |
-    ComplexDesignatorList DesignatorList Designator
+newtype DesignatorList =
+    DesignatorList (NonEmpty Designator)
     deriving (Show)
 
 data Designator =
@@ -197,8 +190,8 @@ data Designator =
     deriving (Show)
 
 data Initializer =
-    SimpleInitializer AssignmentExpression |
-    ComplexInitializer InitializerList
+    AssignmentExpressionInitializer AssignmentExpression |
+    InitializerListInitializer InitializerList
     deriving (Show)
 
 data PrimaryExpression =
@@ -210,10 +203,187 @@ data PrimaryExpression =
     deriving (Show)
 
 data Constant =
-    IntegerConstant Integer |
-    FloatingConstant Float |
-    EnumerationConstant Int |
-    CharacterConstant Char
+    IntegerConstantConstant IntegerConstant |
+    FloatingConstantConstant FloatingConstant |
+    EnumerationConstantConstant EnumerationConstant |
+    CharacterConstantConstant CharacterConstant
+    deriving (Show)
+
+data IntegerConstant =
+    DecimalConstantIntegerConstant DecimalConstant (Maybe IntegerSuffix) |
+    OctalConstantIntegerConstant OctalConstant (Maybe IntegerSuffix) |
+    HexadecimalConstantIntegerConstant HexadecimalConstant (Maybe IntegerSuffix)
+    deriving (Show)
+
+data DecimalConstant =
+    DecimalConstant NonzeroDigit [Digit]
+    deriving (Show)
+
+newtype OctalConstant =
+    OctalConstant [OctalDigit]
+    deriving (Show)
+
+data HexadecimalConstant =
+    HexadecimalConstant HexadecimalPrefix (NonEmpty HexadecimalDigit)
+    deriving (Show)
+
+data HexadecimalPrefix =
+    CapitalXHexPrefix |
+    LowerCaseXHexPrefix
+    deriving (Show)
+
+data IntegerSuffix =
+    UnsignedMaybeLong UnsignedSuffix (Maybe LongSuffix) |
+    UnsignedLongLong UnsignedSuffix LongLongSuffix |
+    LongMaybeUnsigned LongSuffix (Maybe UnsignedSuffix) |
+    LongLongMaybeUnsigned LongLongSuffix (Maybe UnsignedSuffix)
+    deriving (Show)
+
+newtype NonzeroDigit =
+    NonzeroDigit Integer
+    deriving (Show)
+
+newtype Digit =
+    Digit Integer
+    deriving (Show)
+
+newtype OctalDigit =
+    OctalDigit Integer
+    deriving (Show)
+
+-- maybe this should be an isomorphic type of Integer like Digit and OctalDigit
+newtype HexadecimalDigit =
+    HexadecimalDigit Char
+    deriving (Show)
+
+data UnsignedSuffix =
+    CapitalUUnsignedSuffix |
+    LowerCaseUUnsignedSuffix
+    deriving (Show)
+
+data LongSuffix =
+    CapitalLLongSuffix |
+    LowerCaseLLongSuffix
+    deriving (Show)
+
+data LongLongSuffix =
+    CapitalLLongLongSuffix |
+    LowerCaseLLongLongSuffix
+    deriving (Show)
+
+data FloatingConstant =
+    DecimalFloatingConstant DecimalFloatingConstant |
+    HexadecimalFloatingConstant HexadecimalFloatingConstant
+    deriving (Show)
+
+data DecimalFloatingConstant =
+    FractionalDecimalFloatingConstant FractionalConstant (Maybe ExponentPart) (Maybe FloatingSuffix) |
+    DigitSequenceDecimalFloatingConstant DigitSequence ExponentPart (Maybe FloatingSuffix)
+    deriving (Show)
+
+data FractionalConstant =
+    HighPrecisionFractionalConstant (Maybe DigitSequence) DigitSequence |
+    LowPrecisionFractionalConstant DigitSequence
+    deriving (Show)
+
+data ExponentPart =
+    LowerCaseEExponentPart (Maybe Sign) DigitSequence |
+    CapitalEExponentPart (Maybe Sign) DigitSequence
+    deriving (Show)
+
+data Sign =
+    PlusSign |
+    MinusSign
+    deriving (Show)
+
+newtype DigitSequence =
+    DigitSequence (NonEmpty Digit)
+    deriving (Show)
+
+data FloatingSuffix =
+    LowerCaseFFloatingSuffix |
+    LowerCaseLFloatingSuffix |
+    CapitalFFloatingSuffix |
+    CapitalLFloatingSuffix
+    deriving (Show)
+
+data HexadecimalFloatingConstant =
+    FractionalHexadecimalFloatingConstant HexadecimalPrefix HexadecimalFractionalConstant BinaryExponentPart (Maybe FloatingSuffix) |
+    DigitSequenceHexadecimalFloatingConstant HexadecimalPrefix HexadecimalDigitSequence BinaryExponentPart (Maybe FloatingSuffix)
+    deriving (Show)
+
+data HexadecimalFractionalConstant =
+    HighPrecisionHexadecimalFractionalConstant (Maybe HexadecimalDigitSequence) HexadecimalDigitSequence |
+    LowPrecisionHexadecimalFractionalConstant HexadecimalDigitSequence
+    deriving (Show)
+
+newtype HexadecimalDigitSequence =
+    HexadecimalDigitSequence (NonEmpty HexadecimalDigit)
+    deriving (Show)
+
+data BinaryExponentPart =
+    LowerCasePExponentPart (Maybe Sign) DigitSequence |
+    CapitalPExponentPart (Maybe Sign) DigitSequence
+    deriving (Show)
+
+newtype EnumerationConstant =
+    EnumerationConstant Identifier
+    deriving (Show)
+
+data CharacterConstant =
+    SimpleCharacterConstant CCharSequence |
+    LCharacterConstant CCharSequence |
+    LowerCaseUCharacterConstant CCharSequence |
+    CapitalUCharacterConstant CCharSequence
+    deriving (Show)
+
+newtype CCharSequence =
+    CCharSequence (NonEmpty CChar)
+    deriving (Show)
+
+data CChar =
+    SimpleCChar Char |
+    EscapeSequence EscapeSequence
+    deriving (Show)
+
+data EscapeSequence =
+    SimpleEscapeSequence SimpleEscapeSequence |
+    OctalEscapeSequence OctalEscapeSequence |
+    HexadecimalEscapeSequenceEscapeSequence HexadecimalEscapeSequence |
+    UniversalCharacterName UniversalCharacterName
+    deriving (Show)
+
+data SimpleEscapeSequence =
+    SingleQuote |
+    DoubleQuote |
+    QuestionMark |
+    Backslash |
+    Alert |
+    Backspace |
+    FormFeed |
+    NewLine |
+    CarriageReturn |
+    HorizontalTab |
+    VerticalTab
+    deriving (Show)
+
+data OctalEscapeSequence =
+    SingleOctalEscapeSequence OctalDigit |
+    DoubleOctalEscapeSequence OctalDigit OctalDigit |
+    TripleOctalEscapeSequence OctalDigit OctalDigit OctalDigit
+    deriving (Show)
+
+newtype HexadecimalEscapeSequence =
+    HexadecimalEscapeSequence (NonEmpty HexadecimalDigit)
+    deriving (Show)
+
+data UniversalCharacterName =
+    ShortUniversalCharacterName HexQuad |
+    LongUniversalCharacterName HexQuad HexQuad
+    deriving (Show)
+
+newtype HexQuad =
+    HexQuad (HexadecimalDigit, HexadecimalDigit, HexadecimalDigit, HexadecimalDigit)
     deriving (Show)
 
 data Expression =
@@ -223,11 +393,10 @@ data Expression =
 
 data GenericSelection =
     GenericSelection AssignmentExpression GenericAssocList
-    deriving Show
+    deriving (Show)
 
-data GenericAssocList =
-    SimpleGenericAssocList GenericAssociation |
-    ComplexGenericAssocList GenericAssocList GenericAssociation
+newtype GenericAssocList =
+    GenericAssocList (NonEmpty GenericAssociation)
     deriving (Show)
 
 data GenericAssociation =
