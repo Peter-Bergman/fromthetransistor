@@ -11,18 +11,29 @@ module PreprocessingParser
 , stringSatisfyT
 , stringSatisfyTNoPrecedingWhiteSpace
 , testParse
+, charToStringTokenParser
 ) where
+import CustomCombinators
+    (failsIfDoesNotConsumeAllInput)
 import Lexer.Lexer
     ( lexString
     , horizontalSpacing
     )
+import Text.Parsec.Combinator
+    (anyToken)
 import Text.Parsec.Pos
     (updatePosString)
+import Text.Parsec.Error
+    ( errorMessages
+    , Message
+    , showErrorMessages
+    )
 import Text.Parsec.Prim
     ( parse
     , runParser
     , tokenPrim
     , skipMany
+    , parserFail
     )
 import Text.Parsec.String
     ( Parser
@@ -76,6 +87,19 @@ stringParserToStringChecker parser inputString =
         Right xs -> xs == inputString
     where
         parsedString = parse parser "" inputString
+
+charToStringTokenParser :: Parser t -> PreprocessingParserX t
+charToStringTokenParser parser = do
+    parsedToken <- anyToken
+    let parsedResult = parseStringWithCharTokenParser parsedToken
+    case (parsedResult) of
+        Left err -> parserFail $ showParseErrorNoPos err
+        Right xs -> return xs
+    where
+        parseStringWithCharTokenParser tokenToParse = parse (failsIfDoesNotConsumeAllInput parser) "" tokenToParse
+        showErrorMessagesCustom :: [Message] -> String
+        showErrorMessagesCustom messages = showErrorMessages "or" "unknown parse error" "expecting" "unexpected" "end of string token" messages
+        showParseErrorNoPos parseError = showErrorMessagesCustom $ errorMessages parseError
 
 testParse :: Show t => PreprocessingParserX t -> [String] -> IO ()
 testParse parser tokenList = case (runParser parser () "" tokenList) of
