@@ -4,6 +4,7 @@ module Lexer.PreprocessingToken
 , identifier
 , characterConstant
 , stringLiteral
+, ppNumber
 , punctuator
 , otherCharacter
 ) where
@@ -21,9 +22,9 @@ import Text.Parsec.String
 preprocessingToken :: Parser String
 preprocessingToken = 
     try (headerName) <|>
+    try (characterConstant) <|>
     try (identifier) <|>
     try (ppNumber) <|>
-    try (characterConstant) <|>
     try (stringLiteral) <|>
     try (punctuator) <|>
     otherCharacter
