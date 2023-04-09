@@ -1,8 +1,0 @@
-     ----------------- Constant expressions -----------------------
-
- ------------- Syntax ------------------
-
-constant-expression:
-	conditional-expression
-
-

@@ -1,0 +1,4 @@
+# Run `ghci -i../ Group.hs` in ../Preprocessor/
+# Enter command `:m + PreprocessingParser`
+lexThenParse (group None) $ "#if 5\n" ++ "#define control line\n" ++ "#elif 7\n" ++ "int main();\n" ++ "#elif 90\n" ++ "int main(int argc);\n" ++ "#else\n" ++ "#error message control line\n" ++ "#endif\n" ++ "simple text line\n" ++ "#non directive line\n" ++ "#pragma control line\n"
+

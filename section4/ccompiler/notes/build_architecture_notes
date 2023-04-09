@@ -26,3 +26,5 @@ The makefiles will reference other packages by simply adding -i../ CLA
 There will be one single bin directory inside the directory holding 
     all the different haskell packages.
 
+I am using stack now. It took a lot of time to figure this out, and it will take more figuring out, but I am using stack now.
+

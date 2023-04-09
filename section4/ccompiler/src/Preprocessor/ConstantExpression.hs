@@ -1,0 +1,688 @@
+module Preprocessor.ConstantExpression (constantExpression) where
+import AbstractSyntaxTree
+import CustomCombinators
+import Data.List.NonEmpty
+import Identifier
+import qualified IntegerConstant
+import PreprocessingParser
+import Text.Parsec.Combinator
+import Text.Parsec.Prim
+import Text.Parsec.String
+import Text.Parsec.Char
+import Text.Parsec.Char
+import Text.Parsec.Char
+
+
+parens :: PreprocessingParserX t -> PreprocessingParserX t
+parens = between leftParenthesis rightParenthesis
+
+brackets :: PreprocessingParserX t -> PreprocessingParserX t
+brackets = between leftBracket rightBracket
+
+braces :: PreprocessingParserX t -> PreprocessingParserX t
+braces = between leftBrace rightBrace
+
+leftParenthesis :: PreprocessingParserX ()
+leftParenthesis = stringSatisfy_ (=="(")
+
+rightParenthesis :: PreprocessingParserX ()
+rightParenthesis = stringSatisfy_ (==")")
+
+leftBracket :: PreprocessingParserX ()
+leftBracket = stringSatisfy_ (=="[")
+
+rightBracket :: PreprocessingParserX ()
+rightBracket = stringSatisfy_ (=="]")
+
+leftBrace :: PreprocessingParserX ()
+leftBrace = stringSatisfy_ (=="{")
+
+rightBrace :: PreprocessingParserX ()
+rightBrace = stringSatisfy_ (=="}")
+
+simpleExpression :: PreprocessingParserX isomorphicType1 -> (isomorphicType1 -> isomorphicType2) -> PreprocessingParserX isomorphicType2
+simpleExpression initialParser constructor = try $ initialParser >>= return . constructor
+
+infixRecursiveBinaryOperatorExpression :: PreprocessingParserX returnType -> PreprocessingParserX primitiveType -> PreprocessingParserX operator -> (returnType -> primitiveType -> returnType) -> PreprocessingParserX returnType
+infixRecursiveBinaryOperatorExpression recursedParser primitiveParser operatorParser typeConstructor = do
+    parsedPrimitiveType <- primitiveParser
+    operatorParser
+    parsedReturnType <- recursedParser
+    return $ typeConstructor parsedReturnType parsedPrimitiveType
+
+onlyInConstantExpressions :: Bool -> PreprocessingParserX t -> PreprocessingParserX t
+onlyInConstantExpressions isPartOfConstantExpression parser =
+    if isPartOfConstantExpression then parser else parserFail "defined unary operator can only be part of constant expressions"
+
+constantExpression :: PreprocessingParserX ConstantExpression
+constantExpression = conditionalExpression True
+
+conditionalExpression :: Bool -> PreprocessingParserX ConditionalExpression
+conditionalExpression = simpleConditionalExpression <|> complexConditionalExpression
+ 
+simpleConditionalExpression :: Bool -> PreprocessingParserX ConditionalExpression
+simpleConditionalExpression = simpleExpression logicalOrExpression SimpleConditionalExpression
+--simpleConditionalExpression = logicalOrExpression >>= return . SimpleConditionalExpression
+
+complexConditionalExpression :: Bool -> PreprocessingParserX ConditionalExpression
+complexConditionalExpression = do
+    parsedLogicalOrExpression <- logicalOrExpression
+    questionMark
+    parsedExpression <- expression
+    colon
+    parsedConditionalExpression <- conditionalExpression
+    return $ ComplexConditionalExpression parsedLogicalOrExpression parsedExpression parsedConditionalExpression
+
+questionMark :: PreprocessingParserX ()
+questionMark = stringSatisfy_ (=="?")
+
+colon :: PreprocessingParserX ()
+colon = stringSatisfy_ (==":")
+
+logicalOrExpression :: Bool -> PreprocessingParserX LogicalOrExpression
+logicalOrExpression = try $ sepBy1 logicalAndExpression logicalOrOperator >>= return . LogicalOrExpression . fromList
+
+logicalOrOperator :: PreprocessingParserX ()
+logicalOrOperator = stringSatisfy_ (=="||")
+
+logicalAndExpression :: Bool -> PreprocessingParserX LogicalAndExpression
+logicalAndExpression = try $ sepBy1 inclusiveOrExpression logicalAndOperator >>= return . LogicalAndExpression . fromList
+
+logicalAndOperator :: PreprocessingParserX ()
+logicalAndOperator = stringSatisfy_ (=="&&")
+
+inclusiveOrExpression :: Bool -> PreprocessingParserX InclusiveOrExpression
+inclusiveOrExpression = try $ sepBy1 exclusiveOrExpression bitwiseOrOperator >>= return . InclusiveOrExpression . fromList
+
+bitwiseOrOperator :: PreprocessingParserX ()
+bitwiseOrOperator = stringSatisfy_ (=="|")
+
+exclusiveOrExpression :: Bool -> PreprocessingParserX ExclusiveOrExpression
+exclusiveOrExpression = try $ sepBy1 andExpression bitwiseXorOperator >>= return . ExclusiveOrExpression . fromList
+
+bitwiseXorOperator :: PreprocessingParserX ()
+bitwiseXorOperator = stringSatisfy_ (=="^")
+
+andExpression :: Bool -> PreprocessingParserX AndExpression
+andExpression = try $ sepBy1 equalityExpression bitwiseAndOperator >>= return . AndExpression . fromList
+
+bitwiseAndOperator :: PreprocessingParserX ()
+bitwiseAndOperator = stringSatisfy_ (=="&")
+
+
+-- Next Thing To Implement below
+equalityExpression :: PreprocessingParserX EqualityExpression
+equalityExpression = 
+    try equalityOperatorExpression <|>
+    try inequalityExpression <|>
+    simpleEqualityExpression
+    --(relationalExpression >>= return . RelationalExpression)
+
+equalityOperatorExpression :: PreprocessingParserX EqualityExpression
+equalityOperatorExpression = do
+    parsedRelationalExpression <- relationalExpression
+    equalityOperator
+    parsedEqualityExpression <- equalityExpression
+    return $ EqualityExpression parsedEqualityExpression parsedRelationalExpression
+
+equalityOperator :: PreprocessingParserX ()
+equalityOperator = stringSatisfy_ (=="==")
+
+inequalityExpression :: PreprocessingParserX EqualityExpression
+inequalityExpression = do
+    parsedRelationalExpression <- relationalExpression
+    inequalityOperator
+    parsedEqualityExpression <- equalityExpression
+    return $ InequalityExpression parsedEqualityExpression parsedRelationalExpression
+
+inequalityOperator :: PreprocessingParserX ()
+inequalityOperator = stringSatisfy_ (=="!=")
+
+simpleEqualityExpression :: PreprocessingParserX EqualityExpression
+simpleEqualityExpression = simpleExpression relationalExpression SimpleEqualityExpression
+
+relationalExpression :: PreprocessingParserX RelationalExpression
+relationalExpression =
+    lessThanExpression <|>
+    greaterThanExpression <|>
+    lessThanOrEqualToExpression <|>
+    greaterThanOrEqualToExpression <|>
+    simpleRelationalExpression
+
+lessThanExpression :: PreprocessingParserX RelationalExpression
+lessThanExpression = try $ infixRecursiveBinaryOperatorExpression relationalExpression shiftExpression lessThanOperator LessThanExpression
+{-lessThanExpression = do
+    parsedShiftExpression <- shiftExpression
+    lessThanOperator
+    parsedRelationalExpression <- relationalExpression
+    return $ LessThanExpression parsedRelationalExpression parsedShiftExpression
+-}
+
+lessThanOperator :: PreprocessingParserX ()
+lessThanOperator = stringSatisfy_ (=="<")
+
+greaterThanExpression :: PreprocessingParserX RelationalExpression
+greaterThanExpression = try $ infixRecursiveBinaryOperatorExpression relationalExpression shiftExpression greaterThanOperator GreaterThanExpression
+{-greaterThanExpression = do
+    parsedShiftExpression <- shiftExpression
+    greaterThanOperator
+    parsedRelationalExpression <- relationalExpression
+    return $ GreaterThanExpression parsedRelationalExpression parsedShiftExpression-}
+
+greaterThanOperator :: PreprocessingParserX ()
+greaterThanOperator = stringSatisfy_ (==">")
+
+lessThanOrEqualToExpression :: PreprocessingParserX RelationalExpression
+lessThanOrEqualToExpression = try $ infixRecursiveBinaryOperatorExpression relationalExpression shiftExpression lessThanOrEqualToOperator LessThanOrEqualToExpression
+{-lessThanOrEqualToExpression = do
+    parsedShiftExpression <- shiftExpression
+    lessThanOrEqualToOperator
+    parsedRelationalExpression <- relationalExpression-}
+
+lessThanOrEqualToOperator :: PreprocessingParserX ()
+lessThanOrEqualToOperator = stringSatisfy_ (=="<=")
+
+greaterThanOrEqualToExpression :: PreprocessingParserX RelationalExpression
+greaterThanOrEqualToExpression = try $ infixRecursiveBinaryOperatorExpression relationalExpression shiftExpression greaterThanOrEqualToExpression GreaterThanOrEqualToExpression
+{-greaterThanOrEqualToExpression = do
+    parsedShiftExpression <- shiftExpression
+    greaterThanOrEqualToOperator
+    parsedRelationalExpression <- relationalExpression
+-}
+
+greaterThanOrEqualToOperator :: PreprocessingParserX ()
+greaterThanOrEqualToOperator = stringSatisfy_ (==">=")
+
+simpleRelationalExpression :: PreprocessingParserX RelationalExpression
+simpleRelationalExpression = simpleExpression shiftExpression SimpleRelationalExpression
+--simpleRelationalExpression = try $ shiftExpression >>= return . SimpleRelationalExpression
+
+shiftExpression :: PreprocessingParserX ShiftExpression
+shiftExpression =
+    leftShiftExpression <|>
+    rightShiftExpression <|>
+    simpleShiftExpression
+
+leftShiftExpression :: PreprocessingParserX ShiftExpression
+leftShiftExpression = try $ infixRecursiveBinaryOperatorExpression shiftExpression additiveExpression leftShiftOperator LeftShiftExpression
+{-leftShiftExpression = do
+    parsedAdditiveExpression <- additiveExpression
+    leftShiftOperator
+    parsedShiftExpression <- shiftExpression
+    return $ LeftShiftExpression parsedShiftExpression parsedAdditiveExpression
+-}
+
+leftShiftOperator :: PreprocessingParserX ()
+leftShiftOperator = stringSatisfy_ (=="<<")
+
+rightShiftExpression :: PreprocessingParserX ShiftExpression
+rightShiftExpression = try $ infixRecursiveBinaryOperatorExpression shiftExpression additiveExpression rightShiftOperator RightShiftExpression
+{-rightShiftExpression = do
+    parsedAdditiveExpression <- additiveExpression
+    rightShiftOperator
+    parsedShiftExpression <- shiftExpression
+    return $ RightShiftExpression parsedShiftExpression parsedAdditiveExpression
+-}
+
+rightShiftOperator :: PreprocessingParserX ()
+rightShiftOperator = stringSatisfy_ (==">>")
+
+simpleShiftExpression :: PreprocessingParserX ShiftExpression
+simpleShiftExpression = simpleExpression additiveExpression SimpleShiftExpression
+--simpleShiftExpression = try $ additiveExpression >>= return . SimpleShiftExpression
+
+additiveExpression :: PreprocessingParserX AdditiveExpression
+additiveExpression =
+    additionExpression  <|>
+    subtractionExpression <|>
+    simpleAdditiveExpression
+
+additionExpression :: PreprocessingParserX AdditiveExpression
+additionExpression = infixRecursiveBinaryOperatorExpression additiveExpression multiplicativeExpression additionOperator AdditionExpression
+
+additionOperator :: PreprocessingParserX ()
+additionOperator = stringSatisfy_ (=="+")
+
+subtractionExpression :: PreprocessingParserX AdditiveExpression
+subtractionExpression = infixRecursiveBinaryOperatorExpression additiveExpression multiplicativeExpression subtractionOperator SubtractionExpression
+
+subtractionOperator :: PreprocessingParserX ()
+subtractionOperator = stringSatisfy_ (=="-")
+
+simpleAdditiveExpression :: PreprocessingParserX AdditiveExpression
+simpleAdditiveExpression = multiplicativeExpression >>= return . SimpleAdditiveExpression
+
+multiplicativeExpression :: PreprocessingParserX MultiplicativeExpression
+multiplicativeExpression =
+    multiplicationExpression <|>
+    divisionExpression <|>
+    moduloExpression <|>
+    simpleMultiplicativeExpression
+
+multiplicationExpression :: PreprocessingParserX MultiplicativeExpression
+multiplicationExpression = try $ infixRecursiveBinaryOperatorExpression multiplicativeExpression castExpression multiplicationOperator MultiplicationExpression
+
+multiplicationOperator :: PreprocessingParserX ()
+multiplicationOperator = asterisk
+
+asterisk :: PreprocessingParserX ()
+asterisk = stringSatisfy_ (=="*")
+
+divisionExpression :: PreprocessingParserX MultiplicativeExpression
+divisionExpression = try $ infixRecursiveBinaryOperatorExpression multiplicativeExpression castExpression divisionOperator DivisionExpression
+
+divisionOperator :: PreprocessingParserX ()
+divisionOperator = slash
+
+slash :: PreprocessingParserX ()
+slash = stringSatisfy_ (=="/")
+
+moduloExpression :: PreprocessingParserX MultiplicativeExpression
+moduloExpression = try $ infixRecursiveBinaryOperatorExpression multiplicativeExpression castExpression moduloOperator ModuloExpression
+
+moduloOperator :: PreprocessingParserX ()
+moduloOperator = percentSign
+
+percentSign :: PreprocessingParserX ()
+percentSign = stringSatisfy_ (=="%")
+
+simpleMultiplicativeExpression :: PreprocessingParserX MultiplicativeExpression
+simpleMultiplicativeExpression = simpleExpression castExpression SimpleMultiplicativeExpression
+
+castExpression :: PreprocessingParserX CastExpression
+castExpression =
+    complexCastExpression <|>
+    simpleCastExpression
+
+complexCastExpression :: PreprocessingParserX CastExpression
+complexCastExpression = do
+    parsedTypeName <- parens typeName
+    parsedCastExpression <- castExpression
+    return $ ComplexCastExpression parsedTypeName parsedCastExpression
+
+simpleCastExpression :: PreprocessingParserX CastExpression
+simpleCastExpression = simpleExpression unaryExpression SimpleCastExpression
+
+unaryExpression :: PreprocessingParserX UnaryExpression
+unaryExpression = -- double check the ordering of these alternatives
+    incrementExpression <|>
+    decrementExpression <|>
+    sizeOfType <|>
+    alignOfType <|>
+    definedWithParentheses <|>
+    operatorExpression <|>
+    sizeOfExpression <|>
+    postfixExpression
+    
+incrementExpression :: PreprocessingParserX UnaryExpression
+incrementExpression = try $ simpleExpression (incrementOperator >> unaryExpression) IncrementExpression
+
+incrementOperator :: PreprocessingParserX ()
+incrementOperator = stringSatisfy_ (=="++")
+
+decrementExpression :: PreprocessingParserX UnaryExpression
+decrementExpression = try $ simpleExpression (decrementOperator >> unaryExpression) DecrementExpression
+
+decrementOperator :: PreprocessingParserX ()
+decrementOperator = stringSatisfy_ (=="--")
+
+sizeOfType :: PreprocessingParserX UnaryExpression
+sizeOfType = try $ simpleExpression (sizeOf >> parens typeName) SizeOfType
+
+sizeOf :: PreprocessingParserX ()
+sizeOf = stringSatisfy_ (=="sizeof")
+
+alignOfType :: PreprocessingParserX UnaryExpression
+alignOfType = try $ simpleExpression (alignOf >> parens typeName) AlignOfType
+
+alignOf :: PreprocessingParserX ()
+alignOf = stringSatisfy_ (=="_Alignof")
+
+definedWithParentheses :: PreprocessingParserX UnaryExpression
+definedWithParentheses = try $ onlyInConstantExpressions $ simpleExpression (defined >> parens identifier) DefinedWithParentheses
+
+defined :: PreprocessingParserX ()
+defined = stringSatisfy_ (=="defined")
+
+operatorExpression :: PreprocessingParserX UnaryExpression
+operatorExpression = try $ do
+    parsedUnaryOperator <- unaryOperator
+    parsedCastExpression <- castExpression
+    return $ OperatorExpression parsedUnaryOperator parsedCastExpression
+
+unaryOperator :: PreprocessingParserX UnaryOperator
+unaryOperator =
+    addressOf <|>
+    indirection <|>
+    plusSign <|>
+    minusSign <|>
+    bitwiseNot <|>
+    logicalNot <|>
+    definedWithoutParentheses
+
+addressOf :: PreprocessingParserX UnaryOperator
+addressOf = ampersand >> return AddressOf
+
+ampersand :: PreprocessingParserX ()
+ampersand = stringSatisfy_ (=="&")
+
+indirection :: PreprocessingParserX UnaryOperator
+indirection = asterisk >> return Indirection
+
+plusSign :: PreprocessingParserX UnaryOperator
+plusSign = stringSatisfy_ (=="+") >> return PlusSign
+
+minusSign :: PreprocessingParserX UnaryOperator
+minusSign = hyphen >> return MinusSign
+
+hyphen :: PreprocessingParserX ()
+hyphen = stringSatisfy_ (=="-")
+
+bitwiseNot :: PreprocessingParserX UnaryOperator
+bitwiseNot = tilde >> return BitwiseNot
+
+tilde :: PreprocessingParserX ()
+tilde = stringSatisfy_ (=="~")
+
+logicalNot :: PreprocessingParserX UnaryOperator
+logicalNot = exclamationPoint >> return LogicalNot
+
+exclamationPoint :: PreprocessingParserX ()
+exclamationPoint = stringSatisfy_ (=="!")
+
+definedWithoutParentheses :: PreprocessingParserX UnaryOperator
+definedWithoutParentheses = onlyInConstantExpressions $ defined >> DefinedWithoutParentheses
+
+sizeOfExpression :: PreprocessingParserX UnaryExpression
+sizeOfExpression = simpleExpression (sizeOf >> unaryExpression) SizeOfExpression
+
+postfixExpression :: PreprocessingParserX UnaryExpression
+postfixExpression = do
+    parsedPrimitivePostfixExpression <- primitivePostfixExpression
+    fullPostfixExpression parsedPrimitivePostfixExpression
+
+
+    {-indexExpression <|>
+    functionCallExpression <|>
+    dotSelectorExpression <|>
+    arrowSelectorExpression <|>
+    postfixIncrementExpression <|>
+    postfixDecrementExpression <|>
+    postfixInitializerListExpression <|>
+    simplePostfixExpression-}
+
+primitivePostfixExpression :: PreprocessingParserX PostfixExpression
+primitivePostfixExpression = postfixInitializerListExpression <|> simplePostfixExpression
+
+postfixInitializerListExpression :: PreprocessingParserX PostfixExpression
+postfixInitializerListExpression = do
+    parsedTypeName <- parens typeName
+    parsedInitializerList <- braces initializerListWithOptionalFollowingComma
+    return $ PostfixInitializerListExpression parsedTypeName parsedInitializerList
+
+simplePostfixExpression :: PreprocessingParserX PostfixExpression
+simplePostfixExpression = simpleExpression primaryExpression SimplePostfixExpression
+
+initializerListWithOptionalFollowingComma :: PreprocessingParserX InitializerList
+initializerListWithOptionalFollowingComma = do
+    parsedInitializerList <- initializerList
+    tryMaybe comma
+    return $ parsedInitializerList
+
+initializerList :: PreprocessingParserX InitializerList
+initializerList = sepBy1NonConsumption initializerListElement comma >>= return . InitializerList . fromList
+
+initializerListElement :: PreprocessingParserX (Maybe Designation, Initializer)
+initializerListElement = do
+    parsedMaybeDesignation <- tryMaybe designation
+    parsedInitializer <- initializer
+    return (parsedMaybeDesignation, parsedInitializer)
+
+comma :: PreprocessingParserX ()
+comma = stringSatisfy_ (==",")
+
+designation :: PreprocessingParserX Designation
+designation = do
+    parsedDesignatorList <- designatorList
+    equalSign
+    return $ Designation parsedDesignatorList
+
+equalSign :: PreprocessingParserX ()
+equalSign = stringSatisfy_ (=="=")
+
+designatorList :: PreprocessingParserX DesignatorList
+designatorList = many1NonEmpty designator
+
+designator :: PreprocessingParserX Designator
+designator =
+    bracketDesignator <|>
+    dotDesignator
+
+bracketDesignator :: PreprocessingParserX Designator
+bracketDesignator = try $ simpleExpression (brackets constantExpression) BracketDesignator
+
+dotDesignator :: PreprocessingParserX Designator
+dotDesignator = simpleExpression (dot >> identifier) DotDesignator
+
+dot :: PreprocessingParserX ()
+dot = stringSatisfy_ (==".")
+
+initializer :: PreprocessingParserX Initializer
+initializer = assignmentExpressionInitializer <|> initializerListInitializer
+
+assignmentExpressionInitializer :: PreprocessingParserX Initializer
+assignmentExpressionInitializer = simpleExpression assignmentExpression AssignmentExpressionInitializer
+
+initializerListInitializer :: PreprocessingParserX Initializer
+initializerListInitializer = simpleExpression initializerListWithOptionalFollowingComma InitializerListInitializer
+
+fullPostfixExpression :: PostfixExpression -> PreprocessingParserX PostfixExpression
+fullPostfixExpression primitivePostfixExpression =
+    indexExpression primitivePostfixExpression <|>
+    functionCallExpression primitivePostfixExpression <|>
+    dotSelectorExpression primitivePostfixExpression <|>
+    arrowSelectorExpression primitivePostfixExpression <|>
+    postfixIncrementExpression primitivePostfixExpression <|>
+    postfixDecrementExpression primitivePostfixExpression <|>
+    return primitivePostfixExpression
+
+indexExpression :: PostfixExpression -> PreprocessingParserX PostfixExpression
+indexExpression prefixPostfixExpression = do
+    parsedIndexExpression <- try $ brackets expression
+    return $ IndexExpression prefixPostfixExpression parsedIndexExpression
+
+functionCallExpression :: PostfixExpression -> PreprocessingParserX PostfixExpression
+functionCallExpression prefixPostfixExpression = do
+    parsedMaybeArgumentExpressionList <- try $ parens $ tryMaybe argumentExpressionList
+    let parsedFunctionCallExpression = FunctionCallExpression prefixPostfixExpression parsedMaybeArgumentExpressionList
+    fullPostfixExpression parsedFunctionCallExpression
+
+dotSelectorExpression :: PostfixExpression -> PreprocessingParserX PostfixExpression
+dotSelectorExpression prefixPostfixExpression = do
+    dot
+    parsedIdentifier <- identifier
+    return $ DotSelectorExpression prefixPostfixExpression parsedIdentifier
+
+arrowSelectorExpression :: PostfixExpression -> PreprocessingParserX PostfixExpression
+arrowSelectorExpression prefixPostfixExpression = do
+    arrowSelector
+    parsedIdentifier <- identifier
+    return $ ArrowSelectorExpression prefixPostfixExpression parsedIdentifier
+
+arrowSelector :: PreprocessingParserX ()
+arrowSelector = stringSatisfy_ (=="->")
+
+postfixIncrementExpression :: PostfixExpression -> PreprocessingParserX PostfixExpression
+postfixIncrementExpression prefixPostfixExpression = do
+    incrementOperator
+    return $ PostfixIncrementExpression prefixPostfixExpression
+
+postfixDecrementExpression :: PostfixExpression -> PreprocessingParserX PostfixExpression
+postfixDecrementExpression prefixPostfixExpression = do
+    decrementOperator
+    return $ PostfixDecrementExpression prefixPostfixExpression
+
+primaryExpression :: PreprocessingParserX PrimaryExpression
+primaryExpression =
+    identifierPrimaryExpression <|>
+    constantPrimaryExpression <|>
+    stringLiteralPrimaryExpression <|>
+    expressionPrimaryExpression <|>
+    genericSelectionPrimaryExpression
+
+identifierPrimaryExpression :: PreprocessingParserX PrimaryExpression
+identifierPrimaryExpression = simpleExpression identifier IdentifierPrimaryExpression
+
+constantPrimaryExpression :: PreprocessingParserX PrimaryExpression
+constantPrimaryExpression = simpleExpression constant ConstantPrimaryExpression
+
+stringLiteralPrimaryExpression :: PreprocessingParserX PrimaryExpression
+stringLiteralPrimaryExpression = simpleExpression stringLiteral StringLiteralPrimaryExpression
+
+expressionPrimaryExpression :: PreprocessingParserX PrimaryExpression
+expressionPrimaryExpression = simpleExpression (parens expression) ExpressionPrimaryExpression
+
+genericSelectionPrimaryExpression :: PreprocessingParserX PrimaryExpression
+genericSelectionPrimaryExpression = simpleExpression genericSelection GenericSelectionPrimaryExpression
+
+genericSelection :: PreprocessingParserX GenericSelection
+genericSelection = try $ do
+    genericSelectionPrefix
+    parens genericSelectionSuffix
+
+genericSelectionPrefix :: PreprocessingParserX ()
+genericSelectionPrefix = stringSatisfy_ (=="_Generic")
+
+genericSelectionSuffix :: PreprocessingParserX GenericSelection
+genericSelectionSuffix = try $ do
+    parsedAssignmentExpression <- assignmentExpression
+    parsedGenericAssocList <- genericAssocList
+    return $ GenericSelection parsedAssignmentExpression parsedGenericAssocList
+
+genericAssocList :: PreprocessingParserX GenericAssocList
+genericAssocList = try $ do
+    parsedGenericAssociations <- sepBy1NonConsumption genericAssociation comma
+    return $ GenericAssocList . fromList parsedGenericAssociations
+
+genericAssociation :: PreprocessingParserX GenericAssociation
+genericAssociation = typedGenericAssociation <|> defaultGenericAssociation
+
+typedGenericAssociation :: PreprocessingParserX GenericAssociation
+typedGenericAssociation = try $ do
+    parsedTypeName <- typeName
+    colon
+    parsedAssignmentExpression <- assignmentExpression
+    return $ TypedGenericAssociation parsedTypeName parsedAssignmentExpression
+
+defaultGenericAssociation :: PreprocessingParserX GenericAssociation
+defaultGenericAssociation = try $ do
+    default_
+    colon
+    parsedAssignmentExpression <- assignmentExpression
+    return parsedAssignmentExpression
+
+default_ :: PreprocessingParserX ()
+default_ = stringSatisfy_ (=="default")
+
+constant :: PreprocessingParserX Constant
+constant =
+    integerConstantConstant <|>
+    floatingConstantConstant <|>
+    enumerationConstantConstant <|>
+    characterConstantConstant
+
+integerConstantConstant :: PreprocessingParserX Constant
+integerConstantConstant = simpleExpression integerConstant IntegerConstantConstant
+
+floatingConstantConstant :: PreprocessingParserX Constant
+floatingConstantConstant = simpleExpression floatingConstant FloatingConstantConstant
+
+enumerationConstantConstant :: PreprocessingParserX Constant
+enumerationConstantConstant = simpleExpression enumerationConstant EnumerationConstantConstant
+
+characterConstantConstant :: PreprocessingParserX Constant
+characterConstantConstant = simpleExpression characterConstant CharacterConstantConstant
+
+integerConstant :: PreprocessingParserX IntegerConstant
+integerConstant = charToStringTokenParser IntegerConstant.integerConstant
+
+floatingConstant :: PreprocessingParserX FloatingConstant
+floatingConstant = decimalFloatingConstant <|> hexadecimalFloatingConstant
+
+enumerationConstant :: PreprocessingParserX EnumerationConstant
+enumerationConstant = simpleExpression identifier EnumerationConstant
+
+{-
+integerConstant :: PreprocessingParserX Constant
+integerConstant =
+    decimalConstantIntegerConstant <|>
+    octalConstantIntegerConstant <|>
+    hexadecimalConstantIntegerConstant
+
+hexadecimalConstantIntegerConstant :: PreprocessingParserX Constant
+hexadecimalConstantIntegerConstant = do
+    parsedHexadecimalConstant <- hexadecimalConstant
+    parsedIntegerSuffix <- tryMaybe $ integerSuffix
+    return $ HexadecimalConstantIntegerConstant parsedHexadecimalConstant parsedIntegerSuffix
+
+integerSuffix :: PreprocessingParserX IntegerSuffix
+integerSuffix =
+    unsignedMaybeLong <|> -- check order for this
+    unsignedLongLong <|>
+    longMaybeUnsigned <|>
+    longLongMaybeUnsigned
+
+unsignedMaybeLong :: PreprocessingParserX IntegerSuffix
+unsignedMaybeLong = do
+    parsedUnsignedSuffix <- unsignedSuffix
+    parsedLongSuffix <- tryMaybe $ longSuffix
+    return $ UnsignedMaybeLong parsedUnsignedSuffix parsedLongSuffix
+
+unsignedLongLong :: PreprocessingParserX IntegerSuffix
+unsignedLongLong = do
+    parsedUnsignedSuffix <- unsignedSuffix
+    parsedLongLongSuffix <- longLongSuffix
+    return $ UnsignedLongLong parsedUnsignedSuffix parsedLongLongSuffix
+
+longMaybeUnsigned :: PreprocessingParserX IntegerSuffix
+longMaybeUnsigned = do
+    parsedLongSuffix <- longSuffix
+    parsedMaybeUnsignedSuffix <- tryMaybe $ unsignedSuffix
+    return $ LongMaybeUnsigned parsedLongSuffix parsedMaybeUnsignedSuffix
+
+longLongMaybeUnsigned :: PreprocessingParserX IntegerSuffix
+longLongMaybeUnsigned = do
+    parsedLongLongSuffix <- longLongSuffix
+    parsedMaybeUnsignedSuffix <- tryMaybe $ unsignedSuffix
+    return $ LongLongMaybeUnsigned parsedLongLongSuffix parsedMaybeUnsignedSuffix
+
+unsignedSuffix :: PreprocessingParserX UnsignedSuffix
+unsignedSuffix = capitalUUnsignedSuffix <|> lowerCaseUUnsignedSuffix
+
+capitalUUnsignedSuffix :: PreprocessingParserX UnsignedSuffix
+capitalUUnsignedSuffix = simpleExpression (stringSatisfy_ (=="U")) CapitalUUnsignedSuffix
+
+lowerCaseUUnsignedSuffix :: PreprocessingParserX UnsignedSuffix
+lowerCaseUUnsignedSuffix = simpleExpression (stringSatisfy_ (=="u")) LowerCaseUUnsignedSuffix
+
+longSuffix :: PreprocessingParserX LongSuffix
+longSuffix = lowerCaseLLongSuffix <|> capitalLLongSuffix
+
+lowerCaseLLongSuffix :: PreprocessingParserX LongSuffix
+lowerCaseLLongSuffix = simpleExpression (stringSatisfy_ (=="l")) LowerCaseLLongSuffix
+
+capitalLLongSuffix :: PreprocessingParserX LongSuffix
+capitalLLongSuffix = simpleExpression (stringSatisfy_ (=="L")) CapitalLLongSuffix
+
+longLongSuffix :: PreprocessingParserX LongLongSuffix
+longLongSuffix = lowerCaseLLongLongSuffix <|> capitalLLongLongSuffix
+
+lowerCaseLLongLongSuffix :: PreprocessingParserX LongLongSuffix
+lowerCaseLLongLongSuffix = simpleExpression (stringSatisfy_ (=="ll")) LowerCaseLLongLongSuffix
+
+capitalLLongLongSuffix :: PreprocessingParserX LongLongSuffix
+capitalLLongLongSuffix = simpleExpression (stringSatisfy_ (=="LL")) CapitalLLongLongSuffix
+
+hexadecimalConstant :: PreprocessingParserX HexadecimalConstant
+hexadecimalConstant = try (charToStringTokenParser HexadecimalConstant.hexadecimalConstant) <?> "Hexadecimal Constant"
+-}

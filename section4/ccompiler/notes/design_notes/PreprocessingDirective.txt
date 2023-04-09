@@ -76,3 +76,416 @@ item = tokenPrim show nextPos testString
 
 Me likey.
 I will try compiling and testing this tomorrow.
+
+There have been a lot of changes since the last time I touched this document.
+I cannot process preprocessing directives within the parser code.
+The reason for this is the include directive.
+The include directive requires IO functionality.
+
+I made lots of changes to the parsers in the Preprocessor.
+All of the parsers used in ControlLine.hs now parse ADT's from the AST
+in AbstractSyntaxTree.hs.
+The same with TextLine.hs
+
+I need to refactor the string.*Satisfy.? parser constructors in 
+    PreprocessingParser.hs
+They need to be able to handle my changes to the Lexer.
+The Lexer no longer skips horizontal spacing.
+Rather, it lexes--the word for next to each other
+What is it? What is it? What is it? Next to each other.
+Not immediately? Not continuous? What is the word that 
+    I am looking for? It lexes, not continuous
+Not contiguous.
+Not serial.
+What is that word?
+It's on the tip of my tongue.
+Not immediately sequenced, though that would
+    convey the same meaning.
+God fucking dammit (no, no, we don't say that; yes we do)
+What is the word?
+I am going to stop blasting the keyboard to think without 
+    continuous writing.
+CONSECUTIVE!!!!!
+That's the word! Yes!
+The lexer lexes consecutive horizontal spacing characters into
+    a single token.
+
+Next session. Didn't get super far last time.
+Spent most of the time scratching my head metaphorically.
+As I said before, I need to have the string.*Satisfy.?
+    parser builders handle the changes to the lexer.
+They need to be able to easily parse whitespace before them.
+The first change that I would like to make is actually an
+    action to clean up and abstract the code in the 
+    PreprocessingParser.hs module.
+I would like there to be one and only one function in that
+    module that calls tokenPrim from Text.Parsec.Prim.
+Then, I would like all of the string.*Satisfy.? functions
+    to have that function in their expression tree.
+
+Third session, here goes.
+Okay, I need to decide what function will directly
+    call tokenPrim.
+In order for all of the other string satisfy functions
+    to have this function in their expression trees,
+    the function that directly calls tokenPrim will
+    have to be stringSatisfyT, or at least a function
+    that is abstracted to construct any
+    PreprocessingParserX t, like stringSatisfyT.
+There are three pathways that I can take from here:
+1. Have the current string.*Satisfy functions
+    optionally skip horizontal spacing.
+
+Fourth session, continuing on...
+2. Have the current string.*Satisfy functions
+    not consume spacing and write a new function
+    (or functions) that does consume spacing.
+3. Add another parameter to all of the 
+    string.*Satisfy.? functions.
+The third option does not require writing ANY new functions.
+Thus, no function identifiers in the Preprocessor 
+    directory would need to be modified.
+However, every call to a string.*Satisfy.? function
+    would have to be modified to pass the new parameter.
+I do not know yet where in the parameter lists I would
+    like to add the ...
+
+Session 5, continuing on:
+... new parameter; the start or the back?
+One position may have advantages of simplicity
+    in the current code invoking those functions.
+I will now talk about the first option, though.
+If I opted for the first method, I would have
+    to write a new function that LParen would
+    call.
+My only concern with the first option is a
+    lack of semantic clarity.
+If a parser is going to skip preceding
+    horizontal white space, then it would
+    be nice to have that be explicit in
+    the parser's name.
+Maybe not.
+
+Session 6
+Well, I guess it would be fine.
+Changing the name of a function identifier,
+    I think, would be more convenient than
+    adding a parameter, as in the 3rd
+    option.
+I say this because of partial applications
+    and the weirdness that comes with that.
+By adding a parameter to a function, I may
+    kill some of the sweet and sexy
+    syntactic sugar used in one of the
+    invoking modules.
+That wouldn't be the end of the world,
+    but it would take more time.
+The commit changes would be easier to
+    read and comprehend if I change
+    a function name than if I change
+    the function call syntax used
+    somewhere.
+Okay, then, I don't like the third option.
+The third option is ruled out.
+
+Session 7
+What about the second option.
+It is barely on screen for me.
+This one is not dissimilar from the
+    first.
+With either of these options, I will
+    have to change the function
+    identifiers all throughout the
+    Preprocessor directory.
+Well, that is not actually the
+    case.
+The first one, if I don't change
+    the name of the functions
+    currently in use, will only
+    require further changes in
+    LParen, I think.
+Maybe LParen.hs and the DefineDirective.hs
+    module that imports LParen (the
+    only LParen import, I believe).
+Let me summarize the remaining options
+    to myself.
+
+Session 8
+I just realized that option 1 is the same
+    as option 3.
+Now, I'm confused as to what I thought
+    option 1 was when I decided it was
+    better than option 3.
+I will redefine option 1 here:
+1. Have the current string.*Satisfy.? functions
+    consume horizontal spacing, and make them
+    all derive their definition from a new
+    function that does not consume preceding
+    horizontal whitespace.
+This is as opposed to making the current
+    string satisfy functions not consume
+    preceding white space and writing
+    functions that do.
+The second option would require me to
+    rewrite all...
+
+Session 9
+... --I'll start that sentence over.
+The second option would require me to
+    write a new version of each 
+    string satisfy function.
+With the first option, I could
+    simply write one new function
+    and have stringSatisfyT
+    invoke it.
+Is that not correct?
+Yes, it is.
+Okay, then first option it is.
+That leaves one last question.
+Will I change the name of the
+    current string.*Satisfy.?
+    functions to make explicit
+    that they skip preceding
+    whitespace?
+
+
+Session 10
+I don't want to.
+Well, I was going to ask myself
+    if changing the names would
+    probably lead to payoffs in
+    easier to read code.
+It could.
+However, I am the only person
+    working on this repository.
+I do not need to make this design
+    decision now.
+It will probably be in the side
+    of my mind as I write the
+    remainder of the parsers.
+That will give plenty of
+    oppurtunities for the
+    OCD parts of me to speak
+    up.
+There is no need for me to
+    demand that I make a
+    decision now.
+One of my favorite principles
+    for making design decisions
+    is to push them further
+    and further down the line,
+    if possible.
+
+I am going to go with option 1.
+
+I need to build a parser for postfix expressions.
+It is difficult to do so without making one that will infinitely recurse.
+My current idea is to define a parser called primitivePostfixExpression.
+It will parse the postfix expression mutations with a typename and 
+    initializer list or a primary expression.
+Then, I would feed the parsed output, a postfix expression, to a parser
+    constructor that parses possibly following parts of the postfix
+    expression.
+The constructed parser would return the initially parsed postfix expression
+    if a more complex postfix expression could not be parsed.
+The constructed parser, should, therefore, never fail.
+The parser constructors for non-primitive postfix expressions are not
+    semantically correct in this way of doing parsing postfix expressions.
+I would either like to figure out better parser constructor names or use a
+    more semantically correct design.
+
+
+I need to be able to parse integer constants for the Preprocessor.
+I am writing that parser inside of ConstantExpression.hs, though
+    I guess constants could be in their own module.
+Anyways, some of the syntactical structures that make up an integer
+    constant are more fine grained than a single string token
+    output by the lexer.
+An example of this is hexadecimal-digit (as in the ISO document),
+    HexadecimalDigit in the AST. I could double check that, but I
+    don't think it is actually necessary in order for me to move on.
+Anyways, hexadecimal digits are single characters. There could me
+    many of them in a single token.
+I think my solution for this problem is to transform Char
+    token parsers into PreprocessingParserX parsers. I wrote out
+    in my notebook what I intuitively think the type signature of
+    that transformation is. Checking.
+transformerName :: Text.Parsec.String.Parser t ->
+    PreprocessingParserX t
+That is actually a much simpler signature compared to a lot of the
+    other transformer functions that I've written that map char
+    token parsers to PreprocessingParserX parsers. Most of those
+    other parsers (if not all) require some kind of first class
+    function to be passed as an argument to transform a string into
+    type t, and the input parser does not have type t, I believe,
+    for any of the previous parser transformers that I've written.
+I think I will copy or abstract some of the code in
+    PreprocessingParser.hs for this transformation, specifically
+    the code that does the case expression for the parsing error
+    and successful parse, the case expression that handles
+    some Either data type parameter.
+I will look in the PreprocessingParser module now for that code.
+I think I will be using or abstracting the code for the function
+    stringParserToStringChecker.
+Below is the signature.
+stringParserToStringChecker :: Parser String -> (String -> Bool)
+I think I will be copying, rather than abstracting this code.
+    I do not want a function that returns a bool.
+Rather, I need the parsed AST.
+I can reuse the pattern matches for the case expression and the
+    where definition.
+I need a name for the parser transformer that I am trying to make.
+I could call it charTokenParserToStringTokenParser.
+That is a long name, but I don't know of any better way to
+    describe what the function does.
+A more concise way to say that is charToStringTokenParser.
+I will use that for now.
+Well, actually I don't want to use that name.
+It does not output just any string token parser, rather a stateless
+    one (based on the current definition of PreprocessingParserX)
+I will figure out a better name after implementing the function.
+Hold on! I need to rethink the type signature.
+I don't think I can implement what I need with the current
+    signature.
+I think I will need a string (the token being parsed) as an input.
+I think I've got it. I wrote some extra code in the where
+    clause that makes charToStringTokenParser fail if it does not
+    parse the entire string token.
+If charToStringTokenParser throws a ParseError, there are two
+    parser positions printed, which could be confusing. I wish I
+    could grab the messages from a ParseError. I think I can.
+    I looked up the definition of ParseError.
+I was trying to deconstruct ParseError myself. I could not
+    because the constructor was not exported.
+I just found the function, also in Text.Parsec.Error, errorMessages.
+The errorMessages returns the error messages of a ParseError.
+I will use that to rethrow the parse error.
+Appartently, the Message data type does not derive the Show
+    typeclass. That is fine.
+There is a function messageString that returns the string for
+    the message.
+I will use that instead of show to pass the messages from the
+    internal ParseError to parserFail.
+I think I will have to reduce a list of messages.
+I did that. The messages do not have the Expected or Unexpected
+    prefix before them.
+I can figure that out in the future.
+Oh, this problem can be solved by the showErrorMessages function
+    in the Text.Parsec.Error module.
+Furthermore, I can use the ending of the ParseError instantiation
+    of the Show typeclass.
+See the source code for instance Show ParseError.
+
+I will work on the showing embedded ParseError objects in a little bit.
+Before fucking around with the diagnostic messages, I want to confirm that
+    I can convert any char token parser to a PreprocessingParserX type
+    parser.
+I want to implement hexadecimalConstant in this way.
+I need to think of a way to name the Parser HexadecimalConstant
+    and a different name for the PreprocessingParserX HexadecimalConstant.
+
+
+I have an issue with the lexer.
+When I lex the character constant "L'a'", the character constant is split
+    into two tokens, shown in a haskell string on the line below.
+["L","'a'"]
+That is not what I expect.
+I expected it to be just one token.
+I checked the iso c document, and I looked under the syntactic definition
+    of preprocessing-token.
+One of the possible syntaxes for a preprocessing-token is a simple
+    character-constant.
+Therefore, I think I messed up the order of alternatives in my
+    preprocessing-token parser implementation.
+The identifier parser is earlier in the sequence of alternatives.
+I think that the L is being parsed as an identifier, and the 'a' is
+    parsed as something else.
+I will see which of the alternative parsers parse the full string "'a'".
+Maybe headerName?
+Maybe stringLiteral, but I bet that only messes with double quotes.
+I'll try now.
+The headerName parser did not consume the first '\'' character.
+The same happened with the stringLiteral parser.
+I will try each of the alternatives.
+Oh, I just realized that the string "'a'" will itself be parsed as a
+    character constant, even without the 'L' prefix.
+That makes more sense.
+I will try parsing the string "'a'" with ppNumber.
+The ppNumber parser is not exported from the Lexer.PreprocessingToken
+    module.
+I added it to the exports.
+I reloaded my modules in ghci, and I tried parsing "'a'"with ppNumber, and
+    it failed on the first character.
+I moved characterConstant before identifier (past ppNumber and identifier)
+    in the order of alternatives for the preprocessingToken parser.
+Now, it is only behind headerName.
+None of the possible first characters of a header-name can be the first
+    character of a character-constant, and vise versa.
+I think that I solved the problem without creating any new ones.
+I still need to test the preprocessingToken parser on the string "L'a'" to
+    find out.
+The preprocessingToken parsed the entire string "L'a'".
+That is good.
+I will now check that the lexer lexes that string in the context of other
+    strings properly.
+It seemed to work properly.
+I'm calling this issue fixed. I will commit the changes to
+    PreprocessingToken.hs.
+I have a bunch of changes and a crappy hard drive.
+I had previously planned to only commit modules when they would compile,
+    but I don't want to waste any space.
+Also, holy fuck, there are a bunch of deep circular dependencies in the
+    syntax for a constant-expression, so there are many pieces that
+    cannot be factored into smaller modules.
+I am going to commit the mess I've got so far.
+I'll commit the AbstractSyntaxTree first, then the IntegerConstant module,
+    I think.
+I need to look in the AbstractSyntaxTree to find the changes I've made and
+    the old code I commented out and delete that old code.
+I'll do that now.
+I committed the changes to the AbstractSyntaxTree and some changes to
+    Identifier.hs, the PreprocessingParserX version.
+The IntegerConstant module relies on the CustomCombinators module.
+I will commit the CustomCombinators module first.
+The IntegerConstant module, I believe, relies on changes to the
+    PreprocessingParser module, as well.
+I will commit those changes before committing the IntegerConstant module.
+
+I have a couple issues and ideas that I thought of today at work that
+    I would like to write down and explore.
+The first thing that comes to mind is the idea of creating a typeclass
+    with a function like show that would convert preprocessing tokens
+    to strings.
+It would be like the Show typeclass, but I want this to be different.
+I may not even need a typeclass for this, but a function from an abstract
+    data type PreprocessingToken -> String.
+I think this could be a good idea because I want to be able to reuse all of
+    the char token parsers used by the lexer.
+Hopefully, the cabal/stack build system I create will help make it possible
+    to reuse code in a clean way.
+If I do decide to make the PreprocessingToken -> String function a
+    typeclass, I could call it Unparse or ShowTokenString or something
+    like those.
+I think I like Unparse more.
+It sounds cooler.
+I might prefer ShowPPTokenString or ShowPreprocessingTokenString over
+    ShowTokenString because the typeclass may not be reused by the compiler
+    proper.
+PreprocessingParserX can't be used for compiler proper.
+Maybe that type can, but the type name cannot.
+The compiler proper will probably have/need the same parsers as the
+    preprocessor, but I do not know whether the compiler will need state
+    during that phase/those phases.
+When I have tried to plan far into the future on this project, my plans
+    often have not worked or have not worked fast enough.
+Even if the compiler proper needs the same parsers with different state, I
+    may be able to create some parser transformers to create parsers that
+    handle and use state as needed without having to rewrite boilerplate
+    parsers.
+On the topic of the PreprocessingToken -> String function, I think I would
+    like to make it a typeclass.
+I have never actually written a typeclass and do not know the syntax.
+If for no other reason, I would like this to be a learning experience where
+    I write a typeclass for the first time.
+It is 8:28, almost time to get off the electronics.
+
