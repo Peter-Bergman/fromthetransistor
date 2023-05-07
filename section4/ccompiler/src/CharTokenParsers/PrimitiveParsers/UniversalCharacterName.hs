@@ -1,5 +1,6 @@
 module CharTokenParsers.PrimitiveParsers.UniversalCharacterName where
 import AbstractSyntaxTree
+import ASTEquipped
 import CustomCombinators
 import Numeric
 import Text.Parsec
@@ -8,53 +9,54 @@ import Text.Parsec.String
 
 
 
--- Universal Character Name Parser Section
-
 universalCharacterName :: Parser UniversalCharacterName
-universalCharacterName = tryWithFailMessage "Universal Character Name" $ universalShort <|> universalLong
+universalCharacterName = parserFail "universalCharacterName not finished being implemented" --tryWithFailMessage "Universal Character Name" $ universalShort <|> universalLong
 
-universalCharacterNameOutOfRangeError :: String
+{-universalCharacterNameOutOfRangeError :: String
 universalCharacterNameOutOfRangeError = "Universal Character Name not in range"
 
-universalCharacterInRange :: Integer -> Bool
-universalCharacterInRange universalCharNum
-    | 0xD800 <= universalCharNum && universalCharNum <= 0xDFFF = False
-    | ( universalCharNum < 0x00A0 ) && not ( elem universalCharNum otherAllowedCharacters ) = False
+
+-- See constraints for universal-character-name in the C spec
+isValidUniversalCharacterName :: Integer -> Bool
+isValidUniversalCharacterName universalCharNum
+    | inBannedRange = False
+    | tooSmall = False
     | otherwise = True
     where
-        -- See ISO constraints for universal-character-name
+        inBannedRange = 0xD800 <= universalCharNum && universalCharNum <= 0xDFFF
+        tooSmall = universalCharNum < 0x00A0 && (not $ elem universalCharNum otherAllowedCharacters)
         otherAllowedCharacters = [0x0024, 0x0040, 0x0060]
 
 universalShort :: Parser UniversalCharacterName
 universalShort = do
-    prefix <- string "\\u"
+    parsedPrefix <- string "\\u"
     parsedHexQuad <- hexQuad
-    let hexQuadInteger = fst $ head $ readHex parsedHexQuad
-    let passed = universalCharacterInRange hexQuadInteger
+    let hexQuadInteger = toInteger parsedHexQuad
+    let passed = isValidUniversalCharacterName hexQuadInteger
     if passed
-        then return $ UniversalCharacterName parsedHexQuad
+        then return $ ShortUniversalCharacterName parsedHexQuad
         else fail universalCharacterNameOutOfRangeError
 
-universalLong :: Parser String
+universalLong :: Parser UniversalCharacterName
 universalLong = do
-    prefix <- string "\\U"
+    parsedPrefix <- string "\\U"
     parsedHexQuad1 <- hexQuad
     parsedHexQuad2 <- hexQuad
-    let hexQuadIntegerPart1 = (fst $ head $ readHex parsedHexQuad1) * (16 * 16 * 16 * 16)
-    let hexQuadIntegerPart2 = fst $ head $ readHex parsedHexQuad2
+    let hexQuadIntegerPart1 = toInteger parsedHexQuad1 * (16 ^ 4)
+    let hexQuadIntegerPart2 = toInteger parsedHexQuad2
     let hexQuadInteger = hexQuadIntegerPart1 + hexQuadIntegerPart2
-    let inRange = universalCharacterInRange hexQuadInteger
+    let inRange = isValidUniversalCharacterName hexQuadInteger
     if inRange
-        then return $ LongUniversalCharacterName hexQuad1 hexQuad2
+        then return $ LongUniversalCharacterName parsedHexQuad1 parsedHexQuad2
         else fail universalCharacterNameOutOfRangeError
+-}
 
-hexQuad :: Parser String
-hexQuad = do
+hexQuad :: Parser HexQuad
+hexQuad = parserFail "hexQuad not finished being implemented" {-do
     char1 <- HexadecimalDigit <$> hexDigit
     char2 <- HexadecimalDigit <$> hexDigit
     char3 <- HexadecimalDigit <$> hexDigit
     char4 <- HexadecimalDigit <$> hexDigit
-    return ([char1] ++ [char2] ++ [char3] ++ [char4])
-
--- End of Universal Character Parser Section
+    return $ HexQuad (char1, char2, char3, char4)
+    -}
 
