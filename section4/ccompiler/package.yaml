@@ -41,6 +41,7 @@ library:
   exposed-modules:
     # Miscellaneous utilities
     - AbstractSyntaxTree
+    - ASTEquipped
     - CustomCombinators
     # Preprocessor specific modules
     - Preprocessor.CharacterConstant

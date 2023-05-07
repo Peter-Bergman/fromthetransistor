@@ -197,7 +197,7 @@ data Initializer =
 data PrimaryExpression =
     IdentifierPrimaryExpression Identifier |
     ConstantPrimaryExpression Constant |
-    StringLiteralPrimaryExpression String |
+    StringLiteralPrimaryExpression StringLiteral |
     ExpressionPrimaryExpression Expression |
     GenericSelectionPrimaryExpression GenericSelection
     deriving (Show)
@@ -539,4 +539,50 @@ data AlignmentSpecifier =
     ConstantAlignment ConstantExpression
     deriving (Show)
 
+data IdentifierNonDigit =
+    NonDigitIdentifierNonDigit NonDigit |
+    UniversalCharacterNameNonDigit UniversalCharacterName
+    deriving (Show)
 
+newtype NonDigit =
+    NonDigit Char
+    deriving (Show)
+
+data SChar =
+    NonEscapeSequenceSChar Char |
+    EscapeSequenceSChar EscapeSequence
+    deriving (Show)
+
+newtype SCharSequence =
+    SCharSequence (NonEmpty SChar)
+    deriving (Show)
+
+data StringLiteral =
+    StringLiteral (Maybe EncodingPrefix) (Maybe SCharSequence)
+    deriving (Show)
+
+data EncodingPrefix =
+    U8 |
+    LowerCaseU |
+    CapitalU |
+    CapitalL
+    deriving (Show)
+
+data PPNumber =
+    DottedDigitPPNumber Digit [PPNumberSuffix] |
+    DigitPPNumber Digit [PPNumberSuffix]
+    deriving (Show)
+
+-- PPNumberSuffix is not formally defined
+data PPNumberSuffix =
+    DigitPPNumberSuffix Digit |
+    IdentifierNonDigitPPNumberSuffix IdentifierNonDigit |
+    LowerCaseEPPNumberSuffix Sign |
+    CapitalEPPNumberSuffix Sign |
+    LowerCasePPPNumberSuffix Sign |
+    CapitalPPPNumberSuffix Sign |
+    DotPPNumberSuffix Sign
+    deriving (Show)
+
+
+    

@@ -489,3 +489,30 @@ If for no other reason, I would like this to be a learning experience where
     I write a typeclass for the first time.
 It is 8:28, almost time to get off the electronics.
 
+It is May 03 today.
+I feel like I am wasting a lot of my time implementing a bunch of typeclasses and shit.
+So much of what I am doing seems like busy work.
+I had planned on making a full implementation of a C preprocessor.
+I think that will take longer than I want it to.
+I think I am going to not implement a bunch of things, like universal character names.
+I had planned on implementing them for the preprocessor, but not using them for the compiler proper.
+However, I will not be using most of this syntax.
+If I do want to use it in the future, I will implement it.
+I think I will simply include a bunch of these syntaxes in alternatives separated by <|> combinator.
+I will implement them with a parserFail message, though.
+That way, the code shouldn't break, and I at least give a hint for myself as to where I left off.
+I still think I might use the ASTEquipped module.
+I might decide against that soon, though.
+I am going to leave the mess I made for the HexQuad and the HexadecimalDigit types for now.
+I just looked up how to do split screens in vim.
+I am using vsplit and Ctrl+W and arrows to move around.
+It is interesting.
+I might grow to like this.
+It is almost certainly less convenient than hitting Alt+Tab or Ctrl+Tab, but I think it is nice that the ordering doesn't change as if I were using different windows or was using Visual Studio.
+I just realized that I can hit Ctrl+W twice in normal mode, and the cursor moves to the next window pane in vim.
+That is pretty convenient.
+I might use hexadecimal digits when I build the operating system.
+However, for now I will not implement them.
+I might have a parser built for them, but I do not want to handle supporting all the conversions needed between integers, characters, etc.
+
+
