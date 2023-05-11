@@ -515,4 +515,8 @@ I might use hexadecimal digits when I build the operating system.
 However, for now I will not implement them.
 I might have a parser built for them, but I do not want to handle supporting all the conversions needed between integers, characters, etc.
 
-
+I wonder if I am overcomplicating a lot of the data types in the AST by deconstructing the strings.
+For example, I am not storing identifiers as strings.
+Rather, I am storing them as an IdentifierNonDigit and [IdentifierSuffix]
+I just made that change.
+I could go against that decision, but that would be inconsistent with my other ADTs in the AST.

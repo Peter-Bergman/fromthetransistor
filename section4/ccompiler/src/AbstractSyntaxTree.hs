@@ -1,8 +1,13 @@
 module AbstractSyntaxTree where
 import Data.List.NonEmpty
 
-type AbstractSyntaxTree = Maybe Group
-type Group = NonEmpty GroupPart
+newtype AbstractSyntaxTree =
+    AbstractSyntaxTree (Maybe Group)
+    deriving (Show)
+
+newtype Group =
+    Group (NonEmpty GroupPart)
+    deriving (Show)
 
 data GroupPart =
     IfSection IfGroup (Maybe ElifGroups) (Maybe ElseGroup) |
@@ -17,15 +22,27 @@ data IfGroup =
     IfNDefDirective Identifier (Maybe Group)
     deriving (Show)
 
-type ElifGroups = NonEmpty ElifGroup
+newtype ElifGroups =
+    ElifGroups (NonEmpty ElifGroup)
+    deriving (Show)
 
 data ElifGroup =
     ElifGroup ConstantExpression (Maybe Group)
     deriving (Show)
 
-type ElseGroup = Maybe Group
+newtype ElseGroup =
+    ElseGroup (Maybe Group)
+    deriving (Show)
 
-type Identifier = String
+data Identifier =
+    Identifier IdentifierNonDigit [IdentifierSuffix]
+    deriving (Show)
+
+-- NOTE: IdentifierSuffix is not formally defined
+data IdentifierSuffix =
+    IdentifierNonDigitIdentifierSuffix IdentifierNonDigit |
+    DigitIdentifierSuffix Digit
+    deriving (Show)
 
 data ControlLine =
     IncludeDirective PPTokens |
@@ -37,8 +54,13 @@ data ControlLine =
     NullDirective
     deriving (Show)
 
-type PPToken = String
-type PPTokens = NonEmpty PPToken
+newtype PreprocessingToken =
+    PreprocessingToken String
+    deriving (Show)
+
+newtype PPTokens =
+    PPTokens (NonEmpty PreprocessingToken)
+    deriving (Show)
 
 data DefineDirective =
     ObjectLikeDefine Identifier ReplacementList |
@@ -47,8 +69,13 @@ data DefineDirective =
     IdentifierListEllipsisFunctionDefine Identifier IdentifierList ReplacementList
     deriving (Show)
 
-type ReplacementList = Maybe PPTokens
-type IdentifierList = NonEmpty Identifier
+newtype ReplacementList =
+    ReplacementList (Maybe PPTokens)
+    deriving (Show)
+
+newtype IdentifierList =
+    IdentifierList (NonEmpty Identifier)
+    deriving (Show)
 
 newtype ConstantExpression =
     ConditionalExpression ConditionalExpression
@@ -173,7 +200,8 @@ data AssignmentOperator =
     PipeEqual
     deriving (Show)
 
-newtype InitializerList = InitializerList (NonEmpty (Maybe Designation, Initializer))
+newtype InitializerList =
+    InitializerList (NonEmpty (Maybe Designation, Initializer))
     deriving (Show)
 
 newtype Designation =
@@ -485,7 +513,9 @@ data StructOrUnion =
     Union
     deriving (Show)
 
-type StructDeclarationList = NonEmpty StructDeclaration
+newtype StructDeclarationList =
+    StructDeclarationList (NonEmpty StructDeclaration)
+    deriving (Show)
 
 data StructDeclaration =
     SpecifierQualifierListStructDeclaration SpecifierQualifierList (Maybe StructDeclaratorList) |
@@ -496,14 +526,18 @@ data StaticAssertDeclaration =
     StaticAssertDeclaration ConstantExpression String
     deriving (Show)
 
-type StructDeclaratorList = NonEmpty StructDeclarator
+newtype StructDeclaratorList =
+    StructDeclaratorList (NonEmpty StructDeclarator)
+    deriving (Show)
 
 data StructDeclarator =
     SimpleStructDeclarator Declarator |
     ComplexStructDeclarator (Maybe Declarator) ConstantExpression
     deriving (Show)
 
-type TypeQualifierList = NonEmpty TypeQualifier
+newtype TypeQualifierList =
+    TypeQualifierList (NonEmpty TypeQualifier)
+    deriving (Show)
 
 data TypeQualifier =
     Const |
@@ -573,7 +607,7 @@ data PPNumber =
     DigitPPNumber Digit [PPNumberSuffix]
     deriving (Show)
 
--- PPNumberSuffix is not formally defined
+-- NOTE: PPNumberSuffix is not formally defined
 data PPNumberSuffix =
     DigitPPNumberSuffix Digit |
     IdentifierNonDigitPPNumberSuffix IdentifierNonDigit |
@@ -581,8 +615,8 @@ data PPNumberSuffix =
     CapitalEPPNumberSuffix Sign |
     LowerCasePPPNumberSuffix Sign |
     CapitalPPPNumberSuffix Sign |
-    DotPPNumberSuffix Sign
+    DotPPNumberSuffix
     deriving (Show)
 
 
-    
+

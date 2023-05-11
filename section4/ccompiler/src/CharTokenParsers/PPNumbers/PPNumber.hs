@@ -4,18 +4,27 @@ import CharTokenParsers.PrimitiveParsers.UniversalCharacterName
 import CustomCombinators
 import Data.List
 import System.Environment
-import Text.Parsec
-import Text.Parsec.Char
+import qualified Text.Parsec.Char as Char
 import Text.Parsec.Combinator
+import Text.Parsec.Prim
 import Text.Parsec.String
+import qualified Text.Read as Read
 
-ppNumber :: Parser String
-ppNumber = (do
-    parsedDot <- option "" dotAsString
-    initialDigit <- digit
-    tail <- many ppNumberSuffix
-    let tailString = intercalate "" tail
-    return $ parsedDot ++ initialDigit : tailString) <?> "Preprocessing Number"
+ppNumber :: Parser PPNumber
+ppNumber = tryWithFailMessage "PPNumber" $ dottedDigitPPNumber <|> digitPPNumber
+
+dottedDigitPPNumber :: Parser PPNumber
+dottedDigitPPNumber = tryWithFailMessage "Dotted Digit PPNumber" $ do
+    Char.char '.'
+    parsedDigit <- digit
+    parsedPPNumberSuffixes <- many ppNumberSuffix
+    return $ DottedDigitPPNumber parsedDigit parsedPPNumberSuffixes
+
+digitPPNumber :: Parser PPNumber
+digitPPNumber = tryWithFailMessage "Digit PPNumber" $ do
+    parsedDigit <- digit
+    parsedPPNumberSuffixes <- many ppNumberSuffix
+    return $ DigitPPNumber parsedDigit parsedPPNumberSuffixes
 
 ppNumberSuffix :: Parser PPNumberSuffix
 ppNumberSuffix = 
@@ -28,16 +37,25 @@ ppNumberSuffix =
     dotPPNumberSuffix
 
 digitPPNumberSuffix :: Parser PPNumberSuffix
-digitPPNumberSuffix = simpleExpression digit Digit
+digitPPNumberSuffix = simpleExpression digit DigitPPNumberSuffix
 
 identifierNonDigitPPNumberSuffix :: Parser PPNumberSuffix
 identifierNonDigitPPNumberSuffix = simpleExpression identifierNonDigit IdentifierNonDigitPPNumberSuffix
 
 lowerCaseEPPNumberSuffix :: Parser PPNumberSuffix
-lowerCaseEPPNumberSuffix = try $ char 'e' >> simpleExpression sign LowerCaseEPPNumberSuffix
+lowerCaseEPPNumberSuffix = try $ Char.char 'e' >> simpleExpression sign LowerCaseEPPNumberSuffix
 
 capitalEPPNumberSuffix :: Parser PPNumberSuffix
-capitalEPPNumberSuffix = try $ char 'E' >> simpleExpression sign CapitalEPPNumberSuffix
+capitalEPPNumberSuffix = try $ Char.char 'E' >> simpleExpression sign CapitalEPPNumberSuffix
+
+lowerCasePPPNumberSuffix :: Parser PPNumberSuffix
+lowerCasePPPNumberSuffix = try $ Char.char 'p' >> simpleExpression sign LowerCasePPPNumberSuffix
+
+capitalPPPNumberSuffix :: Parser PPNumberSuffix
+capitalPPPNumberSuffix = try $ Char.char 'P' >> simpleExpression sign CapitalPPPNumberSuffix
+
+dotPPNumberSuffix :: Parser PPNumberSuffix
+dotPPNumberSuffix = Char.char '.' >> return DotPPNumberSuffix
 
 identifierNonDigit :: Parser IdentifierNonDigit
 identifierNonDigit = universalCharacterNameNonDigit <|> nonDigitIdentifierNonDigit
@@ -48,40 +66,23 @@ universalCharacterNameNonDigit = simpleExpression universalCharacterName Univers
 nonDigitIdentifierNonDigit :: Parser IdentifierNonDigit
 nonDigitIdentifierNonDigit = simpleExpression nonDigit NonDigitIdentifierNonDigit
 
-{-nonDigitAsString :: Parser String
-nonDigitAsString = nonDigit >>= return . (:"")
--}
-
 nonDigit :: Parser NonDigit
-nonDigit = simpleExpression (letter <|> char '_') NonDigit
-
-littleESign = charThenSign 'e'
-bigESign = charThenSign 'E'
-littlePSign = charThenSign 'p'
-bigPSign = charThenSign 'P'
+nonDigit = simpleExpression (Char.letter <|> Char.char '_') NonDigit
 
 sign :: Parser Sign
 sign = minusSign <|> plusSign
 
 minusSign :: Parser Sign
-minusSign = char '-' >> return MinusSign
+minusSign = Char.char '-' >> return MinusSign
 
 plusSign :: Parser Sign
-plusSign = char '+' >> return PlusSign
+plusSign = Char.char '+' >> return PlusSign
 
-charThenSign :: Char -> Parser String
-charThenSign character = do
-    parsedCharacter <- char character
-    sign <- sign
-    return $ parsedCharacter : sign
-
-dotAsString :: Parser String
-dotAsString = do
-    char '.'
-    return "."
-
-digitAsString :: Parser String
-digitAsString = do
-    parsedDigit <- digit
-    return $ parsedDigit : ""
+digit :: Parser Digit
+digit = tryWithFailMessage "Digit" $ do
+    parsedDigitChar <- Char.digit
+    let maybeDigit = Read.readMaybe (parsedDigitChar : [])
+    case maybeDigit of
+        Just digit' -> return $ Digit digit'
+        Nothing     -> parserFail "error in digit parser"
 
