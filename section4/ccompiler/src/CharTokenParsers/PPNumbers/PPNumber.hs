@@ -3,7 +3,6 @@ import AbstractSyntaxTree
 import CharTokenParsers.PrimitiveParsers.UniversalCharacterName
 import CustomCombinators
 import Data.List
-import System.Environment
 import qualified Text.Parsec.Char as Char
 import Text.Parsec.Combinator
 import Text.Parsec.Prim
