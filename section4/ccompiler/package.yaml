@@ -76,6 +76,8 @@ library:
     - CharTokenParsers.HeaderNames.HeaderName
     - CharTokenParsers.Identifiers.Identifier
     - CharTokenParsers.PPNumbers.PPNumber
+    - CharTokenParsers.PrimitiveParsers.Digit
+    - CharTokenParsers.PrimitiveParsers.NonDigit
     - CharTokenParsers.PrimitiveParsers.EscapeSequence
     - CharTokenParsers.PrimitiveParsers.OctalDigit
     - CharTokenParsers.PrimitiveParsers.UniversalCharacterName

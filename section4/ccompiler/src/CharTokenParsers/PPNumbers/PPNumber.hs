@@ -1,5 +1,7 @@
 module CharTokenParsers.PPNumbers.PPNumber (ppNumber) where
 import AbstractSyntaxTree
+import CharTokenParsers.PrimitiveParsers.Digit
+import CharTokenParsers.PrimitiveParsers.NonDigit
 import CharTokenParsers.PrimitiveParsers.UniversalCharacterName
 import CustomCombinators
 import Data.List
@@ -65,9 +67,6 @@ universalCharacterNameNonDigit = simpleExpression universalCharacterName Univers
 nonDigitIdentifierNonDigit :: Parser IdentifierNonDigit
 nonDigitIdentifierNonDigit = simpleExpression nonDigit NonDigitIdentifierNonDigit
 
-nonDigit :: Parser NonDigit
-nonDigit = simpleExpression (Char.letter <|> Char.char '_') NonDigit
-
 sign :: Parser Sign
 sign = minusSign <|> plusSign
 
@@ -76,12 +75,4 @@ minusSign = Char.char '-' >> return MinusSign
 
 plusSign :: Parser Sign
 plusSign = Char.char '+' >> return PlusSign
-
-digit :: Parser Digit
-digit = tryWithFailMessage "Digit" $ do
-    parsedDigitChar <- Char.digit
-    let maybeDigit = Read.readMaybe (parsedDigitChar : [])
-    case maybeDigit of
-        Just digit' -> return $ Digit digit'
-        Nothing     -> parserFail "error in digit parser"
 
