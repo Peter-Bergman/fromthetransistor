@@ -1,33 +1,32 @@
 module CharTokenParsers.Identifiers.Identifier (identifier) where
+import AbstractSyntaxTree
+import CharTokenParsers.PrimitiveParsers.Digit
+import CharTokenParsers.PrimitiveParsers.IdentifierNonDigit
+import CharTokenParsers.PrimitiveParsers.NonDigit
 import CharTokenParsers.PrimitiveParsers.UniversalCharacterName
 import CustomCombinators
-    ( singleton
-    , tryWithFailMessage
-    )
-import Data.List
 import Numeric
 import Text.Parsec
-import Text.Parsec.Char
+    ( (<|>)
+    , try
+    , many
+    )
+import qualified Text.Parsec.Char as Char
 import Text.Parsec.String
 
 
-identifier :: Parser String
-identifier = tryWithFailMessage "Identifier" do
-    firstCharacter <- identifierNonDigit
-    remainingCharacters <- many (digitString <|> identifierNonDigit)
-    let identifier = firstCharacter ++ (intercalate "" remainingCharacters)
-    return identifier
+identifier :: Parser Identifier
+identifier = tryWithFailMessage "Identifier" $ do
+    parsedIdentifierNonDigit <- identifierNonDigit
+    parsedIdentifierSuffixes <- many identifierSuffix
+    return $ Identifier parsedIdentifierNonDigit parsedIdentifierSuffixes
 
-digitString :: Parser String
-digitString = singleton digit
+identifierSuffix :: Parser IdentifierSuffix
+identifierSuffix = try $ identifierNonDigitIdentifierSuffix <|> digitIdentifierSuffix
 
-identifierNonDigit :: Parser String
-identifierNonDigit = nonDigit <|> universalCharacterName
+identifierNonDigitIdentifierSuffix :: Parser IdentifierSuffix
+identifierNonDigitIdentifierSuffix = simpleExpression identifierNonDigit IdentifierNonDigitIdentifierSuffix
 
-nonDigit :: Parser String
-nonDigit = do
-    character <- letter <|> char '_'
-    return [character]
-
-
+digitIdentifierSuffix :: Parser IdentifierSuffix
+digitIdentifierSuffix = simpleExpression digit DigitIdentifierSuffix
 
