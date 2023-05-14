@@ -1,6 +1,7 @@
 module CharTokenParsers.PPNumbers.PPNumber (ppNumber) where
 import AbstractSyntaxTree
 import CharTokenParsers.PrimitiveParsers.Digit
+import CharTokenParsers.PrimitiveParsers.IdentifierNonDigit
 import CharTokenParsers.PrimitiveParsers.NonDigit
 import CharTokenParsers.PrimitiveParsers.UniversalCharacterName
 import CustomCombinators
@@ -57,15 +58,6 @@ capitalPPPNumberSuffix = try $ Char.char 'P' >> simpleExpression sign CapitalPPP
 
 dotPPNumberSuffix :: Parser PPNumberSuffix
 dotPPNumberSuffix = Char.char '.' >> return DotPPNumberSuffix
-
-identifierNonDigit :: Parser IdentifierNonDigit
-identifierNonDigit = universalCharacterNameNonDigit <|> nonDigitIdentifierNonDigit
-
-universalCharacterNameNonDigit :: Parser IdentifierNonDigit
-universalCharacterNameNonDigit = simpleExpression universalCharacterName UniversalCharacterNameNonDigit
-
-nonDigitIdentifierNonDigit :: Parser IdentifierNonDigit
-nonDigitIdentifierNonDigit = simpleExpression nonDigit NonDigitIdentifierNonDigit
 
 sign :: Parser Sign
 sign = minusSign <|> plusSign

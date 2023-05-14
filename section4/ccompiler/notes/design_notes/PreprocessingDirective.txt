@@ -520,3 +520,8 @@ For example, I am not storing identifiers as strings.
 Rather, I am storing them as an IdentifierNonDigit and [IdentifierSuffix]
 I just made that change.
 I could go against that decision, but that would be inconsistent with my other ADTs in the AST.
+
+I need to move the identifierNonDigit parser to its own module.
+I will name the module IdentifierNonDigit.
+The definition I will use is currently in the CharTokenParsers.PPNumbers.PPNumber module.
+It is on line 67 at the moment.

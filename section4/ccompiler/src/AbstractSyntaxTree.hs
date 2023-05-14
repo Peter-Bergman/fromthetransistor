@@ -575,7 +575,7 @@ data AlignmentSpecifier =
 
 data IdentifierNonDigit =
     NonDigitIdentifierNonDigit NonDigit |
-    UniversalCharacterNameNonDigit UniversalCharacterName
+    UniversalCharacterNameIdentifierNonDigit UniversalCharacterName
     deriving (Show)
 
 newtype NonDigit =
