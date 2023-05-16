@@ -525,3 +525,20 @@ I need to move the identifierNonDigit parser to its own module.
 I will name the module IdentifierNonDigit.
 The definition I will use is currently in the CharTokenParsers.PPNumbers.PPNumber module.
 It is on line 67 at the moment.
+
+I am going to refactor the Lexer.PreprocessingToken module now.
+This is one of the highest level modules in the Preprocessor's Lexer, so this is a good sign to show that I am getting close to finishing the refactors to the Lexer (and all parsers) to use the AST data types.
+Oh, shit!
+I will still have to define and implement ShowLexer for all these data types! Fuck!
+The code will be elegant, but holy fuck, it's going to be a lot of time, I think.
+I hope it was a wise decision to write the code in this way.
+
+I had to make changes to the AST and make the PreprocessingToken data type an actual AST and not just a String.
+I implemented parsers based on other parsers for the PreprocessingToken data type.
+I thought that would allow the Lexer.PreprocessingToken module to compile.
+However, after I finished implementing the parsers for PreprocessingToken constructors, I saw some type matching errors that indicated that I still need to refactor the parsers that the PreprocessingToken constructor
+    parsers are defined with.
+That includes the headerName CharTokenParser.
+I will refactor the CharTokenParsers.HeaderNames.HeaderName module next.
+I will eventually swing back around to the Lexer.PreprocessingToken module.
+
