@@ -54,8 +54,14 @@ data ControlLine =
     NullDirective
     deriving (Show)
 
-newtype PreprocessingToken =
-    PreprocessingToken String
+data PreprocessingToken =
+    HeaderNamePreprocessingToken HeaderName |
+    IdentifierPreprocessingToken Identifier |
+    PPNumberPreprocessingToken PPNumber |
+    CharacterConstantPreprocessingToken CharacterConstant |
+    StringLiteralPreprocessingToken StringLiteral |
+    PunctuatorPreprocessingToken Punctuator |
+    OtherCharacterPreprocessingToken Char
     deriving (Show)
 
 newtype PPTokens =
@@ -618,5 +624,28 @@ data PPNumberSuffix =
     DotPPNumberSuffix
     deriving (Show)
 
+newtype Punctuator =
+    Punctuator String
+    deriving (Show)
 
+data HeaderName =
+    HCharSequenceHeaderName HCharSequence |
+    QCharSequenceHeaderName QCharSequence
+    deriving (Show)
+
+newtype HCharSequence =
+    HCharSequence (NonEmpty HChar)
+    deriving (Show)
+
+newtype HChar =
+    HChar Char
+    deriving (Show)
+
+newtype QCharSequence =
+    QCharSequence (NonEmpty QChar)
+    deriving (Show)
+
+newtype QChar =
+    QChar Char
+    deriving (Show)
 
