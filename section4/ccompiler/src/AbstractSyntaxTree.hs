@@ -629,8 +629,8 @@ newtype Punctuator =
     deriving (Show)
 
 data HeaderName =
-    HCharSequenceHeaderName HCharSequence |
-    QCharSequenceHeaderName QCharSequence
+    HHeaderName HCharSequence |
+    QHeaderName QCharSequence
     deriving (Show)
 
 newtype HCharSequence =

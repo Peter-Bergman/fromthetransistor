@@ -1,47 +1,57 @@
 module CharTokenParsers.HeaderNames.HeaderName (headerName) where
+import AbstractSyntaxTree
+import CustomCombinators
 import Data.List
+import Data.List.NonEmpty as NE
 import System.Environment
 import Text.Parsec
 import Text.Parsec.Char
 import Text.Parsec.String
 
-headerName :: Parser String
+headerName :: Parser HeaderName
 headerName = hHeaderName <|> qHeaderName <?> "Header Name"
 
-hHeaderName :: Parser String
+hHeaderName :: Parser HeaderName
 hHeaderName = do
     char '<'
-    headerName <- hCharSequence
-    if isSemanticallyValidHCharSequence headerName then return () else fail "Invalid Header File Name"
+    parsedHCharSequence <- hCharSequence
+    if isSemanticallyValidHCharSequence parsedHCharSequence then return () else fail "Invalid Header File Name"
     char '>'
-    return $ "<" ++ headerName ++ ">"
+    return $ HHeaderName parsedHCharSequence
 
-qHeaderName :: Parser String
+qHeaderName :: Parser HeaderName
 qHeaderName = do
     char '\"'
     headerName <- qCharSequence
     if isSemanticallyValidQCharSequence headerName then return () else fail "Invalid Header File Name"
     char '\"'
-    return $ "\"" ++ headerName ++ "\""
+    return $ QHeaderName headerName
 
-hCharSequence :: Parser String
-hCharSequence = many hChar
+hCharSequence :: Parser HCharSequence
+hCharSequence = simpleExpression (many1NonEmpty hChar) HCharSequence
 
-hChar :: Parser Char
-hChar = noneOf ">\n"
+hChar :: Parser HChar
+hChar = simpleExpression (noneOf ">\n") HChar
 
-qCharSequence :: Parser String
-qCharSequence = many qChar
+qCharSequence :: Parser QCharSequence
+qCharSequence = simpleExpression (many1NonEmpty qChar) QCharSequence
 
-qChar :: Parser Char
-qChar = noneOf "\"\n"
+qChar :: Parser QChar
+qChar = simpleExpression (noneOf "\"\n") QChar
 
-isSemanticallyValidHCharSequence :: String -> Bool
-isSemanticallyValidHCharSequence inputHCharSequence = not $ anyElementsAreSubstringOfString semanticallyUnallowedHCharSequenceSymbols inputHCharSequence
---not $ any (`isInfixOf` inputHCharSequence) semanticallyUnallowedHCharSequenceSymbols
-
-isSemanticallyValidQCharSequence :: String -> Bool
-isSemanticallyValidQCharSequence inputQCharSequence = not $ anyElementsAreSubstringOfString semanticallyUnallowedQCharSequenceSymbols inputQCharSequence
+isSemanticallyValidHCharSequence :: HCharSequence -> Bool
+isSemanticallyValidHCharSequence (HCharSequence nonEmptyHChars) = not $ anyElementsAreSubstringOfString semanticallyUnallowedHCharSequenceSymbols hCharSequenceAsString
+    where
+        hCharSequenceAsString = toList nonEmptyHChar
+        nonEmptyHChar = NE.map hCharToChar nonEmptyHChars
+        hCharToChar (HChar char) = char
+        
+isSemanticallyValidQCharSequence :: QCharSequence -> Bool
+isSemanticallyValidQCharSequence (QCharSequence nonEmptyQChars) = not $ anyElementsAreSubstringOfString semanticallyUnallowedQCharSequenceSymbols qCharSequenceAsString
+    where
+        qCharSequenceAsString = toList nonEmptyQChar
+        nonEmptyQChar = NE.map qCharToChar nonEmptyQChars
+        qCharToChar (QChar char) = char
 
 anyElementsAreSubstringOfString :: [String] -> String -> Bool
 anyElementsAreSubstringOfString listOfStrings superString = any (`isInfixOf` superString) listOfStrings
