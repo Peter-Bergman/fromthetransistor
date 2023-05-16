@@ -370,8 +370,8 @@ newtype CCharSequence =
     deriving (Show)
 
 data CChar =
-    SimpleCChar Char |
-    EscapeSequence EscapeSequence
+    NonEscapeSequenceCChar Char |
+    EscapeSequenceCChar EscapeSequence
     deriving (Show)
 
 data EscapeSequence =
