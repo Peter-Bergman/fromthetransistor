@@ -1,12 +1,12 @@
 module Lexer.PreprocessingToken
 ( preprocessingToken
-, headerName
-, identifier
-, characterConstant
-, stringLiteral
-, ppNumber
-, punctuator
-, otherCharacter
+, headerNamePreprocessingToken
+, identifierPreprocessingToken
+, characterConstantPreprocessingToken
+, stringLiteralPreprocessingToken
+, ppNumberPreprocessingToken
+, punctuatorPreprocessingToken
+, otherCharacterPreprocessingToken
 ) where
 import AbstractSyntaxTree
 import CharTokenParsers.Constants.CharacterConstants.CharacterConstant
@@ -52,7 +52,7 @@ punctuatorPreprocessingToken = simpleExpression punctuator PunctuatorPreprocessi
 otherCharacterPreprocessingToken :: Parser PreprocessingToken
 otherCharacterPreprocessingToken = do
     parsedCharacter <- satisfy nonSpace
-    return $ parsedCharacter : ""
+    return $ OtherCharacterPreprocessingToken parsedCharacter
 
 nonSpace :: Char -> Bool
 nonSpace = not . isSpace
