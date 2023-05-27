@@ -578,3 +578,18 @@ I might look into writing tests similar to those in the parsec github repository
 I want to write regression tests, though, tests for which I can update the outputs.
 I want an easy way to create tests AND update expected outputs for a given input.
 
+I am going to try to use the parseADTAndConsumedInput combinator to make the lexer work as it did before I began the migration to char token parsers
+    that parse ADTs.
+How am I going to do that?
+Well, I might need to create another data type in the Lexer that allows me to union the PreprocessingToken type and the String type.
+The reason that I might need to union those types is because I want to handle the spacing (for the sake of good source position messages) parsed
+    by the lexParser parser in the Lexer.Lexer module.
+I could go back and fix that.
+Well, that would affect the tokens parsed by the preprocessor proper.
+Actually, I don't think it would.
+I was going to have the lexer output a list of strings anyways.
+I could use map.
+It would be easy to make the necessary conversion from a product type of String and (String, PreprocessingToken) to String.
+For each element in the list, I could select the String itself if the element was a String.
+Otherwise, I could select the first element in the tuple using fst.
+The ADT I define can be exclusively used in the Lexer.Lexer module.
