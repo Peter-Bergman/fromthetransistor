@@ -5,12 +5,15 @@ module CustomCombinators
 , many1NonEmpty
 , many1Till
 , many1TillNonEmpty
+, parseADTAndConsumedInput
 , sepBy1NonConsumption
 , simpleExpression
 , singleton
 , tryMaybe
 , tryWithFailMessage
 ) where
+import Data.List
+    ( stripPrefix )
 import Data.List.NonEmpty
     ( fromList
     , NonEmpty
@@ -23,7 +26,8 @@ import Text.Parsec.Combinator
     , optionMaybe
     )
 import Text.Parsec.Prim
-    ( many
+    ( getInput
+    , many
     , ParsecT
     , parserFail
     , Stream
@@ -85,4 +89,23 @@ singleton :: ParsecT s u m a -> ParsecT s u m [a]
 singleton parser = do
     parsedSingleElement <- parser
     return [parsedSingleElement]
+
+stripSuffix :: Eq a => [a] -> [a] -> Maybe [a]
+stripSuffix a b = reverse <$> stripPrefix (reverse a) (reverse b)
+
+-- This combinator only works for list streams.
+-- I doubt I will need to use any other kind of stream.
+parseADTAndConsumedInput :: Monad m => Eq t => ParsecT [t] u m a -> ParsecT [t] u m ([t],a)
+parseADTAndConsumedInput adtParser = do
+    inputStreamBeforeConsumption <- getInput
+    parsedADT <- adtParser
+    inputStreamAfterConsumption <- getInput
+    let consumedInput = determineConsumedInput inputStreamAfterConsumption inputStreamBeforeConsumption
+    return (consumedInput, parsedADT)
+    where
+        emptyStream = []
+        determineConsumedInput inputStreamAfterConsumption inputStreamBeforeConsumption =
+            case stripSuffix inputStreamAfterConsumption inputStreamBeforeConsumption of
+                Nothing -> emptyStream
+                Just consumedInput' -> consumedInput'
 

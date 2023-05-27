@@ -542,3 +542,39 @@ That includes the headerName CharTokenParser.
 I will refactor the CharTokenParsers.HeaderNames.HeaderName module next.
 I will eventually swing back around to the Lexer.PreprocessingToken module.
 
+I have reached a big design decision.
+I will have to decide whether I will write code to deconstruct the Lexer's parse tree into strings.
+Alternatively, I could write a wrapper that transforms the Char token parsers into parsers that return the
+    consumed input and the parse tree/AST/lexed tokens.
+In theory, I could write the later stages of the preprocessor to use parse the parse tree of lexed tokens, but I think that would create some code redundancy.
+The later stages of the preprocessor might also not be as intuitive to write as they would be if I were writing a string parser.
+I already ran into that issue a little bit, a couple months ago.
+Some of the fine grained syntactical elements did not fill up an entire token sometimes, and I would have needed to have Char token parsers and String token parsers defined in the same module.
+I would like to get away from that.
+I tried to see if Parsec supports an easy way to get the input consumed by a parser.
+It does not seem to have anything for that task out of the box.
+I could probably call getInput before and after running the preprocessingToken parser, and compare the two to get the consumed input.
+That could be a big performance hit.
+I am not super concerned with the performance of this compiler currently.
+I do not plan to use this compiler to compile greatly over 2000 lines of code at a time, if even.
+That would be the operating system I eventually write.
+I think I will ask stack overflow.
+See https://stackoverflow.com/questions/76273112/how-do-i-get-the-input-consumed-by-a-parser-in-parsec
+I am glad I asked that question.
+I have not been very active on Stack Overflow lately.
+
+I got a pretty good answer from stack overflow.
+It was actually in a comment, not an answer per se.
+I wrote a String version of stripSuffix (like stripSuffix in Data.Text of text package [see hackage])
+I wrote stripSuffix as an internal function in the CustomCombinators module.
+I used that to write a combinator parseADTAndConsumedInput.
+It creates a parser that returns a tuple.
+That tuple has 2 elements.
+The first element is a list of the consumed tokens.\
+The second element is the parsed ADT.
+I was able to test the combinator with ghci (not using stack, just ghci CustomCombinators.hs)
+I thought about testing more after I tested in ghci, specifically writing tests.
+I might look into writing tests similar to those in the parsec github repository, except for my parsers.
+I want to write regression tests, though, tests for which I can update the outputs.
+I want an easy way to create tests AND update expected outputs for a given input.
+
