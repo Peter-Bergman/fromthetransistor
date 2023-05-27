@@ -3,7 +3,6 @@ import AbstractSyntaxTree
 import CustomCombinators
 import Data.List
 import Data.List.NonEmpty as NE
-import System.Environment
 import Text.Parsec
 import Text.Parsec.Char
 import Text.Parsec.String
