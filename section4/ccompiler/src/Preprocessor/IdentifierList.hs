@@ -1,11 +1,11 @@
 module Preprocessor.IdentifierList (identifierList) where
 import AbstractSyntaxTree
     (IdentifierList)
-import Comma
+import Preprocessor.Comma
     (comma)
 import CustomCombinators
     (sepBy1NonConsumption)
-import Identifier
+import Preprocessor.Identifier
     (identifier)
 import Data.List.NonEmpty
     (fromList)

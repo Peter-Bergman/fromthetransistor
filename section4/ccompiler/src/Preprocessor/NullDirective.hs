@@ -3,12 +3,13 @@ import AbstractSyntaxTree
     ( ControlLine
         (NullDirective)
     )
-import NewLine
+import Preprocessor.NewLine
     (newLine)
-import Octothorpe
+import Preprocessor.Octothorpe
     (octothorpe)
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     (PreprocessingParserX)
 
 nullDirective :: PreprocessingParserX ControlLine
 nullDirective = octothorpe >> newLine >> return NullDirective
+

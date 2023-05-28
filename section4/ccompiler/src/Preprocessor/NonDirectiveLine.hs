@@ -6,13 +6,13 @@ import AbstractSyntaxTree
     ( GroupPart
         (NonDirective)
     )
-import NewLine
+import Preprocessor.NewLine
     (newLine)
-import Octothorpe
+import Preprocessor.Octothorpe
     (octothorpe)
-import PPTokens
+import Preprocessor.PPTokens
     (ppTokens)
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     (PreprocessingParserX)
 
 nonDirective :: PreprocessingParserX GroupPart

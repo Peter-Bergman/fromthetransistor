@@ -1,5 +1,5 @@
 module Preprocessor.LParen (lParen) where
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     ( PreprocessingParserX
     , stringSatisfyTNoPrecedingWhiteSpace
     )

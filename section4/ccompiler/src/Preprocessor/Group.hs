@@ -17,25 +17,25 @@ import AbstractSyntaxTree
         , IfNDefDirective
         )
     )
-import ControlLine
+import Preprocessor.ControlLine
     (controlLine)
-import CustomCombinators
+import Preprocessor.CustomCombinators
     ( nullifyParser
     , many1NonEmpty
     , many1TillNonEmpty
     , tryMaybe
     )
-import EndIfLine
+import Preprocessor.EndIfLine
     (endIfLine)
-import Identifier
+import Preprocessor.Identifier
     (identifier)
-import NewLine
+import Preprocessor.NewLine
     (newLine)
-import NonDirectiveLine
+import Preprocessor.NonDirectiveLine
     (nonDirectiveLine)
-import Octothorpe
+import Preprocessor.Octothorpe
     (octothorpe)
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     ( PreprocessingParser
     , PreprocessingParserX
     , stringParserSatisfy
@@ -53,7 +53,7 @@ import Text.Parsec.Prim
     , (<|>)
     , (<?>)
     )
-import TextLine
+import Preprocessor.TextLine
     (textLine)
 
 

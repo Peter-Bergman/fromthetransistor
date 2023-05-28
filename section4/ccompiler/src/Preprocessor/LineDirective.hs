@@ -3,13 +3,13 @@ import AbstractSyntaxTree
     ( ControlLine
         (LineDirective)
     )
-import Octothorpe
+import Preprocessor.Octothorpe
     (octothorpe)
-import NewLine
+import Preprocessor.NewLine
     (newLine)
-import PPTokens
+import Preprocessor.PPTokens
     (ppTokens)
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     ( PreprocessingParserX
     , stringSatisfy_
     )

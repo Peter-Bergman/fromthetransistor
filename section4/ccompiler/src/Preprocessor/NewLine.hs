@@ -1,5 +1,5 @@
 module Preprocessor.NewLine where
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     ( PreprocessingParser
     , stringParserSatisfy
     )

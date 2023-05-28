@@ -5,13 +5,13 @@ import AbstractSyntaxTree
     )
 import CustomCombinators
     (tryMaybe)
-import NewLine
+import Preprocessor.NewLine
     (newLine)
-import Octothorpe
+import Preprocessor.Octothorpe
     (octothorpe)
-import PPTokens
+import Preprocessor.PPTokens
     (ppTokens)
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     ( PreprocessingParserX
     , stringSatisfy_
     )
@@ -28,3 +28,4 @@ pragmaPrefix = octothorpe >> pragma
 
 pragma :: PreprocessingParserX ()
 pragma = stringSatisfy_ (=="pragma")
+

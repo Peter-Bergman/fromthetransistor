@@ -3,7 +3,7 @@ import AbstractSyntaxTree
     (Identifier)
 import qualified CharTokenParsers.Identifiers.Identifier
     (identifier)
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     ( PreprocessingParserX
     , stringParserSatisfyT
     )

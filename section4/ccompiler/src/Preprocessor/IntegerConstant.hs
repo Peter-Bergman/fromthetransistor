@@ -137,3 +137,4 @@ lowerCaseLLongLongSuffix = string "ll" >> return LowerCaseLLongLongSuffix
 
 capitalLLongLongSuffix :: Parser LongLongSuffix
 capitalLLongLongSuffix = string "LL" >> return CapitalLLongLongSuffix
+

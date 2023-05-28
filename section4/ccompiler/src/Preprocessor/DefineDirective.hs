@@ -12,21 +12,21 @@ import AbstractSyntaxTree --importing all the types from AbstractSyntaxTree
     , IdentifierList
     , ReplacementList
     )
-import Comma
+import Preprocessor.Comma
     (comma)
 import Data.Char
     (isSpace)
-import IdentifierList
+import Preprocessor.IdentifierList
     (identifierList)
 import Lexer.PreprocessingToken
     (identifier)
-import LParen
+import Preprocessor.LParen
     (lParen)
-import NewLine
+import Preprocessor.NewLine
     (newLine)
-import Octothorpe
+import Preprocessor.Octothorpe
     (octothorpe)
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     ( PreprocessingParser
     , PreprocessingParserX
     , stringParserSatisfy
@@ -34,7 +34,7 @@ import PreprocessingParser
     , stringSatisfy_
     , stringSatisfyT
     )
-import ReplacementList
+import Preprocessor.ReplacementList
     (replacementList)
 import Text.Parsec
     (string)

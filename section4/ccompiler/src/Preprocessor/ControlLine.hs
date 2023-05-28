@@ -1,21 +1,21 @@
 module Preprocessor.ControlLine (controlLine) where
 import AbstractSyntaxTree
     (ControlLine)
-import DefineDirective
+import Preprocessor.DefineDirective
     (defineDirective)
-import ErrorDirective
+import Preprocessor.ErrorDirective
     (errorDirective)
-import IncludeDirective
+import Preprocessor.IncludeDirective
     (includeDirective)
-import LineDirective
+import Preprocessor.LineDirective
     (lineDirective)
-import NullDirective
+import Preprocessor.NullDirective
     (nullDirective)
-import PragmaDirective
+import Preprocessor.PragmaDirective
     (pragmaDirective)
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     (PreprocessingParserX)
-import UndefDirective
+import Preprocessor.UndefDirective
     (undefDirective)
 import Text.Parsec.Prim
     ( try
@@ -33,3 +33,4 @@ controlLine =
     try (errorDirective) <|>
     try (pragmaDirective) <|>
     try (nullDirective)
+

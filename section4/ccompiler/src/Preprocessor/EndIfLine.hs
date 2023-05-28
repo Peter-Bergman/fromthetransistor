@@ -1,11 +1,11 @@
 module Preprocessor.EndIfLine where
 import CustomCombinators
     (nullifyParser)
-import NewLine
+import Preprocessor.NewLine
     (newLine)
-import Octothorpe
+import Preprocessor.Octothorpe
     (octothorpe)
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     ( PreprocessingParserX
     , stringSatisfy_
     )
