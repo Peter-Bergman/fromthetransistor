@@ -593,3 +593,6 @@ It would be easy to make the necessary conversion from a product type of String 
 For each element in the list, I could select the String itself if the element was a String.
 Otherwise, I could select the first element in the tuple using fst.
 The ADT I define can be exclusively used in the Lexer.Lexer module.
+
+I think I will eventually move the Preprocessor.IntegerConstant module to the CharTokenParsers set of modules.
+

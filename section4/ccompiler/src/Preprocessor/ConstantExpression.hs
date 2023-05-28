@@ -2,9 +2,9 @@ module Preprocessor.ConstantExpression (constantExpression) where
 import AbstractSyntaxTree
 import CustomCombinators
 import Data.List.NonEmpty
-import Identifier
-import qualified IntegerConstant
-import PreprocessingParser
+import Preprocessor.Identifier
+import qualified Preprocessor.IntegerConstant
+import Preprocessor.PreprocessingParser
 import Text.Parsec.Combinator
 import Text.Parsec.Prim
 import Text.Parsec.String
@@ -604,7 +604,7 @@ characterConstantConstant :: PreprocessingParserX Constant
 characterConstantConstant = simpleExpression characterConstant CharacterConstantConstant
 
 integerConstant :: PreprocessingParserX IntegerConstant
-integerConstant = charToStringTokenParser IntegerConstant.integerConstant
+integerConstant = charToStringTokenParser Preprocessor.IntegerConstant.integerConstant
 
 floatingConstant :: PreprocessingParserX FloatingConstant
 floatingConstant = decimalFloatingConstant <|> hexadecimalFloatingConstant
