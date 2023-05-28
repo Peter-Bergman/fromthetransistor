@@ -1,7 +1,8 @@
 module Preprocessor.Octothorpe (octothorpe) where
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
+    (stringSatisfy)
 import Text.Parsec
-import Text.Parsec.String
+    ((<?>))
 
 octothorpe :: PreprocessingParser
 octothorpe = stringSatisfy (=="#") <?> "Octothorpe"
