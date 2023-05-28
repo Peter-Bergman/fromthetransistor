@@ -1,7 +1,7 @@
 module Preprocessor.CharacterConstant
 ( characterConstant
-, cCharSequence
-, cChar
+--, cCharSequence
+--, cChar
 , escapeSequence
 , simpleEscapeSequence
 , octalEscapeSequence
@@ -10,6 +10,8 @@ module Preprocessor.CharacterConstant
 ) where
 import AbstractSyntaxTree
 import CharTokenParsers.PrimitiveParsers.UniversalCharacterName
+import qualified CharTokenParsers.Constants.CharacterConstants.CharacterConstant as CTP.CharacterConstant
+import CharTokenParsers.PrimitiveParsers.EscapeSequence
 import CustomCombinators
 import Text.Parsec.Char
 import Text.Parsec.String
@@ -27,7 +29,7 @@ simpleCharacterConstant :: Parser CharacterConstant
 simpleCharacterConstant = cCharSequenceBetweenSingleQuotes >>= return . SimpleCharacterConstant
 
 cCharSequenceBetweenSingleQuotes :: Parser CCharSequence
-cCharSequenceBetweenSingleQuotes = between singleQuote singleQuote cCharSequence
+cCharSequenceBetweenSingleQuotes = between singleQuote singleQuote CTP.CharacterConstant.cCharSequence
 
 lCharacterConstant :: Parser CharacterConstant
 lCharacterConstant = char 'L' >> cCharSequenceBetweenSingleQuotes >>= return . LCharacterConstant
@@ -38,29 +40,6 @@ lowerCaseUCharacterConstant = char 'u' >> cCharSequenceBetweenSingleQuotes >>= r
 capitalUCharacterConstant :: Parser CharacterConstant
 capitalUCharacterConstant = char 'U' >> cCharSequenceBetweenSingleQuotes >>= return . CapitalUCharacterConstant
 
-cCharSequence :: Parser CCharSequence
-cCharSequence = many1NonEmpty cChar
+singleQuote :: Parser Char
+singleQuote = char '\''
 
-cChar :: Parser CChar
-cChar = escapeSequenceCChar <|> simpleCChar
-
-simpleCChar :: Parser CChar
-simpleCChar = satisfy (\character -> character /='\'' && character /= '\\' && character /= '\n')
-
-escapeSequence :: Parser EscapeSequence
-escapeSequence = simpleEscapeSequence <|> octalEscapeSequence <|> hexadecimalEscapeSequence <|> universalCharacterNameEscapeSequence
-
-simpleEscapeSequence :: Parser EscapeSequence
-simpleEscapeSequence = anyOf 
-    [ string "\\\'"
-    , string "\\\""
-    , string "\\?"
-    , string "\\\\"
-    , string "\\a"
-    , string "\\b"
-    , string "\\f"
-    , string "\\n"
-    , string "\\r"
-    , string "\\t"
-    , string "\\v"
-    ]
