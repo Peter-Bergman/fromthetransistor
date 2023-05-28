@@ -1,5 +1,5 @@
 module Preprocessor.Comma (comma) where
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     ( PreprocessingParserX
     , stringSatisfy_
     )
