@@ -22,9 +22,12 @@ instance Show PreprocessorLexeme where
 backSlashedNewLines :: Parser Char
 backSlashedNewLines = try (string"\\\n") >> return ' '
 
-horizontalSpacing :: Parser PreprocessorLexeme
-horizontalSpacing = tryWithFailMessage "Horzontal Spacing" $ do
-    parsedHorizontalSpacingString <- many1 (horizontalSpace <|> backSlashedNewLines)
+horizontalSpacing :: Parser String
+horizontalSpacing = tryWithFailMessage "Horzontal Spacing" $ many1 (horizontalSpace <|> backSlashedNewLines)
+
+horizontalSpacingStringLexeme :: Parser PreprocessorLexeme
+horizontalSpacingStringLexeme = try $ do
+    parsedHorizontalSpacingString <- horizontalSpacing
     return $ StringLexeme parsedHorizontalSpacingString
 
 horizontalSpace :: Parser Char
@@ -49,7 +52,7 @@ preprocessingTokenLexeme = simpleExpression (parseADTAndConsumedInput preprocess
 
 lexParser :: Parser [String]
 lexParser = try $ do
-    parsedLexemes <- many $ horizontalSpacing <|> preprocessingTokenLexeme <|> newLineStringLexeme
+    parsedLexemes <- many $ horizontalSpacingStringLexeme <|> preprocessingTokenLexeme <|> newLineStringLexeme
     let lexemesAsStrings = map show parsedLexemes
     return lexemesAsStrings
 
