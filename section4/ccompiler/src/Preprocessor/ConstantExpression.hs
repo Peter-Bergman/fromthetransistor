@@ -40,9 +40,6 @@ leftBrace = stringSatisfy_ (=="{")
 rightBrace :: PreprocessingParserX ()
 rightBrace = stringSatisfy_ (=="}")
 
-simpleExpression :: PreprocessingParserX isomorphicType1 -> (isomorphicType1 -> isomorphicType2) -> PreprocessingParserX isomorphicType2
-simpleExpression initialParser constructor = try $ initialParser >>= return . constructor
-
 infixRecursiveBinaryOperatorExpression :: PreprocessingParserX returnType -> PreprocessingParserX primitiveType -> PreprocessingParserX operator -> (returnType -> primitiveType -> returnType) -> PreprocessingParserX returnType
 infixRecursiveBinaryOperatorExpression recursedParser primitiveParser operatorParser typeConstructor = do
     parsedPrimitiveType <- primitiveParser

@@ -5,22 +5,25 @@ module Preprocessor.PPTokens
 import AbstractSyntaxTree
     ( PreprocessingToken
     , PPTokens
+        (PPTokens)
     )
-import Data.List.NonEmpty
-    (fromList)
+import CustomCombinators
+    (many1NonEmpty)
 import Lexer.PreprocessingToken as LPPT
 import Preprocessor.PreprocessingParser
     ( PreprocessingParserX
     , stringParserSatisfyT
+    , charToStringTokenParser
     )
 import Text.Parsec
 import Text.Parsec.Combinator
 
 ppToken :: PreprocessingParserX PreprocessingToken
-ppToken = stringParserSatisfyT LPPT.preprocessingToken id <?> "Preprocessing Token"
+ppToken = charToStringTokenParser LPPT.preprocessingToken <?> "Preprocessing Token"
 
 ppTokens :: PreprocessingParserX PPTokens
 ppTokens = do
-    tokens <- many1 (try ppToken) <?> "PPTokens"
-    return $ fromList tokens
+    parsedTokens <- many1NonEmpty (try ppToken) <?> "PPTokens"
+    let ppTokensToReturn = PPTokens parsedTokens
+    return ppTokensToReturn
 

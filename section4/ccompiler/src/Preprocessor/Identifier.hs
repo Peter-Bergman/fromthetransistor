@@ -5,10 +5,11 @@ import qualified CharTokenParsers.Identifiers.Identifier
     (identifier)
 import Preprocessor.PreprocessingParser
     ( PreprocessingParserX
-    , stringParserSatisfyT
+    , charToStringTokenParser
     )
 import Text.Parsec.Prim
     ((<?>))
 
 identifier :: PreprocessingParserX Identifier
-identifier = stringParserSatisfyT CharTokenParsers.Identifiers.Identifier.identifier id <?> "Identifier"
+identifier = charToStringTokenParser CharTokenParsers.Identifiers.Identifier.identifier <?> "Identifier"
+

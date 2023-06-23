@@ -1,7 +1,7 @@
 I need to decide what kind of parser I am going to use to process directives.
 
 I will do something along one of the following lines:
- 1.  Make some kind of transformer from Parser String type to 
+ 1. Make some kind of transformer from Parser String type to 
 	GenParser String SymbolTable [String] where SymbolTable is some
 	kind of Dictionary with Get and Set operations.
  2. Flatten out list of Strings returned from lexer, then use 
@@ -595,4 +595,72 @@ Otherwise, I could select the first element in the tuple using fst.
 The ADT I define can be exclusively used in the Lexer.Lexer module.
 
 I think I will eventually move the Preprocessor.IntegerConstant module to the CharTokenParsers set of modules.
+I might do that some other time, but not now.
+
+I am writing a parser constructor named t1SatisfyT2NoPrecedingWhiteSpace.
+It is an abstraction of stringSatisfyTNoPrecedingWhiteSpace.
+This is in the Preprocessor.PreprocessingParser module.
+I am going to have to...
+Wait, I just realized that I do not need to even write this parser constructor.
+I will not need it in the preprocessor.
+The lexer is going to return a [String] object, just as it used to before I began the migration to Char token ADT parsers.
+
+I am confused.
+Well, I need to clarify and structure my thoughts about transforming parsers from Char token ADT parsers into String token ADT parsers.
+I determined that I will not need a t1SatisfyT2NoPrecedingWhiteSpace parser constructor.
+I would like to note that I might need another parser constructor.
+I also might need another parser transformer.
+I may need both, and I may need more than one of one or both of them.
+I might be able to get by cleanly without
+
+I don't know what I was going to say.
+I think I am going to write another parser transformer in the Preprocessor.PreprocessingParser module.
+I think it will transform a Char token ADT parser to a String token ADT parser.
+It will utilize the parseADTAndConsumedInput combinator and the stringSatisfyTNoPrecedingWhiteSpace parser constructor.
+It will have to run the Char token parser and use its output.
+I will probably utilize the stringParserToStringChecker function.
+I will transform the Char token ADT parser to a (String, ADT) parser.
+I will write a parser that takes that returns only the String in that tuple.
+Then, I will utilize the Preprocessor.PreprocessingParser module's functions to transform that Char token String parser into a String token ADT parser.
+Oh, wait!
+I just realized that I cannot just transform the Char token String parser into a String token ADT parser.
+I will need the ADT result from the same parse that gets me the String that I extracted from the tuple.
+I will return the parsed ADT from the tuple.
+I will probably only do that conditionally.
+The condition would be that the consumed input is equal to the input token.
+I could verify that easily and efficiently by using the eof parser from the parsec library.
+
+I think I have an alternative to using parseADTAndConsumedInput.
+I think that the reason I was going to use the parseADTAndConsumedInput combinator was because I need to make sure that a Chart token parser consumes the entire String that it is used to parse into
+    an ADT.
+I think that I can accomplish this task with the eof parser.
+I just double checked, and the eof parser, defined in Text.Parsec.Combinator, works for parsers of any type of input stream.
+I think that I can do a check to make sure that all Char tokens in a String were consumed by the parser to be transformed by using the eof parser.
+I may have written a combinator like this previously.
+I will probably git grep for "eof" to ensure that I have not.
+I will do that now before writing more about my plans.
+I have, in fact, written a combinator like the one that I just described.
+It is in the CustomCombinators module.
+It is named failsIfDoesNotConsumeAllInput.
+That is nice.
+However, I still need to figure out some more of the details.
+I have not worked on this compiler for about 2 weeks.
+I see the comment I have with an incomplete definition for t1SatisfyT2NoPrecedingWhiteSpace.
+However, I do not remember all that I was trying to do with that function.
+I guess I could benefit from reading the previous notes in this file.
+I saw that I had notes saying that I do not need a t1SatisfyT2NoPrecedingWhiteSpace.
+I was going to write a parser transformer instaead of writing a parser constructor that I would use on parsers that had been deconstructed into functions returning type Bool.
+I will not be writing t1SatisfyT2NoPrecedingWhiteSpace.
+I think it will be a generalization of stringParserSatisfyT or something like that.
+I just noticed that I already have a parser transformer charToStringTokenParser.
+I am going to check the git status and maybe run git diff to see if that is new.
+That may be exactly what I need.
+I may have already written the parser transformer that I need, and that might be it.
+It is not new in source control.
+It is already checked into source control.
+That is odd.
+I have confused myself.
+I will see if that parser transformer is in use anywhere.
+It is used in the Preprocessor.ConstantExpression module.
+I am going to read through the definition of the charToStringTokenParser function again and determine if that is what I am going to use in the Preprocessor.PPTokens module.
 

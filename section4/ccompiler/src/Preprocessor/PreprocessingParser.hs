@@ -28,6 +28,7 @@ import Text.Parsec.Error
     , Message
     , showErrorMessages
     )
+import Text.Parsec.Pos
 import Text.Parsec.Prim
     ( parse
     , runParser
@@ -45,6 +46,13 @@ type PreprocessingParser = PreprocessingParserX [String]
 -- PreprocessingParserX has kind * -> *
 type PreprocessingParserX = GenParser String ()
 
+
+{-t1SatisfyT2NoPrecedingWhiteSpace :: (t1 -> Bool) -> (t1 -> t2) -> (SourcePos -> t1 -> [String] -> SourcePos) -> PreprocessingParserX t2
+t1SatisfyT2NoPrecedingWhiteSpace t1Check t1ToT2 nextPosition = tokenPrim show nextPosition maybeList
+    where
+        --nextPosition position x xs = -- idk yet
+        maybeList x = if (t1Check x) then Just $ t1ToT2 x else Nothing
+-}
 
 stringSatisfyTNoPrecedingWhiteSpace :: (String -> Bool) -> (String -> t) -> PreprocessingParserX t
 stringSatisfyTNoPrecedingWhiteSpace stringCheck stringToT = tokenPrim show nextPosition maybeList
