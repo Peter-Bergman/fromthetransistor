@@ -681,4 +681,7 @@ I am going to just implement the two morphs of primaryExpression that I mentione
 I will use the same AST as before, but most of the morphs of the syntaxes already defined (and those not defined yet) will fail with an error indicating that the syntax is not implemented yet.
 Some of the syntax, like for logicalOrExpression, is implemented with the sepBy1 combinator, and when I write the code to handle the AST, I will ensure that it has only one element (i.e. no
     operators or parentheses or any other syntax beyond that of constant or stringLiteral are used).
+I have noticed that I often get an error of the form "illegal term-level use of the type constructor" (with letter case not the same).
+The error message goes on with several lines of information.
+However, I have noticed that I get that error usually, if not always, when I have forgotten to import a data constructor, especially one of the same name as the data type or newtype.
 

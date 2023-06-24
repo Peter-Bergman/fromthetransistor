@@ -1,12 +1,17 @@
 module Preprocessor.ReplacementList (replacementList) where
 import AbstractSyntaxTree
-    (ReplacementList)
+    ( ReplacementList
+        (ReplacementList)
+    )
 import CustomCombinators
-    (tryMaybe)
-import PreprocessingParser
+    ( simpleExpression
+    , tryMaybe
+    )
+import Preprocessor.PreprocessingParser
     (PreprocessingParserX)
-import PPTokens
+import Preprocessor.PPTokens
     (ppTokens)
 
 replacementList :: PreprocessingParserX ReplacementList
-replacementList = tryMaybe ppTokens
+replacementList = simpleExpression (tryMaybe ppTokens) ReplacementList
+
