@@ -1,6 +1,8 @@
 module Preprocessor.IdentifierList (identifierList) where
 import AbstractSyntaxTree
-    (IdentifierList)
+    ( IdentifierList
+        (IdentifierList)
+    )
 import Preprocessor.Comma
     (comma)
 import CustomCombinators
@@ -9,11 +11,12 @@ import Preprocessor.Identifier
     (identifier)
 import Data.List.NonEmpty
     (fromList)
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     (PreprocessingParserX)
 
 identifierList :: PreprocessingParserX IdentifierList
 identifierList = do
     listOfIdentifiers <- sepBy1NonConsumption identifier comma
     -- Convert the list of identifiers to a non empty list
-    return $ fromList listOfIdentifiers
+    return $ IdentifierList $ fromList listOfIdentifiers
+
