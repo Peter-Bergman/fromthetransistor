@@ -663,4 +663,22 @@ I have confused myself.
 I will see if that parser transformer is in use anywhere.
 It is used in the Preprocessor.ConstantExpression module.
 I am going to read through the definition of the charToStringTokenParser function again and determine if that is what I am going to use in the Preprocessor.PPTokens module.
+I am now trying to write parsers to fill in some of the syntax in the Preprocessor.ConstantExpression module.
+I might strip it all down to the bare bones and only allow a primaryExpression, and I might furthermore strip that down to only the constant or string literal variants.
+I need to remember what this C compiler is for.
+I only intend to use it for writing my operating system initially.
+I doubt that I will need if directives that evaluate constant expressions.
+I guess it depends if the preprocessor parsing the constant expressions, should the expression contain side effects like an assignment expression, maintain the altered state in later constant
+    expressions.
+I will probably have to read the constraints and semantics to discover whether this is the case or not.
+I will do that now.
+If there are no state changes allowed in the constant expressions, then I will probably simplify the implementation to fail due to lack of implementation for most of the syntax of
+    constant expressions, as I outlined a few lines above.
+I looked in the ISO document, and it says that some syntax is not allowed in a constant expression,
+    such as assignment, increment, decrement, function-call, or comma operators, except when they
+    contained within a subexpression that is not evaluated.
+I am going to just implement the two morphs of primaryExpression that I mentioned earlier, constant and stringLiteral.
+I will use the same AST as before, but most of the morphs of the syntaxes already defined (and those not defined yet) will fail with an error indicating that the syntax is not implemented yet.
+Some of the syntax, like for logicalOrExpression, is implemented with the sepBy1 combinator, and when I write the code to handle the AST, I will ensure that it has only one element (i.e. no
+    operators or parentheses or any other syntax beyond that of constant or stringLiteral are used).
 

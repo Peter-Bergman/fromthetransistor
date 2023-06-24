@@ -66,6 +66,7 @@ library:
     - Preprocessor.PreprocessingParser
     - Preprocessor.Preprocessor
     - Preprocessor.ReplacementList
+    - Preprocessor.StringLiteral
     - Preprocessor.TextLine
     - Preprocessor.UndefDirective
     # Lexer modules (preprocessing lexer)
