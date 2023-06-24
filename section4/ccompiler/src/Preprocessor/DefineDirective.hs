@@ -12,13 +12,15 @@ import AbstractSyntaxTree --importing all the types from AbstractSyntaxTree
     , IdentifierList
     , ReplacementList
     )
+import CustomCombinators
+    (tryWithFailMessage)
 import Preprocessor.Comma
     (comma)
 import Data.Char
     (isSpace)
 import Preprocessor.IdentifierList
     (identifierList)
-import Lexer.PreprocessingToken
+import Preprocessor.Identifier
     (identifier)
 import Preprocessor.LParen
     (lParen)
@@ -55,11 +57,10 @@ defineDirectiveProper :: PreprocessingParserX DefineDirective
 defineDirectiveProper = between definePrefix newLine defineDirectiveBody
 
 defineDirectiveBody :: PreprocessingParserX DefineDirective
-defineDirectiveBody = do
-    let parseErrorMessage = "Define Directive Body"
-    parsedIdentifier <- stringParserSatisfyT identifier id <?> parseErrorMessage
+defineDirectiveBody = tryWithFailMessage "Define Directive Body" $ do
+    parsedIdentifier <- identifier
     -- Order matters here. If I put objectLikeMacroDefinitionBody first, then a function-like macro definition would be parsed as an object like macro definition.
-    try (functionLikeMacroDefinitionBody parsedIdentifier) <|> (objectLikeMacroDefinitionBody parsedIdentifier) <?> parseErrorMessage
+    try (functionLikeMacroDefinitionBody parsedIdentifier) <|> (objectLikeMacroDefinitionBody parsedIdentifier)
 
 objectLikeMacroDefinitionBody :: Identifier -> PreprocessingParserX DefineDirective
 objectLikeMacroDefinitionBody parsedIdentifier = do
