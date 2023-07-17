@@ -1,5 +1,6 @@
 module Preprocessor.PreprocessingParser 
 ( lexThenParse
+, charToStringTokenParser
 , PreprocessingParser
 , PreprocessingParserX
 , stringParserToStringChecker
@@ -11,7 +12,6 @@ module Preprocessor.PreprocessingParser
 , stringSatisfyT
 , stringSatisfyTNoPrecedingWhiteSpace
 , testParse
-, charToStringTokenParser
 ) where
 import CustomCombinators
     (failsIfDoesNotConsumeAllInput)
