@@ -25,10 +25,10 @@ characterPrefix = optionMaybe $ oneOf "LuU"
 determineCharacterConstantConstructorFromPrefix :: Maybe Char -> (CCharSequence -> CharacterConstant)
 determineCharacterConstantConstructorFromPrefix prefix =
     case prefix of
-        Nothing -> SimpleCharacterConstant
         Just 'L' -> LCharacterConstant
         Just 'u' -> LowerCaseUCharacterConstant
         Just 'U' -> CapitalUCharacterConstant
+        _ -> SimpleCharacterConstant
 
 singleQuoted :: Parser a -> Parser a
 singleQuoted = between (string "'") (string "'")
