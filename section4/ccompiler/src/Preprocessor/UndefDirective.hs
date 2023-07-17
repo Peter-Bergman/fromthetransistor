@@ -5,13 +5,13 @@ import AbstractSyntaxTree
     )
 import CustomCombinators
     (nullifyParser)
-import Identifier
+import Preprocessor.Identifier
     (identifier)
-import NewLine
+import Preprocessor.NewLine
     (newLine)
-import Octothorpe
+import Preprocessor.Octothorpe
     (octothorpe)
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     ( PreprocessingParserX
     , stringSatisfy_
     )

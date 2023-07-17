@@ -3,11 +3,11 @@ import AbstractSyntaxTree
     ( GroupPart
         (TextLine)
     )
-import NewLine
+import Preprocessor.NewLine
     (newLine)
-import PreprocessingParser
+import Preprocessor.PreprocessingParser
     (PreprocessingParserX)
-import PPTokens
+import Preprocessor.PPTokens
     (ppTokens)
 import Text.Parsec
     (optionMaybe)
