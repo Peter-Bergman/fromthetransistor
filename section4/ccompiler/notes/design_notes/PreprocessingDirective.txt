@@ -700,3 +700,10 @@ I am going to put the single module for the Constant subtree of the AST on hold 
 
 I want to keep this project L E A N, lean.
 
+I changed the name of the ConstantExpression constructor in the AST.
+It is no longer ConditionalExpression.
+It is now ConditionalExpressionConstantExpression.
+I made this change before I wrote the notes in the previous two paragraphs.
+I am just committing now.
+I could remove the changes, but I would rather just commit them.
+

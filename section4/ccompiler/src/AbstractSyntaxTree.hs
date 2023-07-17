@@ -84,7 +84,7 @@ newtype IdentifierList =
     deriving (Show)
 
 newtype ConstantExpression =
-    ConditionalExpression ConditionalExpression
+    ConditionalExpressionConstantExpression ConditionalExpression
     deriving (Show)
 
 data ConditionalExpression =
