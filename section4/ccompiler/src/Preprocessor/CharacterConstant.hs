@@ -13,13 +13,15 @@ import CharTokenParsers.PrimitiveParsers.UniversalCharacterName
 import qualified CharTokenParsers.Constants.CharacterConstants.CharacterConstant as CTP.CharacterConstant
 import CharTokenParsers.PrimitiveParsers.EscapeSequence
 import CustomCombinators
+import Preprocessor.PreprocessingParser
 import Text.Parsec.Char
 import Text.Parsec.String
 import Text.Parsec.Prim
 import Text.Parsec.Combinator
 
-characterConstant :: Parser CharacterConstant
-characterConstant =
+characterConstant :: PreprocessingParserX CharacterConstant
+characterConstant = charToStringTokenParser CTP.CharacterConstant.characterConstant
+{-
     simpleCharacterConstant <|>
     lCharacterConstant <|>
     lowerCaseUCharacterConstant <|>
@@ -42,4 +44,4 @@ capitalUCharacterConstant = char 'U' >> cCharSequenceBetweenSingleQuotes >>= ret
 
 singleQuote :: Parser Char
 singleQuote = char '\''
-
+-}
