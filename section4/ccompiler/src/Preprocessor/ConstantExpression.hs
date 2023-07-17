@@ -1,9 +1,11 @@
-module Preprocessor.ConstantExpression (constantExpression) where
+module Preprocessor.ConstantExpression {-(constantExpression)-} where
 import AbstractSyntaxTree
 import CustomCombinators
 import Data.List.NonEmpty
+import Preprocessor.Constant
+    (constant)
 import Preprocessor.Identifier
-import qualified Preprocessor.IntegerConstant
+--import qualified Preprocessor.IntegerConstant
 import Preprocessor.PreprocessingParser
 import Preprocessor.StringLiteral
     (stringLiteral)
@@ -14,7 +16,7 @@ import Text.Parsec.Char
 import Text.Parsec.Char
 import Text.Parsec.Char
 
-
+{-
 parens :: PreprocessingParserX t -> PreprocessingParserX t
 parens = between leftParenthesis rightParenthesis
 
@@ -623,34 +625,6 @@ defaultGenericAssociation = (parserFail "complexConditionalExpression not implem
 default_ :: PreprocessingParserX ()
 default_ = stringSatisfy_ (=="default")
 
-constant :: PreprocessingParserX Constant
-constant =
-    integerConstantConstant <|>
-    floatingConstantConstant <|>
-    enumerationConstantConstant <|>
-    characterConstantConstant
-
-integerConstantConstant :: PreprocessingParserX Constant
-integerConstantConstant = simpleExpression integerConstant IntegerConstantConstant
-
-floatingConstantConstant :: PreprocessingParserX Constant
-floatingConstantConstant = simpleExpression floatingConstant FloatingConstantConstant
-
-enumerationConstantConstant :: PreprocessingParserX Constant
-enumerationConstantConstant = simpleExpression enumerationConstant EnumerationConstantConstant
-
-characterConstantConstant :: PreprocessingParserX Constant
-characterConstantConstant = simpleExpression characterConstant CharacterConstantConstant
-
-integerConstant :: PreprocessingParserX IntegerConstant
-integerConstant = charToStringTokenParser Preprocessor.IntegerConstant.integerConstant
-
-floatingConstant :: PreprocessingParserX FloatingConstant
-floatingConstant = decimalFloatingConstant <|> hexadecimalFloatingConstant
-
-enumerationConstant :: PreprocessingParserX EnumerationConstant
-enumerationConstant = simpleExpression identifier EnumerationConstant
-
 typeName :: PreprocessingParserX TypeName
 typeName = (parserFail "complexConditionalExpression not implemented") {->> tryWithFailMessage "Type Name" $ do
     parsedSpecifierQualifierList <- specifierQualifierList
@@ -738,4 +712,6 @@ capitalLLongLongSuffix = simpleExpression (stringSatisfy_ (=="LL")) CapitalLLong
 
 hexadecimalConstant :: PreprocessingParserX HexadecimalConstant
 hexadecimalConstant = try (charToStringTokenParser HexadecimalConstant.hexadecimalConstant) <?> "Hexadecimal Constant"
+-}
+
 -}
