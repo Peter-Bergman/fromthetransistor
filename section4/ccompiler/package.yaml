@@ -79,6 +79,7 @@ library:
     - CharTokenParsers.PPNumbers.PPNumber
     - CharTokenParsers.PrimitiveParsers.Digit
     - CharTokenParsers.PrimitiveParsers.IdentifierNonDigit
+    - CharTokenParsers.PrimitiveParsers.IntegerConstant
     - CharTokenParsers.PrimitiveParsers.NonDigit
     - CharTokenParsers.PrimitiveParsers.EscapeSequence
     - CharTokenParsers.PrimitiveParsers.OctalDigit
