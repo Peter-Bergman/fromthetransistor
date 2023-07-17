@@ -684,4 +684,19 @@ Some of the syntax, like for logicalOrExpression, is implemented with the sepBy1
 I have noticed that I often get an error of the form "illegal term-level use of the type constructor" (with letter case not the same).
 The error message goes on with several lines of information.
 However, I have noticed that I get that error usually, if not always, when I have forgotten to import a data constructor, especially one of the same name as the data type or newtype.
+I am going to create a single module that will define PreprocessingParserX parsers for the Constant subtree of the AST.
+I do not think that I am going to support floating constants.
+The linux kernel does not have any floats, so I will probably be okay without any in my operating system, even though I am writing more than just a kernel.
+
+I am going to make this compiler even leaner.
+I want a full pipeline up and running as soon as possible, at least given the effort that I put in.
+I might simply plug the holes in the preprocessor, forget it for now, and move onto the compiler proper.
+That will not erase the work I have done on/with the preprocessor.
+I will be able to utilize many of the parsing primitives that I have refined.
+I have just plugged up the the if directive.
+By the if directive, I mean the directive that conditionally uses code based on a constant expression, not the ifdef nor ifndef directive.
+I still agree with the idea of not supporting floats.
+I am going to put the single module for the Constant subtree of the AST on hold for now, though.
+
+I want to keep this project L E A N, lean.
 

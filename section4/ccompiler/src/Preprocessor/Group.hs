@@ -98,12 +98,13 @@ ifGroup =
     ifNDefDirective
 
 ifDirective :: PreprocessingParserX IfGroup
-ifDirective = do
+ifDirective = (parserFail "not implemented or implementation not used") {-do
     ifPrefix
     parsedConstantExpression <- constantExpression
     newLine
     parsedMaybeGroup <- tryMaybe $ group IfOrElif
     return $ IfDirective parsedConstantExpression parsedMaybeGroup
+-}
 
 ifDefDirective :: PreprocessingParserX IfGroup
 ifDefDirective = do
