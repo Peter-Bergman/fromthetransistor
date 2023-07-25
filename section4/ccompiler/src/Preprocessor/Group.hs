@@ -1,12 +1,15 @@
 module Preprocessor.Group (group) where
 import AbstractSyntaxTree
     ( ConstantExpression
-        (ConstantExpression)
+        (ConditionalExpressionConstantExpression)
     , ElifGroup
         (ElifGroup)
     , ElifGroups
+        (ElifGroups)
     , ElseGroup
+        (ElseGroup)
     , Group
+        (Group)
     , GroupPart
         ( ControlLine
         , IfSection
@@ -17,9 +20,11 @@ import AbstractSyntaxTree
         , IfNDefDirective
         )
     )
+import CustomCombinators
+    (simpleExpression)
 import Preprocessor.ControlLine
     (controlLine)
-import Preprocessor.CustomCombinators
+import CustomCombinators
     ( nullifyParser
     , many1NonEmpty
     , many1TillNonEmpty
@@ -49,7 +54,8 @@ import Text.Parsec.Combinator
     , many1
     )
 import Text.Parsec.Prim
-    ( try
+    ( parserFail
+    , try
     , (<|>)
     , (<?>)
     )
@@ -63,7 +69,7 @@ data ContainingGroup =
     None
 
 group :: ContainingGroup -> PreprocessingParserX Group
-group containingGroup = many1TillNonEmpty (try groupPart) $ lookAhead $ endOfInnerGroup containingGroup
+group containingGroup = simpleExpression (many1TillNonEmpty (try groupPart) $ lookAhead $ endOfInnerGroup containingGroup) Group
 
 groupPart :: PreprocessingParserX GroupPart
 groupPart = 
@@ -83,13 +89,14 @@ controlLineGroupPart :: PreprocessingParserX GroupPart
 controlLineGroupPart = controlLine >>= return . ControlLine
 
 ifSection :: PreprocessingParserX GroupPart
-ifSection = do
+ifSection = (parserFail "not implemented or implementation not used") {-do
     parsedIfGroup <- ifGroup
     parsedElifGroups <- tryMaybe elifGroups
     parsedElseGroup <- tryMaybe elseGroup
     -- parsed elseGroup
     endIfLine
     return $ IfSection parsedIfGroup parsedElifGroups parsedElseGroup
+-}
 
 ifGroup :: PreprocessingParserX IfGroup
 ifGroup =
@@ -123,7 +130,7 @@ ifNDefDirective = do
     return $ IfNDefDirective parsedIdentifier parsedMaybeGroup
 
 elifGroups :: PreprocessingParserX ElifGroups
-elifGroups = many1NonEmpty $ try elifGroup
+elifGroups = simpleExpression (many1NonEmpty $ try elifGroup) ElifGroups
 
 ifPrefix :: PreprocessingParserX ()
 ifPrefix = octothorpe >> if_
@@ -161,7 +168,8 @@ elseGroup :: PreprocessingParserX ElseGroup
 elseGroup = do
     elsePrefix
     newLine
-    tryMaybe $ group Else
+    parsedGroup <- tryMaybe $ group Else
+    return $ ElseGroup parsedGroup
 
 elsePrefix :: PreprocessingParserX ()
 elsePrefix = octothorpe >> else_
@@ -169,8 +177,12 @@ elsePrefix = octothorpe >> else_
 else_ :: PreprocessingParserX ()
 else_ = stringSatisfy_ (=="else")
 
--- This definition is just for the sake of being able to build this module and test other parsers.
--- THE LINES BELOW SHOULD BE REMOVED.
--- THEY DO NOT REFLECT THE ACTUAL SYNTAX OF A CONSTANT EXPRESSION
+-- NOTE: This definition is just for the sake of being able to build this module and test other parsers.
+-- FIXME: THEY DO NOT REFLECT THE ACTUAL SYNTAX OF A CONSTANT EXPRESSION
 constantExpression :: PreprocessingParserX ConstantExpression
-constantExpression = stringParserSatisfy (many1 digit) >>= (return . ConstantExpression . (read :: String -> Integer) . head)
+constantExpression = (parserFail "not implemented or implementation not used") {-try $ do
+    parsedDigits <- stringParserSatisfy (many1 digit)
+    let digitsAsInteger = ((read :: String -> Integer) . head) parsedDigits
+    --let digitsAsConditionalExpression = SimpleConditionalExpression . LogicalOrExpression . 
+    return $ ConditionalExpressionConstantExpression digitsAsInteger
+-}
