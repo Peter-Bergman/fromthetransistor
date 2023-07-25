@@ -1,6 +1,7 @@
 module Main (main) where
+import System.Environment
 
-import Lib
+--import Lib
 
 main :: IO ()
-main = someFunc
+main = putStrLn "C Compiler in development..."
