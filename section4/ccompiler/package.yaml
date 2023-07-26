@@ -74,11 +74,16 @@ library:
     - Lexer.PreprocessingToken
     # Character Token Parsers
     - CharTokenParsers.Constants.CharacterConstants.CharacterConstant
+    - CharTokenParsers.Constants.Constant
+    - CharTokenParsers.Constants.EnumerationConstants.EnumerationConstant
+    - CharTokenParsers.Constants.IntegerConstants.IntegerConstant
     - CharTokenParsers.HeaderNames.HeaderName
     - CharTokenParsers.Identifiers.Identifier
     - CharTokenParsers.PPNumbers.PPNumber
     - CharTokenParsers.PrimitiveParsers.Digit
     - CharTokenParsers.PrimitiveParsers.IdentifierNonDigit
+    # TODO: remove CharTokenParsers.PrimitiveParsers.IntegerConstant module from the repo/project
+    # Use CharTokenParsers.Constants.IntegerConstants.IntegerConstant instead
     - CharTokenParsers.PrimitiveParsers.IntegerConstant
     - CharTokenParsers.PrimitiveParsers.NonDigit
     - CharTokenParsers.PrimitiveParsers.EscapeSequence

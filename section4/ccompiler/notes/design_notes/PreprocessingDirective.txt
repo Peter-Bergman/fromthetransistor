@@ -707,3 +707,45 @@ I made this change before I wrote the notes in the previous two paragraphs.
 I am just committing now.
 I could remove the changes, but I would rather just commit them.
 
+I now have a build that totally compiles.
+Holy shit, this is nice.
+However, the code I have written does not do hardly anything without a repl at this point in time.
+I think I am going to move onto the compiler proper.
+I can jump back to the preprocessor, but I think that I am mentally ready to take on the compiler proper, and working on the preprocessor seems like more of a time drain for now.
+I do admit, though, for this compiler, I have not written any code dealing with code generation.
+That could prove to be a tricky task that I may backtrack away from, or read more theory before going full speed ahead.
+When writing code for the code generation phase of this compiler, it is likely that I will make changes to the assembler, as well.
+Okay, where the hell am I going to jump into writing code for the compiler proper?
+Well, I will probably do some architectural design now.
+I will have to decide whether I actually want to use a lexer or not.
+Parsing through the output of a lexer, if still split into tokens when input for syntactical analysis, can be error prone, as not all syntactical elements do not comprise a whole token.
+Two examples of this are digit and non-digit (see the C ISO spec).
+I just looked at the variants of the token syntactical construct (would be used in a lexer for the compiler proper).
+It has 5 variants: keyword, identifier, constant, string-literal, and punctuator.
+Keywords would be super straightforward and would probably take under 15 minutes.
+It would mostly be a typing task.
+I already have parsers for identifiers.
+That would probably take under 10 minutes.
+
+There is another thing that I need to take into account when determining whether or not I should require a lexer for the compiler proper: spacing.
+Handling spacing is a very error prone task.
+I have to ensure that spacing is allowed where necessary.
+More importantly, there must not be leeway for spacing to be entered when it should not be allowed (according to the ISO standard).
+I am not going to implement the C language entirely, but I want to make sure that this implementation does not accept invalid C code.
+I want my implementation to accept a strict subset of the C programming language.
+If I do not require a lexer and simply have the compiler proper parse through Strings, then the lexer is not a necessary piece of the pipeline.
+I think I actually like that better.
+I want to read about whether I should or should not use a lexer online before making a decision.
+Everything I saw seems to recommend using a Lexer to output a stream of tokens.
+I also realized that I probably will not be able to write a full compilation pipeline until I have the constant parser completed.
+I might just finish that up and delay these design decisions.
+I also think that I will need to change the output of the assembler to make something that can be linked and loaded by existing RISC-V tooling.
+I moved the Preprocessor.IntegerConstant module to CharTokenParsers tree, as all of the parsers are Char token parsers.
+I will do the same for the EnumerationConstant.
+I just checked.
+I do not have Char token parser code for the type EnumerationConstant.
+There is only a definition of PreprocessingParserX EnumerationConstant.
+All I need is a simpleExpression with an identifier parser.
+I now have all of the variants of constant in the CharTokenParser tree, except floating-constant.
+I am not implementing that, at least not any time soon.
+
