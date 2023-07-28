@@ -1,8 +1,92 @@
 module AbstractSyntaxTree where
 import Data.List.NonEmpty
+    (NonEmpty)
 
-newtype AbstractSyntaxTree =
-    AbstractSyntaxTree (Maybe Group)
+newtype TranslationUnit =
+    TranslationUnit (NonEmpty ExternalDeclaration)
+    deriving (Show)
+
+data ExternalDeclaration =
+    FunctionDefinitionExternalDeclaration FunctionDefinition |
+    DeclarationExternalDeclaration Declaration
+    deriving (Show)
+
+data FunctionDefinition =
+    FunctionDefinition DeclarationSpecifiers Declarator (Maybe DeclarationList) CompoundStatement
+    deriving (Show)
+
+newtype DeclarationList =
+    DeclarationList (NonEmpty Declaration)
+    deriving (Show)
+
+newtype CompoundStatement =
+    CompoundStatement (Maybe BlockItemList)
+    deriving (Show)
+
+newtype BlockItemList =
+    BlockItemList (NonEmpty BlockItem)
+    deriving (Show)
+
+data BlockItem =
+    DeclarationBlockItem Declaration |
+    StatementBlockItem Statement
+    deriving (Show)
+
+data Statement =
+    LabeledStatementStatement LabeledStatement |
+    CompoundStatementStatement CompoundStatement |
+    ExpressionStatementStatement ExpressionStatement |
+    SelectionStatementStatement SelectionStatement |
+    IterationStatementStatement IterationStatement |
+    JumpStatementStatement JumpStatement
+    deriving (Show)
+
+data LabeledStatement =
+    IdentifierLabeledStatement Identifier Statement |
+    CaseLabeledStatement ConstantExpression Statement |
+    DefaultLabeledStatement Statement
+    deriving (Show)
+
+newtype ExpressionStatement =
+    ExpressionStatement (Maybe Expression)
+    deriving (Show)
+
+data SelectionStatement =
+    IfSelectionStatement Expression Statement |
+    IfElseSelectionStatement Expression Statement Statement |
+    SwitchSelectionStatement Expression Statement
+    deriving (Show)
+
+data IterationStatement =
+    WhileIterationStatement Expression Statement |
+    DoWhileIterationStatement Statement Expression |
+    ExpressionForIterationStatement (Maybe Expression) (Maybe Expression) (Maybe Expression) Statement |
+    DeclarationForIterationStatement Declaration (Maybe Expression) (Maybe Expression) Statement
+    deriving (Show)
+
+data JumpStatement =
+    GotoStatement Identifier |
+    ContinueStatement |
+    Break |
+    ReturnStatement (Maybe Statement)
+    deriving (Show)
+
+data Declaration =
+    DeclarationSpecifiersDeclaration DeclarationSpecifiers (Maybe InitDeclaratorList) |
+    StaticAssertDeclarationDeclaration StaticAssertDeclaration
+    deriving (Show)
+
+newtype InitDeclaratorList =
+    InitDeclaratorList (NonEmpty InitDeclarator)
+    deriving (Show)
+
+data InitDeclarator =
+    SimpleInitDeclarator Declarator |
+    ComplexInitDeclarator Declarator Initializer
+    deriving (Show)
+
+newtype PreprocessingFile =
+    PreprocessingFile (Maybe Group)
     deriving (Show)
 
 newtype Group =

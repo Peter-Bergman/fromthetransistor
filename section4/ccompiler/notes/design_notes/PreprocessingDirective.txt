@@ -749,3 +749,14 @@ All I need is a simpleExpression with an identifier parser.
 I now have all of the variants of constant in the CharTokenParser tree, except floating-constant.
 I am not implementing that, at least not any time soon.
 
+I think that I will be able to write some compiler code now.
+I am holding off from implementing the lexer just yet, though I think I will write code that expects lexed tokens.
+I believe that the top level syntax construct in the C programming language is a translation-unit.
+I want to confirm this before moving forward.
+I confirmed by reading the semantics of a translation-unit and section 5.1.1.1 in the ISO document.
+I will need a new AST.
+Well, I will need new ADTs to create an AST with a different root.
+I think I will store all of the ADTs in the AbstractSyntaxTree module that already exists, though.
+I think that I have finished writing code for the AST.
+Everything builds.
+
