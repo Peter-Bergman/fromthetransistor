@@ -7,6 +7,7 @@ module CustomCombinators
 , many1TillNonEmpty
 , parseADTAndConsumedInput
 , sepBy1NonConsumption
+, sepBy1NonConsumptionNonEmpty
 , simpleExpression
 , singleton
 , tryMaybe
@@ -41,6 +42,9 @@ sepBy1NonConsumption parser separator = do
     firstItem <- parser
     followingItems <- many $ try $ separator >> parser
     return $ firstItem : followingItems
+
+sepBy1NonConsumptionNonEmpty :: ParsecT s u m a -> ParsecT s u m sep -> ParsecT s u m (NonEmpty a)
+sepBy1NonConsumptionNonEmpty parser separator = sepBy1NonConsumption parser separator >>= return . fromList
 
 tryMaybe :: Stream s m t => ParsecT s u m a -> ParsecT s u m (Maybe a)
 tryMaybe inputParser = try (optionMaybe inputParser) <|> return Nothing
