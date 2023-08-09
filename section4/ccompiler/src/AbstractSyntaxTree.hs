@@ -168,7 +168,7 @@ newtype IdentifierList =
     deriving (Show)
 
 newtype ConstantExpression =
-    ConditionalExpressionConstantExpression ConditionalExpression
+    ConstantExpression ConditionalExpression
     deriving (Show)
 
 data ConditionalExpression =
@@ -235,7 +235,7 @@ data CastExpression =
     deriving (Show)
 
 data UnaryExpression =
-    PostfixExpression PostfixExpression |
+    PostfixExpressionUnaryExpression PostfixExpression |
     IncrementExpression UnaryExpression |
     DecrementExpression UnaryExpression |
     OperatorExpression UnaryOperator CastExpression |
@@ -584,9 +584,9 @@ data TypeSpecifier =
     Bool_ |
     Complex_ |
     AtomicTypeSpecifierTypeSpecifier AtomicTypeSpecifier |
-    StructOrUnionSpecifier |
-    EnumSpecifier |
-    TypeDefNameSpecifier
+    StructOrUnionSpecifierTypeSpecifier StructOrUnionSpecifier |
+    EnumSpecifierTypeSpecifier EnumSpecifier |
+    TypeDefNameTypeSpecifier TypeDefName
     deriving (Show)
 
 newtype AtomicTypeSpecifier =
@@ -596,6 +596,24 @@ newtype AtomicTypeSpecifier =
 data StructOrUnionSpecifier =
     IdentifierStructOrUnionSpecifier StructOrUnion Identifier |
     BracesStructOrUnionSpecifier (Maybe Identifier) StructDeclarationList
+    deriving (Show)
+
+data EnumSpecifier =
+    EnumSpecifierWithBrackets (Maybe Identifier) EnumeratorList |
+    EnumSpecifierNoBrackets Identifier
+    deriving (Show)
+
+newtype TypeDefName =
+    TypeDefName Identifier
+    deriving (Show)
+
+newtype EnumeratorList =
+    EnumeratorList (NonEmpty Enumerator)
+    deriving (Show)
+
+data Enumerator =
+    SimpleEnumerator EnumerationConstant |
+    ComplexEnumerator EnumerationConstant ConstantExpression
     deriving (Show)
 
 data StructOrUnion =
@@ -636,12 +654,17 @@ data TypeQualifier =
     Atomic
     deriving (Show)
 
-data DeclarationSpecifiers =
-    StorageClassDeclarationSpecifiers StorageClassSpecifier (Maybe DeclarationSpecifiers) |
-    TypeSpecifierDeclarationSpecifiers TypeSpecifier (Maybe DeclarationSpecifiers) |
-    TypeQualifierDeclarationSpecifiers TypeQualifier (Maybe DeclarationSpecifiers) |
-    FunctionSpecifierDeclarationSpecifiers FunctionSpecifier (Maybe DeclarationSpecifiers) |
-    AlignmentDeclarationSpecifiers AlignmentSpecifier (Maybe DeclarationSpecifiers)
+newtype DeclarationSpecifiers =
+    DeclarationSpecifiers (NonEmpty DeclarationSpecifier)
+    deriving (Show)
+
+-- NOTE: DeclarationSpecifier is not formally defined
+data DeclarationSpecifier =
+    StorageClassDeclarationSpecifier StorageClassSpecifier |
+    TypeSpecifierDeclarationSpecifier TypeSpecifier |
+    TypeQualifierDeclarationSpecifier TypeQualifier |
+    FunctionSpecifierDeclarationSpecifier FunctionSpecifier |
+    AlignmentDeclarationSpecifier AlignmentSpecifier
     deriving (Show)
 
 data StorageClassSpecifier =
