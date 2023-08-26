@@ -72,6 +72,8 @@ library:
     # Lexer modules (preprocessing lexer)
     - Lexer.Lexer
     - Lexer.PreprocessingToken
+    # Compiler Proper specific modules
+    - Compiler.Parser.TranslationUnit
     # Character Token Parsers
     - CharTokenParsers.Constants.CharacterConstants.CharacterConstant
     - CharTokenParsers.Constants.Constant

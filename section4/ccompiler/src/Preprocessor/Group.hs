@@ -1,7 +1,7 @@
 module Preprocessor.Group (group) where
 import AbstractSyntaxTree
     ( ConstantExpression
-        (ConditionalExpressionConstantExpression)
+        (ConstantExpression)
     , ElifGroup
         (ElifGroup)
     , ElifGroups

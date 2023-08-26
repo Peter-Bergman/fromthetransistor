@@ -1,0 +1,9 @@
+I have moved over to this file for notes.
+You know what, I think I am going to check in what I have for now.
+I think there are already a lot of changes.
+I just found out about git difftool and vimdiff.
+That shit is awesome.
+I like it.
+The colors are dumb for now, but the tools are cool, and I am going to use them.
+I can configure the colors to be more helpful some time, anyways.
+

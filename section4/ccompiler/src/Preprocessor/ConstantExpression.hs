@@ -1,14 +1,11 @@
-module Preprocessor.ConstantExpression {-(constantExpression)-} where
+module Preprocessor.ConstantExpression where
 import AbstractSyntaxTree
 import CustomCombinators
 import Data.List.NonEmpty
 import Preprocessor.Constant
-    (constant)
 import Preprocessor.Identifier
---import qualified Preprocessor.IntegerConstant
 import Preprocessor.PreprocessingParser
 import Preprocessor.StringLiteral
-    (stringLiteral)
 import Text.Parsec.Combinator
 import Text.Parsec.Prim
 import Text.Parsec.String
@@ -16,7 +13,7 @@ import Text.Parsec.Char
 import Text.Parsec.Char
 import Text.Parsec.Char
 
-{-
+
 parens :: PreprocessingParserX t -> PreprocessingParserX t
 parens = between leftParenthesis rightParenthesis
 
@@ -51,21 +48,22 @@ infixRecursiveBinaryOperatorExpression recursedParser primitiveParser operatorPa
     parsedReturnType <- recursedParser
     return $ typeConstructor parsedReturnType parsedPrimitiveType
 
-onlyInConstantExpressions :: Bool -> PreprocessingParserX t -> PreprocessingParserX t
+-- NOTE: maybe onlyInConstantExpressions could be used in the future; could maybe read parser state
+{-onlyInConstantExpressions ::  PreprocessingParserX t -> PreprocessingParserX t
 onlyInConstantExpressions isPartOfConstantExpression parser =
     if isPartOfConstantExpression then parser else parserFail "defined unary operator can only be part of constant expressions"
+-}
 
 constantExpression :: PreprocessingParserX ConstantExpression
-constantExpression = conditionalExpression True
+constantExpression = simpleExpression conditionalExpression ConstantExpression
 
-conditionalExpression :: Bool -> PreprocessingParserX ConditionalExpression
+conditionalExpression :: PreprocessingParserX ConditionalExpression
 conditionalExpression = simpleConditionalExpression <|> complexConditionalExpression
 
-simpleConditionalExpression :: Bool -> PreprocessingParserX ConditionalExpression
+simpleConditionalExpression :: PreprocessingParserX ConditionalExpression
 simpleConditionalExpression = simpleExpression logicalOrExpression SimpleConditionalExpression
---simpleConditionalExpression = logicalOrExpression >>= return . SimpleConditionalExpression
 
-complexConditionalExpression :: Bool -> PreprocessingParserX ConditionalExpression
+complexConditionalExpression :: PreprocessingParserX ConditionalExpression
 complexConditionalExpression = (parserFail "complexConditionalExpression not implemented") {->> do
     parsedLogicalOrExpression <- logicalOrExpression
     questionMark
@@ -81,38 +79,37 @@ questionMark = stringSatisfy_ (=="?")
 colon :: PreprocessingParserX ()
 colon = stringSatisfy_ (==":")
 
-logicalOrExpression :: Bool -> PreprocessingParserX LogicalOrExpression
+logicalOrExpression :: PreprocessingParserX LogicalOrExpression
 logicalOrExpression = try $ sepBy1 logicalAndExpression logicalOrOperator >>= return . LogicalOrExpression . fromList
 
 logicalOrOperator :: PreprocessingParserX ()
 logicalOrOperator = stringSatisfy_ (=="||")
 
-logicalAndExpression :: Bool -> PreprocessingParserX LogicalAndExpression
+logicalAndExpression ::  PreprocessingParserX LogicalAndExpression
 logicalAndExpression = try $ sepBy1 inclusiveOrExpression logicalAndOperator >>= return . LogicalAndExpression . fromList
 
 logicalAndOperator :: PreprocessingParserX ()
 logicalAndOperator = stringSatisfy_ (=="&&")
 
-inclusiveOrExpression :: Bool -> PreprocessingParserX InclusiveOrExpression
+inclusiveOrExpression ::  PreprocessingParserX InclusiveOrExpression
 inclusiveOrExpression = try $ sepBy1 exclusiveOrExpression bitwiseOrOperator >>= return . InclusiveOrExpression . fromList
 
 bitwiseOrOperator :: PreprocessingParserX ()
 bitwiseOrOperator = stringSatisfy_ (=="|")
 
-exclusiveOrExpression :: Bool -> PreprocessingParserX ExclusiveOrExpression
+exclusiveOrExpression ::  PreprocessingParserX ExclusiveOrExpression
 exclusiveOrExpression = try $ sepBy1 andExpression bitwiseXorOperator >>= return . ExclusiveOrExpression . fromList
 
 bitwiseXorOperator :: PreprocessingParserX ()
 bitwiseXorOperator = stringSatisfy_ (=="^")
 
-andExpression :: Bool -> PreprocessingParserX AndExpression
+andExpression ::  PreprocessingParserX AndExpression
 andExpression = try $ sepBy1 equalityExpression bitwiseAndOperator >>= return . AndExpression . fromList
 
 bitwiseAndOperator :: PreprocessingParserX ()
 bitwiseAndOperator = stringSatisfy_ (=="&")
 
 
--- Next Thing To Implement below
 equalityExpression :: PreprocessingParserX EqualityExpression
 equalityExpression =
     try equalityOperatorExpression <|>
@@ -330,7 +327,7 @@ unaryExpression = -- double check the ordering of these alternatives
     definedWithParentheses <|>
     operatorExpression <|>
     sizeOfExpression <|>
-    postfixExpression
+    postfixExpressionUnaryExpression
 
 incrementExpression :: PreprocessingParserX UnaryExpression
 incrementExpression = (parserFail "complexConditionalExpression not implemented") {->> try $ simpleExpression (incrementOperator >> unaryExpression) IncrementExpression
@@ -394,10 +391,10 @@ indirection :: PreprocessingParserX UnaryOperator
 indirection = asterisk >> return Indirection
 
 plusSign :: PreprocessingParserX UnaryOperator
-plusSign = stringSatisfy_ (=="+") >> return PlusSign
+plusSign = stringSatisfy_ (=="+") >> return PlusSignOperator
 
 minusSign :: PreprocessingParserX UnaryOperator
-minusSign = hyphen >> return MinusSign
+minusSign = hyphen >> return MinusSignOperator
 
 hyphen :: PreprocessingParserX ()
 hyphen = stringSatisfy_ (=="-")
@@ -415,17 +412,19 @@ exclamationPoint :: PreprocessingParserX ()
 exclamationPoint = stringSatisfy_ (=="!")
 
 definedWithoutParentheses :: PreprocessingParserX UnaryOperator
-definedWithoutParentheses = onlyInConstantExpressions $ defined >> DefinedWithoutParentheses
+definedWithoutParentheses = parserFail "definedWithoutParentheses not implemented" --onlyInConstantExpressions $ defined >> DefinedWithoutParentheses
 
 sizeOfExpression :: PreprocessingParserX UnaryExpression
 sizeOfExpression = (parserFail "complexConditionalExpression not implemented") {->> simpleExpression (sizeOf >> unaryExpression) SizeOfExpression
 -}
 
-postfixExpression :: PreprocessingParserX UnaryExpression
+postfixExpressionUnaryExpression :: PreprocessingParserX UnaryExpression
+postfixExpressionUnaryExpression = simpleExpression postfixExpression PostfixExpressionUnaryExpression
+
+postfixExpression :: PreprocessingParserX PostfixExpression
 postfixExpression = do
     parsedPrimitivePostfixExpression <- primitivePostfixExpression
     fullPostfixExpression parsedPrimitivePostfixExpression
-
 
     {-indexExpression <|>
     functionCallExpression <|>
@@ -451,7 +450,7 @@ simplePostfixExpression = simpleExpression primaryExpression SimplePostfixExpres
 initializerListWithOptionalFollowingComma :: PreprocessingParserX InitializerList
 initializerListWithOptionalFollowingComma = do
     parsedInitializerList <- initializerList
-    tryMaybe comma
+    _ <- tryMaybe comma
     return $ parsedInitializerList
 
 initializerList :: PreprocessingParserX InitializerList
@@ -476,7 +475,7 @@ equalSign :: PreprocessingParserX ()
 equalSign = stringSatisfy_ (=="=")
 
 designatorList :: PreprocessingParserX DesignatorList
-designatorList = many1NonEmpty designator
+designatorList = simpleExpression (many1NonEmpty designator) DesignatorList
 
 designator :: PreprocessingParserX Designator
 designator =
@@ -714,4 +713,4 @@ hexadecimalConstant :: PreprocessingParserX HexadecimalConstant
 hexadecimalConstant = try (charToStringTokenParser HexadecimalConstant.hexadecimalConstant) <?> "Hexadecimal Constant"
 -}
 
--}
+
