@@ -845,3 +845,4 @@ I wanted to delay this, but I think I might need to implement the Show typeclass
 I read that due to the orphan instances problem, it is usually best to implement a typeclass in the same module that it is defined.
 I am start writing my notes in a different file.
 I will leave what is already here, though.
+

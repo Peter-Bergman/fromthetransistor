@@ -1,6 +1,7 @@
 module Preprocessor.PreprocessingParser 
 ( lexThenParse
 , charToStringTokenParser
+, charToStringTokenParserSkipPrecedingSpaces
 , PreprocessingParser
 , PreprocessingParserX
 , stringParserToStringChecker
@@ -55,32 +56,36 @@ t1SatisfyT2NoPrecedingWhiteSpace t1Check t1ToT2 nextPosition = tokenPrim show ne
 -}
 
 stringSatisfyTNoPrecedingWhiteSpace :: (String -> Bool) -> (String -> t) -> PreprocessingParserX t
-stringSatisfyTNoPrecedingWhiteSpace stringCheck stringToT = tokenPrim show nextPosition maybeList
+stringSatisfyTNoPrecedingWhiteSpace checkString stringToT = tokenPrim show nextPosition maybeList
     where
         nextPosition position x xs = updatePosString position x
-        maybeList x = if (stringCheck x) then Just $ stringToT x else Nothing
+        maybeList x = if (checkString x) then Just $ stringToT x else Nothing
 
 horizontalWhiteSpace :: PreprocessingParserX Integer
 horizontalWhiteSpace = stringSatisfyTNoPrecedingWhiteSpace (stringParserToStringChecker horizontalSpacing) $ toInteger . length
--- On the line above, I could (and probably will change tabs to be 4 white space characters.
--- That would require me to use a different function than toInteger . length
+-- TODO: On the line above, I could (and probably will change tabs to be 4 white space characters.
+-- NOTE: That would require me to use a different function than toInteger . length
+
+skipAnyHorizontalWhiteSpace :: PreprocessingParserX ()
+skipAnyHorizontalWhiteSpace = skipMany horizontalWhiteSpace
 
 stringSatisfy :: (String -> Bool) -> PreprocessingParser
-stringSatisfy stringCheck = stringSatisfyT stringCheck singleton
+stringSatisfy checkString = stringSatisfyT checkString singleton
     where
-    singleton x = [x]
+        singleton x = [x]
 
 stringSatisfyT :: (String -> Bool) -> (String -> t) -> PreprocessingParserX t
-stringSatisfyT stringCheck stringToT = skipMany horizontalWhiteSpace >> stringSatisfyTNoPrecedingWhiteSpace stringCheck stringToT
+stringSatisfyT checkString stringToT = skipAnyHorizontalWhiteSpace >> stringSatisfyTNoPrecedingWhiteSpace checkString stringToT
 
 stringSatisfy_ :: (String -> Bool) -> PreprocessingParserX ()
-stringSatisfy_ stringCheck = stringSatisfyT stringCheck $ \_ -> ()
+stringSatisfy_ checkString = stringSatisfyT checkString $ \_ -> ()
 
--- Note that the resulting PreprocessingParser will always fail if the input
+-- NOTE: the resulting PreprocessingParser will always fail if the input
 -- parser skips any characters.
 stringParserSatisfy :: Parser String -> PreprocessingParser
 stringParserSatisfy parser = stringSatisfy (stringParserToStringChecker parser)
 
+-- TODO: Can I fully replace all references of stringParserSatisfyT et al. with charToStringTokenParser?
 -- Abstracted version of stringParserSatisfy that has return type PreprocessingParserX t
 stringParserSatisfyT :: Parser String -> (String -> t) -> PreprocessingParserX t
 stringParserSatisfyT parser stringToT = stringSatisfyT (stringParserToStringChecker parser) stringToT
@@ -96,13 +101,17 @@ stringParserToStringChecker parser inputString =
     where
         parsedString = parse parser "" inputString
 
+charToStringTokenParserSkipPrecedingSpaces :: Parser t -> PreprocessingParserX t
+charToStringTokenParserSkipPrecedingSpaces parser = skipAnyHorizontalWhiteSpace >> charToStringTokenParser parser
+
+
 charToStringTokenParser :: Parser t -> PreprocessingParserX t
 charToStringTokenParser parser = do
     parsedToken <- anyToken
     let parsedResult = parseStringWithCharTokenParser parsedToken
     case (parsedResult) of
         Left err -> parserFail $ showParseErrorNoPos err
-        Right xs -> return xs
+        Right parsedT -> return parsedT
     where
         parseStringWithCharTokenParser tokenToParse = parse (failsIfDoesNotConsumeAllInput parser) "" tokenToParse
         showErrorMessagesCustom :: [Message] -> String

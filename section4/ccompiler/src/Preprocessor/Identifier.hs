@@ -5,11 +5,11 @@ import qualified CharTokenParsers.Identifiers.Identifier
     (identifier)
 import Preprocessor.PreprocessingParser
     ( PreprocessingParserX
-    , charToStringTokenParser
+    , charToStringTokenParserSkipPrecedingSpaces
     )
 import Text.Parsec.Prim
     ((<?>))
 
 identifier :: PreprocessingParserX Identifier
-identifier = charToStringTokenParser CharTokenParsers.Identifiers.Identifier.identifier <?> "Identifier"
+identifier = charToStringTokenParserSkipPrecedingSpaces CharTokenParsers.Identifiers.Identifier.identifier <?> "Identifier"
 

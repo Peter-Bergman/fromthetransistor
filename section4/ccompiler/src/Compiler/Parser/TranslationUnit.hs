@@ -32,14 +32,14 @@ staticAssertDeclarationDeclaration :: CompilerParserX Declaration
 staticAssertDeclarationDeclaration = parserFail "not implemented"
 
 declarationSpecifiersDeclaration :: CompilerParserX Declaration
-declarationSpecifiersDeclaration = tryWithFailMessage "declaration specifiers" $ do
+declarationSpecifiersDeclaration = try $ do
     parsedDeclarationSpecifiers <- declarationSpecifiers
     parsedMaybeInitDeclaratorList <- tryMaybe initDeclaratorList
     _ <- semicolon
     return $ DeclarationSpecifiersDeclaration parsedDeclarationSpecifiers parsedMaybeInitDeclaratorList
 
 declarationSpecifiers :: CompilerParserX DeclarationSpecifiers
-declarationSpecifiers = simpleExpression (many1NonEmpty declarationSpecifier) DeclarationSpecifiers
+declarationSpecifiers = tryWithFailMessage "declaration specifiers" $ simpleExpression (many1NonEmpty declarationSpecifier) DeclarationSpecifiers
 
 declarationSpecifier :: CompilerParserX DeclarationSpecifier
 declarationSpecifier =

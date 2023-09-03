@@ -7,3 +7,85 @@ I like it.
 The colors are dumb for now, but the tools are cool, and I am going to use them.
 I can configure the colors to be more helpful some time, anyways.
 
+I have a couple directions that I can go in now.
+I can begin writing tests.
+That does not align with my idea of creating a minimal pipeline.
+I will not spend time writing tests yet.
+I could create a manual instance of Show for Identifier in the AST.
+I would get rid of the derivation that implements Show Identifier currently.
+As I was doing some basic testing on declarators and init-declarators, I think I noticed something seemed off.
+I did not dig into it, and I do not remember it in detail.
+My concern was the ordering of alternatives that can be parsed.
+I will just leave it at that for now.
+I think I will hold off manually implementing Show Identifier for now.
+That sounds like a potential slow-down.
+I will fix correctness issues later, especially if it is just a matter of the order of alternatives.
+I am half expecting that to be an issue, and I will be able to find it pretty quickly, I think.
+Okay, then what do I have to implement next.
+I think the next thing I have to implement is the initializer syntax tree.
+I want to look over the iso document first and get an idea of which piece of syntax I need to implement next.
+I just realized that I have not specified what I am trying to implement in my minimal pipeline.
+I want to be able to simply define an external variable (one outside of a procedure) as an integer and initialize its value.
+You know what, maybe it would be even simpler to not even initialize that value.
+I am going to try that with gcc.
+It works.
+My program just had the code `int x;`
+It compiled perfectly fine.
+It was just an object file, but that's fine for now.
+I am okay with that for now.
+When the code gets to the assembler, I can inspect that code because the assembler is written in python.
+I just ran `stack repl Compiler/Parser/TranslationUnit.hs`
+Inside of the ghci interpreter that opened up, I tinkered with the translationUnit parser.
+I ran `testParse translationUnit ["int", "x", ";"]`
+I believe that parsed what it should have.
+However, if I added a space in the mix, it failed.
+Running `testParse translationUnit ["int", " ", "x", ";"]` returned what the following.
+
+parse error at (line 1, column 5):
+unexpected "x"
+expecting declaration specifiers
+
+I am surprised.
+I will look into this.
+I will grep for "declaration specifiers".
+I got a match.
+I am digging in now using parserTrace in the Text.Parsec.Combinator module.
+I think it might be my charToStringTokenParser implementation.
+I wonder if it is an issue with the handling of the whitespace.
+The error message seems as if the whitespace was properly skipped, though.
+Well, it definitely is an issue with the way that the whitespace is skipped.
+The parse works without the space, but not with the space.
+Yes, it's a spacing issue.
+The charToStringTokenParser implementation does not have any code for handling whitespace.
+I am going to either change or parameterize that.
+I think I'll just parameterize it.
+Well, I could also write a wrapper for charToStringTokenParser that would parse preceding whitespace.
+I don't like whitespace.
+The whole lparen thing makes it so much more complicated.
+It turns out that I wrote code that skips horizontal whitespace already.
+It is in the stringSatisfyT definition.
+I extracted the code for skipping horizontal whitespace.
+In order to comply with the C standard, I might need to make the code handle newlines, not just horizontal whitespace, but I will leave it for now.
+I will change the identifier definition in Preprocessor.Identifier now.
+I have to change module imports and exports for that to work.
+Now the whole parse works.
+I get the same parse result when I have the space in the input stream to be parsed and when I don't.
+The code seems to be parsing the sample string properly.
+I guess I am going to move onto the next phase.
+I guess that would be semantic analysis.
+I will have to read the constraints and semantics of each entity that I parsed.
+I might make a typeclass for constraint checks and semantic analysis.
+I am looking at the first constraint.
+I think that ...
+
+I don't know what I was thinking when I began my last sentence.
+I am going to read the preceding content.
+I was just reading the notes.
+Now, I don't remember what the difference is between the stringSatisfyT ish functions and the charToStringTokenParser function.
+I am going to look at that now.
+Well, charToStringTokenParser, I believe, is kind of like a cleaner version of stringParserSatisfyT.
+It does not exclusively transform parsers with the type Parser String.
+The stringParserSatisfyT parser transformer will transform a (Parser String) to a (String -> Bool), and if the (String -> Bool) returns True, stringParserSatisfyT transforms the parsed string to type t.
+Then, stringParserSatisfyT returns the result of that transformation of the parsed string to type t.
+I am going to leave a TODO comment for getting rid of stringParserSatisfyT.
+I could write some nice documentation for this stuff, but I wanna get my minimal pipeline done.
