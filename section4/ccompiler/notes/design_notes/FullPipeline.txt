@@ -89,3 +89,64 @@ The stringParserSatisfyT parser transformer will transform a (Parser String) to 
 Then, stringParserSatisfyT returns the result of that transformation of the parsed string to type t.
 I am going to leave a TODO comment for getting rid of stringParserSatisfyT.
 I could write some nice documentation for this stuff, but I wanna get my minimal pipeline done.
+
+I am going to continue reading my notes from two paragraphs above.
+Okay, I have to write code to audit the constraints.
+I almost want to run audits while parsing.
+I think there are a few constraints that I already enforce in the parsers.
+I just looked at the second constraint listed in section 6.9.
+The constraint has a 3 next to it.
+That constraint requires a symbol table.
+It requires state.
+I feel slightly inclined to not use state, if I don't need to.
+However, I think that if I wait until parsing is finished to do constraint checks, the parsing precedence might be messed up.
+Some code might parse, but then fail constraint checks later in the pipeline.
+This could conceivably happen when the parsed code could have been parsed in another way.
+I am not certain that I will be able to stomp out this possibility by simply ordering/reordering the alternatives (parsers combined with the <|> operator).
+That said, I think it will be easiest for now if I have constraint audits in a separate stage of the pipeline.
+You know what, though, I could parameterize the method that performs constraint checks with a boolean that would determine whether or not to perform recursive constraint checks on the descendent nodes.
+I have not written out my idea for the use of typeclasses here yet.
+I think it could be good to use a typeclass that would have a method that checks all of the constraints for a given node in the AST.
+I could name that method checkConstraints or something like that.
+I think it would return a Bool.
+It could also return a Maybe type.
+I think it would be a Bool because I only need two values, pass or fail.
+I could probably find some nice way to sugar it up, but for now I think having True represent pass and False represent fail is fine.
+I guess I will implement the typeclass in the AbstractSyntaxTree module for now.
+I am naming the type class Auditable for now.
+I did it.
+I think I did it correctly.
+I believe this is the first typeclass I have ever defined.
+I have implemented them before, but I think this is the first one I have defined.
+It compiiled!
+Okay, now I am going to try to implement this typeclass inside the AbstractSyntaxTree module.
+You know what, I think there is going to be a lot of stuff in the next commit.
+I want to just commit my progress.
+This paragraph is not included in the commit I just made.
+Anyways, I am moving on with a much cleaner working tree.
+I just made some more abstractions to the Auditable typeclass.
+There are now three methods: checkConstraints, checkConstraintsOfNode, and checkConstraintsOfDescendentNodes.
+The checkConstraints method is defined using the others.
+I changed the typeclass again.
+It has three methods: checkConstraintsOfNodeAndDescendents, checkConstraintsOfNode, and checkConstraintsOfDescendentNodes.
+The checkConstraintsOfNodeAndDescendents is defined with the other two in its expression tree.
+It currently compiles.
+I think that the first constraint check I write will mostly be a case of expression and an any call.
+I had to deconstruct a lot of different data types.
+In order to handle all the possible data constructors of some of the data types I deconstructed, I had to nest some case expressions.
+I do not like how the spacing looks when I do that.
+Therefore, I defined a bunch of helper functions for the audit.
+I think I need to ensure that I covered every possible way that declaration specifiers can be in an external declaration.
+What I need is to do cycle detection in the AST ADTs.
+I am looking for indirect recursion on the declaration type.
+I know that exists.
+I only want a subset of the mutually recursive sets of ADTs in the AST.
+I only want to include a cycle in the AST if the nested Declaration is an external definition.
+Eh, I don't think my wording is clear.
+In all fairness, I do not think the wording in the spec is precise either.
+I think they have an implicit definition.
+You know what, though, maybe I need to read the Semantics paragraphs of section 6.9,
+I will do that next time I work on the compiler.
+I am going to do this analysis on a sheet of paper.
+Yes, the term external declaration is defined in the semantics in paragraph 4, sentence 2.
+I still have to do analysis, though.

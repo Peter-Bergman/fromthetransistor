@@ -43,6 +43,7 @@ library:
     - AbstractSyntaxTree
     - ASTEquipped
     - CustomCombinators
+    - Auditable
     # Preprocessor specific modules
     - Preprocessor.CharacterConstant
     - Preprocessor.Comma
