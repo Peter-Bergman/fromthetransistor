@@ -1,6 +1,13 @@
 module AbstractSyntaxTree where
 import Data.List.NonEmpty
     (NonEmpty)
+import Auditable
+    (Auditable
+        ( checkConstraintsOfDescendentNodes
+        , checkConstraintsOfNode
+        , checkConstraintsOfNodeAndDescendents
+        )
+    )
 
 newtype TranslationUnit =
     TranslationUnit (NonEmpty ExternalDeclaration)
@@ -674,7 +681,7 @@ data StorageClassSpecifier =
     ThreadLocal |
     Auto |
     Register
-    deriving (Show)
+    deriving (Show, Eq)
 
 data FunctionSpecifier =
     Inline |
@@ -755,4 +762,38 @@ newtype QCharSequence =
 newtype QChar =
     QChar Char
     deriving (Show)
+
+-- Start of typeclass instances
+
+instance Auditable ExternalDeclaration where
+    -- See section 6.9 of spec to understand this typeclass implementation.
+
+    -- TODO: make paragraph2Check and like names verbs
+    -- TODO: implement paragraph3Check
+    checkConstraintsOfNode node = paragraph2Check-- && paragraph3Check
+        where
+            -- TODO: refactor to be pretty and readable
+            -- TODO: maybe write a function to grab the declaration specifiers
+            paragraph2Check = case node of
+                (FunctionDefinitionExternalDeclaration functionDefinition) -> paragraph2CheckFunctionDefinition functionDefinition
+                (DeclarationExternalDeclaration declaration) -> paragraph2CheckDeclaration declaration
+
+            paragraph2CheckFunctionDefinition (FunctionDefinition declarationSpecifiers _ _ _) = paragraph2CheckDeclarationSpecifiers declarationSpecifiers
+            paragraph2CheckDeclaration declaration = case declaration of
+                (DeclarationSpecifiersDeclaration declarationSpecifiers _) -> paragraph2CheckDeclarationSpecifiers declarationSpecifiers
+                (StaticAssertDeclarationDeclaration _) -> True
+
+            paragraph2CheckDeclarationSpecifiers (DeclarationSpecifiers nonEmptyListOfDeclarationSpecifierElements) = all paragraph2CheckDeclarationSpecifier nonEmptyListOfDeclarationSpecifierElements
+
+            paragraph2CheckDeclarationSpecifier declarationSpecifier = isNotAuto declarationSpecifier && isNotRegister declarationSpecifier
+            isNotAuto declarationSpecifier = case declarationSpecifier of
+                (StorageClassDeclarationSpecifier storageClassSpecifier) -> storageClassSpecifier /= Auto
+                _ -> True
+            isNotRegister declarationSpecifier = case declarationSpecifier of
+                (StorageClassDeclarationSpecifier storageClassSpecifier) -> storageClassSpecifier /= Register
+                _ -> True
+
+    checkConstraintsOfDescendentNodes node = case node of
+        (FunctionDefinitionExternalDeclaration functionDefinition) -> checkConstraintsOfNodeAndDescendents functionDefinition
+        (DeclarationExternalDeclaration declaration) -> checkConstraintsOfNodeAndDescendents declaration
 
