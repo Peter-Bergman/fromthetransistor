@@ -213,3 +213,23 @@ The funny thing is that the stuff I write is often piss that needs to be rewritt
 I would like to get into the habit of throwing a little more shit at the fan.
 Back on the topic of the symbol table, I think it will be fairly straightforward to convert this symbol table to assembly code.
 Well, let me flush out my working tree before I start writing that code.
+
+Okay, I created the file that will hold the data type.
+The module name is Compiler.SymbolTable.SymbolTable.
+I need to figure out what data each entry will hold.
+Well, it might not be polymorphic.
+For now, I think it can just be a list of symbol table entries.
+Okay, now I have to determine the data that a symbol table entry will hold.
+Well, like I said earlier, it will need to hold an identifier/symbol and its type.
+I am not sure how I will handle unresolved types in the future, but that is a hump for me to get over in the future.
+I am using DeclarationSpecifiers instead of TypeSpecifier.
+You know what, I think that's another example of me overthinking this task.
+I am going to change the code back to TypeSpecifier to make this pipeline as simple as possible.
+The symbol table data type code compiles.
+I guess I will check these changes in before writing code that transforms an AST to a symbol table.
+Oh, I just realized the symbol table code did not compile.
+I looked right past the compile errors in the AbstractSyntaxTree module.
+I am glad I caught myself.
+I will cover up that issue (it'll still throw a warning, thankfully) for now in order to confirm my changes are okay.
+
+On a disconnected note, I think I want to move the Auditable instances to their own file or files.

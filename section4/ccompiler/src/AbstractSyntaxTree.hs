@@ -809,3 +809,6 @@ instance Auditable Declaration where
                 Just initDeclaratorList -> True -- NOTE: InitDeclaratorList is a NonEmpty list, so it has at least one declarator.
                 Nothing -> False
 
+instance Auditable FunctionDefinition where
+    -- TODO: implement
+
