@@ -169,3 +169,47 @@ I wish I had an easy way to do the conversion from the AST types to the python d
 You know what, I did a manual check (not necessarily exhaustive).
 I am willing to let the details of this constraint elude me for a little longer.
 This constraint might be better/easier to check for in a later phase, once I get to a point where I don't have to dig deeply through the AST to find external declarations.
+
+Okay, my Auditable implementation for external declaration is finished.
+Well, it is sort of finished.
+Its implementation depends on descendent nodes' types to implement the Auditable typeclass.
+I committed those changes.
+Currently, the code does not compile because there is no Auditable implementation for the FunctionDefinition data type.
+
+I need a way to indicate that some audits have not been implemented yet.
+I might be able to start by providing a generic Auditable instance that throws an error of some sort.
+You know what, I think it will make sense for the constraint checking methods of the Auditable typeclass to return some kind of error type wrapped in the Maybe monad.
+I could even go as far as creating my own audit result type that would have 3 constructors.
+The constructors would represent success, failure from an issue found by audit, and failure due to an audit not being implemented.
+I like that idea.
+I am not sure if that would help me go fast.
+I think I will do that once I finish the minimal pipeline.
+I think I will wind up looking through all of my auditing code again, either way.
+
+I keep getting caught up in worrying about maintainability of this code.
+I need to just push forward and check the constraints that pertain to the syntax that I am supporting and nothing else.
+If I start partially writing code for things that I will need to fully implement anyways, I think I will be wasting my time.
+You know what, audits are whatever at this point in time.
+I am trying to write a minimal pipeline.
+I know that the code that I am trying to translate is valid.
+I can come back to audits and the like later.
+What I need now are transformations.
+What kinds of transformations do I need?
+Well, I need to transform an AST into a symbol table.
+The structure of the AST will not be gone.
+It will be segmented, though.
+At an abstract level, I think I want the different levels of the AST to be closer to corresponding with the scopes of identifiers.
+With the program that I am trying to compile, I do not have to worry about different scopes or namespaces.
+That makes this much simpler.
+I also don't have to worry about declarations nested deeply in the AST like structs, enums, or init-declarator-list nodes with more than 1 elements.
+I just need a symbol table that resolves types and stores the name.
+I don't necessarily even need it to indicate whether or not the symbol is even initialized.
+Therefore, I don't think I will.
+It looks like the next thing I have to do (after flushing out my working tree) is create a simple type for a symbol table.
+I will almost certainly overwrite this code in the future.
+That is fine.
+I think I am deeply nested in a habit of not writing anything unless I am almost positive that it is the best way of doing something.
+The funny thing is that the stuff I write is often piss that needs to be rewritten.
+I would like to get into the habit of throwing a little more shit at the fan.
+Back on the topic of the symbol table, I think it will be fairly straightforward to convert this symbol table to assembly code.
+Well, let me flush out my working tree before I start writing that code.

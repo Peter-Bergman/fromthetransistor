@@ -797,3 +797,15 @@ instance Auditable ExternalDeclaration where
         (FunctionDefinitionExternalDeclaration functionDefinition) -> checkConstraintsOfNodeAndDescendents functionDefinition
         (DeclarationExternalDeclaration declaration) -> checkConstraintsOfNodeAndDescendents declaration
 
+instance Auditable Declaration where
+    -- See section 6.7 of spec to understand this typeclass implementation
+    checkConstraintsOfNode node = paragraph2Check node -- && paragraph3Check node && paragraph4Check node
+        where
+            paragraph2Check node = case node of
+                (DeclarationSpecifiersDeclaration _ maybeInitDeclaratorList) -> paragraph2CheckMaybeInitDeclaratorList maybeInitDeclaratorList
+                (StaticAssertDeclarationDeclaration _) -> True
+
+            paragraph2CheckMaybeInitDeclaratorList maybeInitDeclaratorList = case maybeInitDeclaratorList of
+                Just initDeclaratorList -> True -- NOTE: InitDeclaratorList is a NonEmpty list, so it has at least one declarator.
+                Nothing -> False
+
