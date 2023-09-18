@@ -150,3 +150,22 @@ I will do that next time I work on the compiler.
 I am going to do this analysis on a sheet of paper.
 Yes, the term external declaration is defined in the semantics in paragraph 4, sentence 2.
 I still have to do analysis, though.
+
+I am currently writing a python script to do cycle detection for me.
+Right now, I am having issues with nested iterables.
+I just realized why I am having issues.
+I was trying to flatten the iterators using list comprehension, but that is not working.
+It seems to me that python had to make a tradeoff between list comprehension reading like nested for loops or list comprehension reading like prose.
+The python language designers chose to make list comprehension read like nested for loops (outer loops come first).
+I am not a fan of that decision.
+I found a stack overflow post about it.
+The answer said something similar to what I expected.
+I can complain all I want, but my cycle detection code is still not working.
+I think I got it working now.
+I did not.
+I had a little bug that caused my code to not exhaustively search for all solutions, as I had intended it to do.
+At this point, I think I just need to plug in the data.
+I wish I had an easy way to do the conversion from the AST types to the python dictionary I want to transform them to, but I think it makes sense to do this task manually, at least for now.
+You know what, I did a manual check (not necessarily exhaustive).
+I am willing to let the details of this constraint elude me for a little longer.
+This constraint might be better/easier to check for in a later phase, once I get to a point where I don't have to dig deeply through the AST to find external declarations.
