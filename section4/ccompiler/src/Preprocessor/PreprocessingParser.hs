@@ -129,3 +129,4 @@ lexThenParse parser inputString =
     where
         lexedTokens :: [String]
         lexedTokens = lexString inputString
+

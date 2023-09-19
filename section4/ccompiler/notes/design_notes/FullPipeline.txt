@@ -233,3 +233,26 @@ I am glad I caught myself.
 I will cover up that issue (it'll still throw a warning, thankfully) for now in order to confirm my changes are okay.
 
 On a disconnected note, I think I want to move the Auditable instances to their own file or files.
+Oh, I should mention: the changes were fine.
+The symbol table code compiled fine.
+
+All right, how am I going to convert an abstract syntax tree into a symbol table?
+Well, one thing I could do is try to connect my desired output to my input.
+That means that I need to have the AST of the program that I am trying to compile with my minimal pipeline.
+I have computed it before.
+I really wish I had a prettier way of printing it.
+I wish GHC.Generics would come to my rescure.
+It might.
+I am going to go down that tangent for a little bit.
+I got aeson kind of working for the HeaderName data type and the types it depends on.
+I haven't gotten it to pretty-print out of the box yet.
+I have only gotten it to serialize to a smushed JSON object that I could parse and look through in a browser console.
+I guess it was better than nothing.
+In order to make this solution work for a given type, I have to make it derive Generic and write a blank instance of the ToJSON typeclass.
+I could do a search and replace to make all my newtypes and data types derive the Generic typeclass.
+I could probably automate the creation of the type class instance boilerplate, too.
+I really don't want to make that AbstractSyntaxTree module bigger.
+Well, at this point in time, I don't think that should be my main concern.
+I need to wrangle myself and think about my priorities.
+I don't think that deriving Generic and implementing ToJSON should be the highest thing on my agenda now.
+I have a better gauge of how to make pretty printing easier for arbitrary data types, and I have a better gauge of how long it could take.

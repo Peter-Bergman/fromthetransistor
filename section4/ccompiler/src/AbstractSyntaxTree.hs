@@ -1,6 +1,5 @@
+{-# LANGUAGE DeriveGeneric #-}
 module AbstractSyntaxTree where
-import Data.List.NonEmpty
-    (NonEmpty)
 import Auditable
     (Auditable
         ( checkConstraintsOfDescendentNodes
@@ -8,15 +7,20 @@ import Auditable
         , checkConstraintsOfNodeAndDescendents
         )
     )
+import Data.Aeson.Types
+    (ToJSON)
+import Data.List.NonEmpty
+    (NonEmpty)
+import GHC.Generics
 
 newtype TranslationUnit =
     TranslationUnit (NonEmpty ExternalDeclaration)
-    deriving (Show)
+    deriving (Show, Generic)
 
 data ExternalDeclaration =
     FunctionDefinitionExternalDeclaration FunctionDefinition |
     DeclarationExternalDeclaration Declaration
-    deriving (Show)
+    deriving (Show, Generic)
 
 data FunctionDefinition =
     FunctionDefinition DeclarationSpecifiers Declarator (Maybe DeclarationList) CompoundStatement
@@ -745,23 +749,23 @@ newtype Punctuator =
 data HeaderName =
     HHeaderName HCharSequence |
     QHeaderName QCharSequence
-    deriving (Show)
+    deriving (Show, Generic)
 
 newtype HCharSequence =
     HCharSequence (NonEmpty HChar)
-    deriving (Show)
+    deriving (Show, Generic)
 
 newtype HChar =
     HChar Char
-    deriving (Show)
+    deriving (Show, Generic)
 
 newtype QCharSequence =
     QCharSequence (NonEmpty QChar)
-    deriving (Show)
+    deriving (Show, Generic)
 
 newtype QChar =
     QChar Char
-    deriving (Show)
+    deriving (Show, Generic)
 
 -- Start of typeclass instances
 
@@ -811,4 +815,18 @@ instance Auditable Declaration where
 
 instance Auditable FunctionDefinition where
     -- TODO: implement
+
+
+--instance ToJSON TranslationUnit where
+    --toEncoding = genericToEncoding defaultOptions
+
+--instance ToJSON ExternalDeclaration where
+
+instance ToJSON HCharSequence where
+instance ToJSON QCharSequence where
+
+instance ToJSON HChar where
+instance ToJSON QChar where
+
+instance ToJSON HeaderName where
 
