@@ -13,6 +13,7 @@ import Data.List.NonEmpty
     (NonEmpty)
 import GHC.Generics
 
+-- A translation unit is the highest level of an AST.
 newtype TranslationUnit =
     TranslationUnit (NonEmpty ExternalDeclaration)
     deriving (Show, Generic)
