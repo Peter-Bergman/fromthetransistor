@@ -256,3 +256,152 @@ Well, at this point in time, I don't think that should be my main concern.
 I need to wrangle myself and think about my priorities.
 I don't think that deriving Generic and implementing ToJSON should be the highest thing on my agenda now.
 I have a better gauge of how to make pretty printing easier for arbitrary data types, and I have a better gauge of how long it could take.
+
+Okay, I have a better gauge of how I could use aeson and generics to implement pretty printing.
+I would like to learn more about generics in Haskell because I think they seem to be able to solve a lot of problems for which I instinctively look to macro systems or runtime reflection.
+Anyways, that is a trap, something that could take me off of my current course.
+I am working on writing a full pipeline right now.
+That is my focus, not generics.
+Okay, how am I going to convert the parsed AST to a symbol table?
+Well, I think I have some recent notes that I am going to review before writing more.
+Okay, I am going to try to start with my desired output and my parsed AST and connect the two.
+I can create intermediate representations, if needed.
+I am conceptualizing this problem like so.
+I am on a platform in a tree, like a platform at some zipline/ropes course.
+The AST of the program that I am supporting is represented by the platform.
+I have a platform in the distance that I want to reach.
+That platform in the distance represents the assembly code that I would like to generate.
+Note that I have not written this assembly code yet.
+Perhaps I should.
+I will think on that after I have finished painting my mental image.
+I can always climb down and walk to the base of the tree that holds the platform I want to reach.
+From the ground, I can climb up to the platform that I want to reach, which I will now call the target platform.
+The process of climbing down from my starting platform, walking to base of the tree holding the target platform, and climbing up to the target platform, represents manually compiling a C program.
+Manual compilation is fine and dandy, but I like ziplines.
+Ziplines are cool.
+Anyways, I need to get a rope or series of ropes from my starting platform to the destination platform.
+I can build intermediate platforms between the starting platform and destination platform, if needed.
+Those intermediate platforms represent any intermediate representations that I use, like a symbol table with definitions/declarations.
+All right, I'm not sure if that analogy is helpful for me beyond making me feel a little more free to use more intermediate representations.
+Well, that's something and not nothing.
+Okay, my symbol table is currently a wrapper around a list of symbol table entries.
+How am I going to get those symbol table entries?
+I think I should be able to get them by extracting the list of external declarations from the translation unit.
+I can map the list of external declarations to a list of symbol table entries.
+In the future, I may need to do some flattening, as there might be several symbol table entries to be made from a single external declaration, but that is a future hump to get over.
+I like my current conceptualization.
+I feel a sense of direction and a sense that I can do this, much more pleasant than some of the discouraging thoughts and attitudes I have had at times in the past few weeks.
+Okay, I do not know where I will write the code that converts an AST to a symbol table.
+Well, it will be in the "Compiler" directory, possibly nested, but definitely in that directory somewhere.
+I already have a subdirectory named "Parser" or "Parsers".
+I will probably add another directory with a name pertaining to this process.
+I am not sure what I would even call this process.
+Well, I guess this is semantic analysis.
+It might be intertwined with syntactical analysis in the future, but it is not intertwined yet (hasn't even been written).
+I guess I will name the directory "SemanticAnalysis".
+That sounds good to me.
+Following semantic analysis will probably be audits (if I don't include those in this stage of the pipeline) and then code generation.
+Oh, I just remembered that I have not written the RISC-V assembly code that I want the compiler to generate.
+It should be really simple.
+I won't need a code section because I will only have a data declaration.
+I will need a bss section that declares an int with label x.
+I think that is all I need.
+I might need to also declare the label x to be global.
+I don't think my assembler has any special support for global declarations (it treats all symbols the same).
+I think the code will be less than 10 lines.
+I just read the comment near the top of my assembler.py file.
+The comment said that the assembler does not support sections/segments thus far, nor data.
+I have been messing around with the assembler a little bit.
+I think I am going to refactor some of it.
+Wait, no, I am creating a minimal pipeline.
+I will get there when I get there.
+I can change things if I want.
+I can get by with just writing the target program and adding support for the required assembly constructs later.
+Here is all that I think I want to generate:
+
+    .section bss
+x:  .int
+
+That is all for now.
+I have not seen an int assembler directive before.
+I might change this target in the future, but for now, this is it.
+I might change spacing.
+There are a lot of things that I might change, but I think the pseudo-assembly that I wrote gets the idea of my target across concretely.
+I want an uninitialized integer in the bss section, and I want that integer to have the label x.
+That is all I care about at this time.
+All other directives can come later and spacing changes can come later.
+I honestly did not know the term assembly directive until I read it 20 minutes ago.
+I am glad that I have a term to describe those now.
+That will help me search for more information online.
+It seems like there is no standard set of assembly directives for RISC-V.
+I have found some pages that present numerous directives as if they were dogmatic, but I do not think they are.
+I do not know if it would even be possible to make a dogmatic set of assembly directives, as there are many different formats of object files that assembly files are assembled into, depending on
+    platform and such.
+My assembler is assembling assembly files to ELF objects, but there are numerous alternatives that I could have used, especially because I will be building the linker and loader, too.
+My assembler is in a really bad spot.
+I am probably going to rewrite a lot of it.
+I also overdid some things like support for extensions to the RISC-V 32 bit integer base instruction set.
+I only determined that I would not support all of those extensions after I began writing the SystemVerilog for the CPU, though, so that was a totally understandable mistake.
+Okay, I think I already determined the name of the directory that will hold the code for transforming an AST to a symbol table.
+I decided earlier that I would name the directory SemanticAnalysis.
+I think I will move the Compiler.SymbolTable.SymbolTable to another directory (and change the module name) in the future.
+For now, I am going to leave it as is.
+I am creating a single module in the SemanticAnalysis directory: SemanticAnalysis.hs.
+It's very creative, I know.
+I have some bare bones for the conversion defined.
+I am extracting the external declarations from the translation unit.
+From there, I am using map to convert each of the external declarations to a symbol table entry.
+From here, I have to implement the logic that converts an external declaration into a symbol table entry.
+I am writing that logic in the convertExternalDeclarationToSymbolTableEntry function.
+I realized that I cannot simply map each and every external declaration or function definition to a symbol table entry.
+Some will be invalid.
+There will probably be cases where I will need to throw an error.
+There will be cases where I will need to throw an error.
+I do not want to simply throw an error by calling the impure error function.
+I think I would rather use the Either monad.
+I have to make a choice to do some kind of error handling right here and now because I am not supporting function definitions.
+Well, I will just use the error function for now.
+I will remove that later.
+Okay, now I have narrowed down the logic for me to write to converting a declaration to a symbol table entry.
+The type (at least in this case) should be easy to determine.
+It will simply be the type specifiers.
+Well, you know what, any pointers "modifiers" in the declarator also makes a difference.
+Also, type qualifiers might be important.
+I don't think storage class specifiers will matter for type resolution.
+Well, they actually might impact constraints/semantics with type inference, but that is much farther down the road from where I am at now.
+I can extract all of the type specifiers from a declaration.
+If there are none, I can throw an error.
+Okay, this has gotten really messy and error prone for future me.
+I am going to keep marching forward, though.
+Silly me for making the second field of a symbol table entry a single type specifier.
+I guess that works for now, though.
+I am going to use filter and head.
+I am disappointed that using the head function, an unsafe function, does not cause GHC to give a warning.
+I know not to use head, and I can search for it some other time.
+I have some messy code with some long ass lines and long function names and annoyingly verbose deconstructions.
+I am using head again in my definition of a function extractSymbolNameFromInitDeclaratorList.
+Okay, well, I made a lot of headway in this session.
+I will come continue tomorrow.
+You know what, as nasty as a lot of the code is that I am writing is, I think most of the gross things about it would be fixed by simply using the Maybe, List, and Either monads.
+I have pulled a hoosier move.
+It's very practical at this point in time, though.
+I have written some basic debugging tests in Main.
+The debugging tests are really just a few definitions, but they will help me debug much faster.
+I am at a point where my code is compiling and I expect it to translate an AST to a symbol table (as I have defined it so far).
+In the above statement, by "an AST", I mean the AST generated from the source code that I am focusing on compiling for the minimal full pipeline.
+I have code that builds the aformentioned AST in the Main module.
+It is unsafe, but that's okay because I am only using that code to debug.
+I am going to try to build on top of the code that builds the AST.
+I have tested that the AST is parsed successfully.
+I am going to try to convert that AST to a symbol table.
+I think I'll just need one more symbol and one function call.
+I did that; I defined symbolTable in Main.
+The code compiled.
+I tried to evaluate symbolTable in ghci, but it threw an exception, saying that there is no instance of Show for SymbolTable, which I believe is true.
+I do not think I had SymbolTable or SymbolTableEntry derive anything.
+I just made all the data types in Compiler.SymbolTable.SymbolTable derive Show.
+The code compiles, and I was able to evaluate symbolTable and see it's value in ghci.
+It seemed correct.
+It had one entry, x, and that entry had the symbol name "x" (nested in a bunch of types) and the type specifier Int_, the type specifier constructor which represents an int.
+Okay, I am happy with the progress I have made.
+I am going to commit the changes.
