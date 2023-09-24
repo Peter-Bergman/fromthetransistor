@@ -405,3 +405,103 @@ It seemed correct.
 It had one entry, x, and that entry had the symbol name "x" (nested in a bunch of types) and the type specifier Int_, the type specifier constructor which represents an int.
 Okay, I am happy with the progress I have made.
 I am going to commit the changes.
+
+Okay, I need to figure out the rest of what I have to do.
+I think it is reasonable to try to generate assembly from the symbol table without requiring another intermediate data structure.
+I might need to do some kind of grouping in order to partition symbol definitions that belong in different sections of the assembly file.
+Okay, I think I can begin by generating assembly code for each symbol table entry.
+I can organize (group) that code into sections later.
+For my minimal code, I won't have to do much grouping.
+There will be only one section and thus one group, the bss section.
+Well, I guess I am going to need another intermediate data type to hold the assembly code generated.
+I might store the assembly code as some kind of abstract syntax tree before serializing it to a string and writing that string.
+Well, it wouldn't need to be a complex tree, just a list, I think.
+There could simply be a list of assembly instructions and directives.
+Each element would have a polymorphic data type, but I am not sure what I would call it.
+I cannot think of a good name that makes semantic sense other than AssemblyInstructionOrDirective.
+I guess that name is okay.
+I have another task related to naming.
+I have to decide what to name (and where to put) the modules that convert each symbol table entry into the assembly code ADT.
+Also, I think that the AssemblyInstructionOrDirective will need to be wrapped by other data types.
+I think I might want to keep all of the abstract assembly (what I'll be calling the assembly code generated from the symbol table) associated with the symbol that is defined by it.
+I think I am just going to map each symbol table entry to another abstract data type which may have one or more assembly instructions and/or directives.
+I can name that ADT something like AssemblyDefinition.
+That sounds good for now.
+Currently, external declarations are mapped to symbol table entries.
+I will map each symbol table entry to an assembly definition.
+Each assembly definition will have a section to which it belongs.
+I can use filter to grab all of the assembly definitions in a section.
+I can serialize all of the assembly definitions in a section at once.
+That would negatively impact performance, but that is hardly a concern of mine at this point in time.
+I want everything to work first.
+Okay, amongst the Compiler modules, I think I am going to add another set of modules for code generation.
+I will use the creative name, CodeGeneration.
+I will do that now.
+I did it.
+Okay, I need to define these abstract data types.
+I think I will create a file in this set of modules specifically for defining the data types.
+What will I name that file?
+Well, I can name it AbstractAssembly.hs for now.
+Okay, I am creating an ADT named AbstractAssemblyFile.
+What does that ADT need?
+Will it just be a newtype of assembly definitions?
+I think so.
+That means I can make it a newtype.
+Okay, it is a list of AssemblyDefinition elements.
+I need to define AssemblyDefinition.
+I defined it as a product type of SymbolName and AssemblyInstructionOrDirective.
+I will need to import SymbolName.
+I now need to define AssemblyInstructionOrDirective
+I am having each data type that I define derive Generic from now on.
+I defined AssemblyInstructionOrDirective as a sum type of AssemblyInstruction and AssemblyDirective.
+I have not defined either of those yet.
+For my minimal pipeline, I just realized that I do not have to make AssemblyInstruction store anything meaningful because my target program does not contain a single instruction, only directives.
+The only assembly directive constructor that I am defining for now is ReserveBytesDirective.
+It only has one field, an integer, the number of bytes to reserve for a symbol.
+I think it would be much easier to determine how to structure the abstract assembly file if I had more experience writing assembly.
+This would might be much better if I had a more concrete target.
+Well, I do for now.
+However, I am very uncertain about which assembly directives I want to implement with my assembler.
+You know what, I want an int directive.
+I totally want an int directive.
+Well, you know what, I think I am totally cool with simply creating a bytes directive and maybe a string directive.
+I don't know.
+I think that is kind of out of the scope of what I am currently working on.
+I think that whatever I choose, it won't be very difficult to change, especially since I am only guaranteeing support for a single translation unit at this point in time.
+Yeah, I think I have been slipping into a fearful mindset, fearful of writing something bad.
+I am going to write bad stuff, and that's okay.
+I can rewrite it.
+I can start the whole thing from scratch, and it will almost definitely be better the second time through.
+That's okay.
+I needed to remind myself that's okay.
+It's amazing how often I have had to remind myself of that in the past few weeks.
+I think that what I have now is good enough.
+Well, no, there's no way for the compiler to know that the symbol table entry (of the target program) should be placed in the bss section, unless I place all definitions in the bss.
+I guess it is fine for me to serialize all of the assembly definitions in the bss section for now.
+That is the only section I need for the minimal pipeline.
+Great, that makes life easy.
+I am going to sign off for the day.
+Oh, I want to change my target assembly.
+Here it is:
+
+    .section bss
+x:  .bytes 4
+
+I don't know.
+This seems like a design decision for the assembler, not the compiler.
+You know what, I will stick with the code above for now.
+Note that I am expecting different behavior from the bytes directive than the GNU assembler does for the byte directive (at least I think).
+Anyways, I will work on this more tomorrow.
+I am back for business, baby.
+Oh, I forgot a deriving clause.
+I got it.
+I guess at this point, I will ensure that my code builds.
+I have a few minor errors to handle.
+I am now getting a build error saying that Compiler.SemanticAnalysis.SemanticAnalysis is a hidden module and is not available to Main.
+I think that module got loaded when I ran stack repl, but I guess stack build does some stuff differently.
+Well, stack repl does not load the Main module. Instead, it creates its own main module in a tmp directory.
+Oh, never mind, I misread the output of ghci.
+All right, well, I got everything to compile.
+Hooray!
+Okay, I am going to commit what I have.
+I haven't really added any code, only data types, so there's not really any new testing for me to do.
