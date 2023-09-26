@@ -13,7 +13,7 @@ data AssemblyDefinition =
     deriving (Show, Generic)
 
 data AssemblyInstructionOrDirective =
-    AssemblyInstruction AssemblyInstruction
+    AssemblyInstruction AssemblyInstruction |
     AssemblyDirective AssemblyDirective
     deriving (Show, Generic)
 
