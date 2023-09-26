@@ -79,6 +79,7 @@ library:
     - Compiler.SemanticAnalysis.SemanticAnalysis
     - Compiler.SymbolTable.SymbolTable
     - Compiler.CodeGeneration.AbstractAssembly
+    - Compiler.CodeGeneration.GenerateAbstractAssembly
     # Character Token Parsers
     - CharTokenParsers.Constants.CharacterConstants.CharacterConstant
     - CharTokenParsers.Constants.Constant

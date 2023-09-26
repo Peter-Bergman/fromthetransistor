@@ -505,3 +505,39 @@ All right, well, I got everything to compile.
 Hooray!
 Okay, I am going to commit what I have.
 I haven't really added any code, only data types, so there's not really any new testing for me to do.
+
+All right, I am moving on.
+I believe that the next thing for me to do is to write some code that converts a symbol table into an abstract assembly file.
+I will create a separate module for that.
+I named the new module Compiler.CodeGeneration.GenerateAbstractAssembly.
+I will work on this more at a later time.
+I am back.
+Here I go.
+To recap to myself, I need to write code that converts a symbol table into an abstract assembly file.
+I am planning to write that code in a module I created earlier, named Compiler.CodeGeneration.GenerateAbstractAssembly.
+I will define a function named generateAbstractAssemblyFromSymbolTable.
+Okay, I need to have the symbol table definition and the abstract assembly file definition close at hand.
+Okay, each symbol table entry will map to an assembly definition.
+I think that is enough for me to implement this function at its highest level.
+I implemented the generateAbstractAssemblyFromSymbolTable function.
+I ran stack build.
+The only error is a "Varialbe not in scope" error.
+That is a good sign.
+I now need to implement the function I used in the definition of generateAbstractAssemblyFromSymbolTable, convertSymbolTableEntryToAssemblyDefinition.
+How am I going to do this?
+Well, to start I should probably deconstruct the symbol table entry.
+Oh, before I do that, I just noticed that I can simply use the symbol name of the symbol table entry as the symbol name of the assembly definition.
+The other information stored in a symbol table entry (just a type specifier for this minimal pipeline) will be used to generate the assembly instruction or directive list.
+I can map the TypeSpecifier constructor, Int_, to the value AssemblyDirective ReserveBytesDirective 4.
+That sounds good to me.
+I will begin implementing that.
+I have everything compiling.
+That is a good sign.
+I am going to try to write tests.
+Well, I will use the generateAbstractAssemblyFromSymbolTable function to convert the symbol table defined in Main into an abstract assembly file.
+I added a definition for abstractAssemblyFile in the Main module.
+That new code in Main compiles.
+I was able to evaluate abstractAssemblyFile inside stack repl.
+I looked over the result, and it looked good to me.
+I think I am going to commit these changes.
+Then I will move onto serializing abstract assembly.

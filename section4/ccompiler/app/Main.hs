@@ -1,5 +1,7 @@
 module Main (main) where
 import AbstractSyntaxTree
+import Compiler.CodeGeneration.GenerateAbstractAssembly
+import Compiler.CodeGeneration.AbstractAssembly
 import Compiler.Parser.TranslationUnit
 import Compiler.SemanticAnalysis.SemanticAnalysis
 import Compiler.SymbolTable.SymbolTable
@@ -26,4 +28,7 @@ ast = fromRight (error (show eitherAstOrError)) eitherAstOrError
 
 symbolTable :: SymbolTable
 symbolTable = convertAbstractSyntaxTreeToSymbolTable ast
+
+abstractAssemblyFile :: AbstractAssemblyFile
+abstractAssemblyFile = generateAbstractAssemblyFromSymbolTable symbolTable
 
