@@ -80,6 +80,7 @@ library:
     - Compiler.SymbolTable.SymbolTable
     - Compiler.CodeGeneration.AbstractAssembly
     - Compiler.CodeGeneration.GenerateAbstractAssembly
+    - Compiler.CodeGeneration.ToAssembly
     # Character Token Parsers
     - CharTokenParsers.Constants.CharacterConstants.CharacterConstant
     - CharTokenParsers.Constants.Constant

@@ -541,3 +541,61 @@ I was able to evaluate abstractAssemblyFile inside stack repl.
 I looked over the result, and it looked good to me.
 I think I am going to commit these changes.
 Then I will move onto serializing abstract assembly.
+
+Okay, now I am going to implement the serialization of abstract assembly.
+I think I am going to do that by implementing the Show typeclass.
+I think I will have the type class instances in a separate module from the AbstractAssembly module.
+I think I will have to ensure that I get rid of the derivations of the Show type class.
+I will do that first.
+Oh, you know what, if I get rid of the show derivations, then I won't be able to debug the abstract assembly well.
+I guess I will create my own type class and simply implement that typeclass for each of the data types in the Compiler.CodeGeneration.AbstractAssembly module.
+What will I name the type class that I create?
+I wrote the basic type class.
+I named it ToAssembly.
+I gave it one method, serializeToAssembly.
+I will change that.
+It is now toAssembly.
+I like that better.
+I will now add it to the package.yaml file and run stack build.
+You know what, I don't like the name of the module either.
+I am going to rename the module to Compiler.CodeGeneration.ToAssembly.
+I like that better, too.
+It compiled.
+That is a good sign.
+Now, I need to implement that typeclass for all of the data types and newtypes that I defined in the Compiler.CodeGeneration.AbstractAssembly module.
+Okay, I think I have written all of the code that I need to for the ToAssembly AbstractAssemblyFile instance.
+I get one build error.
+It says that I need to implement ToAssembly AssemblyDefinition.
+That is expected.
+I will do that now.
+I think I will tweak how and where the newline characcters are added in the serialized assembly later, after I have finished the minimal pipeline.
+Now, I just need to implement ToAssembly AssemblyInstruction and ToAssembly AssemblyDirective.
+I believe that I have finished.
+The code compiles, anyways.
+I will try to use the tools I have just built for this stage of the pipeline.
+I have two issues.
+The first is that I forgot to add a directive indicating the beginning of the bss section.
+The other issue is that I am not serializing symbol names correctly.
+I used the show method to serialize a symbol name.
+I got the output on the following line instead of the output on the line after that.
+"SymbolName (Identifier (NonDigitIdentifierNonDigit (NonDigit 'x')) []):\t.bytes 4"
+"\t.section bss\nx:\t.bytes 4"
+I will just implement ToAssembly SymbolName in order to make it serialize properly.
+That works for now.
+I have strongly considered rewriting Show Identifier, but that can wait, and that has tradeoffs that I am not dying to dive into and weigh.
+I wanna go fast, baby.
+Okay, I had to add the FlexibleInstances language extension to the Compiler.CodeGeneration.ToAssembly module to get it to compile my ToAssembly [IdentifierSuffix] instance.
+I tested the result.
+The symbol name serialized properly.
+Now, I just have to add the section directive to the beginning of the definitions.
+I made a change that should add the section directive.
+It seems to have worked.
+Okay, I did some testing with other identifier names besides "x".
+If the identifier has a digit in its name, an exception is thrown when I try to serialize the code.
+I expected that (not just saying that).
+I expected it based on my implementation of ToAssembly Digit.
+I think I just wanted to make sure that I could predict what would happen.
+Okay, I think I am going to check in my changes.
+You know what, I need to make sure it builds with stack build, not just stack repl.
+It does.
+I am going to look over my changes and hopefully commit them.

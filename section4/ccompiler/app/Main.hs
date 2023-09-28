@@ -2,6 +2,7 @@ module Main (main) where
 import AbstractSyntaxTree
 import Compiler.CodeGeneration.GenerateAbstractAssembly
 import Compiler.CodeGeneration.AbstractAssembly
+import Compiler.CodeGeneration.ToAssembly
 import Compiler.Parser.TranslationUnit
 import Compiler.SemanticAnalysis.SemanticAnalysis
 import Compiler.SymbolTable.SymbolTable
@@ -10,8 +11,6 @@ import Lexer.Lexer
 import System.Environment
 import Text.Parsec.Prim
 import Text.Parsec.Error
-
---import Lib
 
 main :: IO ()
 main = putStrLn "C Compiler in development..."
@@ -31,4 +30,7 @@ symbolTable = convertAbstractSyntaxTreeToSymbolTable ast
 
 abstractAssemblyFile :: AbstractAssemblyFile
 abstractAssemblyFile = generateAbstractAssemblyFromSymbolTable symbolTable
+
+serializedAssembly :: String
+serializedAssembly = toAssembly abstractAssemblyFile
 
