@@ -599,3 +599,79 @@ Okay, I think I am going to check in my changes.
 You know what, I need to make sure it builds with stack build, not just stack repl.
 It does.
 I am going to look over my changes and hopefully commit them.
+
+Okay, I now need to do IO stuff - read C code from files and write assembly output to files.
+The parsec library might be able to help me read code from files.
+Writing a string with assembly code to a file should not be difficult, though.
+I could read a string from a C file.
+I will look at the parsec documentation to see if there is an easy way to parse contents from a file.
+If not, I will just read the contents of the file eagerly and then parse them.
+This is a minimal pipeline.
+In Text.Parsec.String, there is an action parseFromFile :: Parser a -> FilePath -> IO (Either ParseError a).
+I think I am going to use that function.
+After I finish the full pipeline, I think that efficient test creation is a must, or at least some kind of testing mechanism.
+I need a testing mechanism to ensure the code has not regressed and that the code only implements a subset of C and throws some kind of error any time invalid C is given.
+Anyways, I am going to try to use the parseFromFile function.
+Oh, you know what, I cannot use parseFromFile in Text.Parsec.String.
+My AST parser, translationUnit, does not parse strings.
+It parses lists of strings.
+I will have to write my own parseFromFile function.
+There is an example in the Text.Parsec.Prim documentation.
+I will probably use binding in the Either monad to write the pipeline.
+I want to break down the steps that should be taken in the main action.
+First, I need to read some parameters.
+For now, I can have the output file name be the same every time and just take in an input file as a command line argument.
+Next, I will read the contents of the input file into a string.
+Next, I will compile that string into some serialized assembly code, another string.
+That will not be an IO operation.
+It would be if it included a preprocessing phase that handled include directives.
+Lastly, I will write the serialized assembly to the output file.
+I can handle the Either monad stuff and pretty error handling at a later time.
+I am working on a minimal pipeline now, and I only want minimal functionality.
+I am making headway.
+So far, I can grab the input file name.
+Now, I have to read that file.
+I will have to make a file with the target C code.
+I put the code in a file named "target.S".
+I will likely move that file elsewhere and rename it.
+That is a task for later, though.
+Okay, I am going to figure out how to read that file.
+I am using readFile.
+It is lazy, unlike readFile'.
+Both of those actions are defined in System.IO.
+I might change to using readFile' in the future, but not now.
+Okay, I successfully read the file contents.
+Now, I have to compile the file contents.
+Oh, I just realized.
+I created an assembly file.
+I was supposed to create a C source file, not an assembly file.
+I was supposed to create the target, not the source.
+I will do that now.
+I will call it minimal_pipeline_source.c
+Done.
+Okay, I am going to lex the file contents into a string.
+Okay, I did that, and I wrote up all of the other compilation steps.
+It is a big main action, but whatever for now.
+I am going to try running it all.
+It all compiles and seems to run.
+I think the stages of compilation did not evaluate.
+I am going to print the serialized assembly to standard output for now.
+That worked.
+It printed the correct file contents to standard output.
+I am almost finished with the minimal pipeline!
+I just have to write the compiled assembly code to the output file.
+I have written code to write the serialized assembly to the output file.
+I am going to run it now.
+It worked!
+I just copied the line below from the output of `ls -l`.
+Sep 29 17:26 ouput.S
+That is the timestamp data and file name.
+I just want to keep it as memorabilia.
+I just realized that I misspelled the output file name.
+That makes it even more memorable.
+I like it.
+I am going to change it to output.S now.
+I also made main return the Integer 0 if it does not fail earlier.
+I am going to try to commit everything now.
+Before doing so, I am going to change the file name "minimal_pipeline_source.c" to "minimal_pipeline.c".
+Done.
