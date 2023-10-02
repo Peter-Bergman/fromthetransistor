@@ -675,3 +675,17 @@ I also made main return the Integer 0 if it does not fail earlier.
 I am going to try to commit everything now.
 Before doing so, I am going to change the file name "minimal_pipeline_source.c" to "minimal_pipeline.c".
 Done.
+
+I think at this point in time, I am going to do some cleanup.
+I have thought a lot about testing, and I think that will be my main priority after I do some cleanup.
+One of the things I want to do is fix some of the compiler warnings.
+I do not expect to eliminate every one of them, but I would like to take on a few of the warning types.
+The first group of warning messages I have in mind are [-Wunused-do-bind] warnings.
+Those are all easy fixes.
+I will eliminate all of those warnings first.
+I believe there are 22 warnings of that type.
+I plan to eliminate them all, then commit.
+I eliminated all of those warnings.
+I am going to ensure that the compiler still compiles the full pipeline translation unit.
+You know what, this notes file is for the full pipeline.
+I will move to another file for notes after this commit.

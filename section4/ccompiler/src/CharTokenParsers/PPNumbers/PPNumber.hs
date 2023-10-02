@@ -17,7 +17,7 @@ ppNumber = tryWithFailMessage "PPNumber" $ dottedDigitPPNumber <|> digitPPNumber
 
 dottedDigitPPNumber :: Parser PPNumber
 dottedDigitPPNumber = tryWithFailMessage "Dotted Digit PPNumber" $ do
-    Char.char '.'
+    _ <- Char.char '.'
     parsedDigit <- digit
     parsedPPNumberSuffixes <- many ppNumberSuffix
     return $ DottedDigitPPNumber parsedDigit parsedPPNumberSuffixes

@@ -20,7 +20,7 @@ pragmaDirective :: PreprocessingParserX ControlLine
 pragmaDirective = do
     pragmaPrefix
     parsedPPTokens <- tryMaybe ppTokens
-    newLine
+    _ <- newLine
     return $ PragmaDirective parsedPPTokens
 
 pragmaPrefix :: PreprocessingParserX ()

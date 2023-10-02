@@ -15,5 +15,5 @@ import Text.Parsec
 textLine :: PreprocessingParserX GroupPart
 textLine = do
     parsedTokens <- optionMaybe ppTokens
-    newLine
+    _ <- newLine
     return $ TextLine parsedTokens

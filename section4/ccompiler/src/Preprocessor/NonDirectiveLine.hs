@@ -18,7 +18,7 @@ import Preprocessor.PreprocessingParser
 nonDirective :: PreprocessingParserX GroupPart
 nonDirective = do
     parsedTokens <- ppTokens
-    newLine
+    _ <- newLine
     return $ NonDirective parsedTokens
 
 nonDirectiveLine :: PreprocessingParserX GroupPart

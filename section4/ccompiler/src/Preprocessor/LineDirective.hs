@@ -18,7 +18,7 @@ lineDirective :: PreprocessingParserX ControlLine
 lineDirective = do
     linePrefix
     parsedPPTokens <- ppTokens
-    newLine
+    _ <- newLine
     return $ LineDirective parsedPPTokens
 
 linePrefix :: PreprocessingParserX ()

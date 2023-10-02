@@ -55,7 +55,7 @@ nonzeroDigit = try $ do
 -- test this
 octalConstant :: Parser OctalConstant
 octalConstant = tryWithFailMessage "Octal Constant" $ do
-    char '0'
+    _ <- char '0'
     parsedOctalDigitChars <- many octDigit
     let parsedOctalDigits = map (\octalDigitCharacter -> OctalDigit $ read $ octalDigitCharacter : "") parsedOctalDigitChars
     return $ OctalConstant parsedOctalDigits

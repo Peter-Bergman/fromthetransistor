@@ -44,7 +44,7 @@ rightBrace = stringSatisfy_ (=="}")
 infixRecursiveBinaryOperatorExpression :: PreprocessingParserX returnType -> PreprocessingParserX primitiveType -> PreprocessingParserX operator -> (returnType -> primitiveType -> returnType) -> PreprocessingParserX returnType
 infixRecursiveBinaryOperatorExpression recursedParser primitiveParser operatorParser typeConstructor = try $ do
     parsedPrimitiveType <- primitiveParser
-    operatorParser
+    _ <- operatorParser
     parsedReturnType <- recursedParser
     return $ typeConstructor parsedReturnType parsedPrimitiveType
 

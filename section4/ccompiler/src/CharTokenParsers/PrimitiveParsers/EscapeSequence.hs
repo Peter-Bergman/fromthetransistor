@@ -48,14 +48,14 @@ singleOctalEscapeSequence = try $ simpleExpression (char '\\' >> octalDigit) Sin
 
 doubleOctalEscapeSequence :: Parser OctalEscapeSequence
 doubleOctalEscapeSequence = try $ do
-    char '\\'
+    _ <- char '\\'
     parsedFirstOctalDigit <- octalDigit
     parsedSecondOctalDigit <- octalDigit
     return $ DoubleOctalEscapeSequence parsedFirstOctalDigit parsedSecondOctalDigit
 
 tripleOctalEscapeSequence :: Parser OctalEscapeSequence
 tripleOctalEscapeSequence = try $ do
-    char '\\'
+    _ <- char '\\'
     parsedFirstOctalDigit <- octalDigit
     parsedSecondOctalDigit <- octalDigit
     parsedThirdOctalDigit <- octalDigit

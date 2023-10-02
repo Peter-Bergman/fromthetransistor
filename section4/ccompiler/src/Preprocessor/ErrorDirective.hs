@@ -21,7 +21,7 @@ errorDirective:: PreprocessingParserX ControlLine
 errorDirective = do
     errorPrefix
     parsedPPTokens <- tryMaybe ppTokens
-    newLine
+    _ <- newLine
     return $ ErrorDirective parsedPPTokens
 
 errorPrefix :: PreprocessingParserX ()

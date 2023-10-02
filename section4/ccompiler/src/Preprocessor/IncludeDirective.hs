@@ -19,7 +19,7 @@ includeDirective :: PreprocessingParserX ControlLine
 includeDirective = do
     includePrefix
     parsedPPTokens <- ppTokens
-    newLine
+    _ <- newLine
     return $ IncludeDirective parsedPPTokens
 
 includePrefix :: PreprocessingParserX ()
@@ -27,3 +27,4 @@ includePrefix = octothorpe >> include
 
 include :: PreprocessingParserX ()
 include = stringSatisfy_ (=="include")
+

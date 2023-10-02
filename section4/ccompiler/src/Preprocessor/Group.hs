@@ -117,7 +117,7 @@ ifDefDirective :: PreprocessingParserX IfGroup
 ifDefDirective = do
     ifDefPrefix
     parsedIdentifier <- identifier
-    newLine
+    _ <- newLine
     parsedMaybeGroup <- tryMaybe $ group IfOrElif
     return $ IfDefDirective parsedIdentifier parsedMaybeGroup
 
@@ -125,7 +125,7 @@ ifNDefDirective :: PreprocessingParserX IfGroup
 ifNDefDirective = do
     ifNDefPrefix
     parsedIdentifier <- identifier
-    newLine
+    _ <- newLine
     parsedMaybeGroup <- tryMaybe $ group IfOrElif
     return $ IfNDefDirective parsedIdentifier parsedMaybeGroup
 
@@ -154,7 +154,7 @@ elifGroup :: PreprocessingParserX ElifGroup
 elifGroup = do
     elifPrefix
     parsedConstantExpression <- constantExpression
-    newLine
+    _ <- newLine
     parsedMaybeGroup <- tryMaybe $ group IfOrElif
     return $ ElifGroup parsedConstantExpression parsedMaybeGroup
 
@@ -167,7 +167,7 @@ elif = stringSatisfy_ (=="elif")
 elseGroup :: PreprocessingParserX ElseGroup
 elseGroup = do
     elsePrefix
-    newLine
+    _ <- newLine
     parsedGroup <- tryMaybe $ group Else
     return $ ElseGroup parsedGroup
 

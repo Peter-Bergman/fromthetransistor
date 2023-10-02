@@ -69,7 +69,7 @@ objectLikeMacroDefinitionBody parsedIdentifier = do
 
 functionLikeMacroDefinitionBody :: Identifier -> PreprocessingParserX DefineDirective
 functionLikeMacroDefinitionBody parsedIdentifier = do
-    lParen
+    _ <- lParen
     functionLikeMacroDefinitionSuffix parsedIdentifier
 
 data DefineDirectiveArgumentList =
@@ -131,3 +131,4 @@ rParen = stringSatisfy_ (==")")
 
 define :: PreprocessingParserX ()
 define = stringSatisfy_ $ (=="define")
+

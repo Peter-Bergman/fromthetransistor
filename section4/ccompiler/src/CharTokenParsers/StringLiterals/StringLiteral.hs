@@ -10,9 +10,9 @@ import Text.Parsec.String
 stringLiteral :: Parser StringLiteral
 stringLiteral = tryWithFailMessage "String Literal" $ do
     parsedMaybeEncodingPrefix <- tryMaybe encodingPrefix
-    char '"'
+    _ <- char '"'
     parsedMaybeSCharSequence <- tryMaybe sCharSequence
-    char '"'
+    _ <- char '"'
     return $ StringLiteral parsedMaybeEncodingPrefix parsedMaybeSCharSequence
     
 

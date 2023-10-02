@@ -12,18 +12,18 @@ headerName = hHeaderName <|> qHeaderName <?> "Header Name"
 
 hHeaderName :: Parser HeaderName
 hHeaderName = do
-    char '<'
+    _ <- char '<'
     parsedHCharSequence <- hCharSequence
     if isSemanticallyValidHCharSequence parsedHCharSequence then return () else fail "Invalid Header File Name"
-    char '>'
+    _ <- char '>'
     return $ HHeaderName parsedHCharSequence
 
 qHeaderName :: Parser HeaderName
 qHeaderName = do
-    char '\"'
+    _ <- char '\"'
     headerName <- qCharSequence
     if isSemanticallyValidQCharSequence headerName then return () else fail "Invalid Header File Name"
-    char '\"'
+    _ <- char '\"'
     return $ QHeaderName headerName
 
 hCharSequence :: Parser HCharSequence
