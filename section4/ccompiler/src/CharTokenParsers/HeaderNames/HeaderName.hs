@@ -22,10 +22,10 @@ hHeaderName = do
 qHeaderName :: Parser HeaderName
 qHeaderName = do
     _ <- char '\"'
-    headerName <- qCharSequence
-    if isSemanticallyValidQCharSequence headerName then return () else fail "Invalid Header File Name"
+    parsedHeaderFileName <- qCharSequence
+    if isSemanticallyValidQCharSequence parsedHeaderFileName then return () else fail "Invalid Header File Name"
     _ <- char '\"'
-    return $ QHeaderName headerName
+    return $ QHeaderName parsedHeaderFileName
 
 hCharSequence :: Parser HCharSequence
 hCharSequence = simpleExpression (many1NonEmpty hChar) HCharSequence
@@ -44,14 +44,14 @@ isSemanticallyValidHCharSequence (HCharSequence nonEmptyHChars) = not $ anyEleme
     where
         hCharSequenceAsString = toList nonEmptyHChar
         nonEmptyHChar = NE.map hCharToChar nonEmptyHChars
-        hCharToChar (HChar char) = char
+        hCharToChar (HChar character) = character
         
 isSemanticallyValidQCharSequence :: QCharSequence -> Bool
 isSemanticallyValidQCharSequence (QCharSequence nonEmptyQChars) = not $ anyElementsAreSubstringOfString semanticallyUnallowedQCharSequenceSymbols qCharSequenceAsString
     where
         qCharSequenceAsString = toList nonEmptyQChar
         nonEmptyQChar = NE.map qCharToChar nonEmptyQChars
-        qCharToChar (QChar char) = char
+        qCharToChar (QChar character) = character
 
 anyElementsAreSubstringOfString :: [String] -> String -> Bool
 anyElementsAreSubstringOfString listOfStrings superString = any (`isInfixOf` superString) listOfStrings

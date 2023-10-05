@@ -16,3 +16,14 @@ I am going to commit now.
 Actually, you know what, I need to test that I did not break the code.
 The serializedAssembly in Main still looks good.
 I will commit.
+
+Now, I want to resolve all of the -Wname-shadowing warnings.
+There are 11 of those warnings for me to resolve.
+I simply added a prime character (single quote) at the end of one of the variable names (a local).
+I renamed some other variables.
+I deleted several of the unused top level names in the Main module.
+I had been using them for debugging purposes, but I think I can manage.
+Each of those symbols is essentially duplicated inside the main definition.
+I am going to try to commit now.
+I just tested everything with stack run.
+It looks good.

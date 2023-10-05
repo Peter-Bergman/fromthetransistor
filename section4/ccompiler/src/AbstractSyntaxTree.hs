@@ -806,7 +806,7 @@ instance Auditable Declaration where
     -- See section 6.7 of spec to understand this typeclass implementation
     checkConstraintsOfNode node = paragraph2Check node -- && paragraph3Check node && paragraph4Check node
         where
-            paragraph2Check node = case node of
+            paragraph2Check node' = case node' of
                 (DeclarationSpecifiersDeclaration _ maybeInitDeclaratorList) -> paragraph2CheckMaybeInitDeclaratorList maybeInitDeclaratorList
                 (StaticAssertDeclarationDeclaration _) -> True
 

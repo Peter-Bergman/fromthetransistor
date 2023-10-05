@@ -502,14 +502,14 @@ initializerListInitializer :: PreprocessingParserX Initializer
 initializerListInitializer = simpleExpression initializerListWithOptionalFollowingComma InitializerListInitializer
 
 fullPostfixExpression :: PostfixExpression -> PreprocessingParserX PostfixExpression
-fullPostfixExpression primitivePostfixExpression =
-    indexExpression primitivePostfixExpression <|>
-    functionCallExpression primitivePostfixExpression <|>
-    dotSelectorExpression primitivePostfixExpression <|>
-    arrowSelectorExpression primitivePostfixExpression <|>
-    postfixIncrementExpression primitivePostfixExpression <|>
-    postfixDecrementExpression primitivePostfixExpression <|>
-    return primitivePostfixExpression
+fullPostfixExpression inputPrimitivePostfixExpression =
+    indexExpression inputPrimitivePostfixExpression <|>
+    functionCallExpression inputPrimitivePostfixExpression <|>
+    dotSelectorExpression inputPrimitivePostfixExpression <|>
+    arrowSelectorExpression inputPrimitivePostfixExpression <|>
+    postfixIncrementExpression inputPrimitivePostfixExpression <|>
+    postfixDecrementExpression inputPrimitivePostfixExpression <|>
+    return inputPrimitivePostfixExpression
 
 indexExpression :: PostfixExpression -> PreprocessingParserX PostfixExpression
 indexExpression prefixPostfixExpression = (parserFail "complexConditionalExpression not implemented") {->> do
