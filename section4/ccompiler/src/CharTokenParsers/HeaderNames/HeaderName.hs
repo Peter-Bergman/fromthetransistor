@@ -2,6 +2,7 @@ module CharTokenParsers.HeaderNames.HeaderName (headerName) where
 import AbstractSyntaxTree
 import CustomCombinators
 import Data.List
+    (isInfixOf)
 import Data.List.NonEmpty as NE
 import Text.Parsec
 import Text.Parsec.Char

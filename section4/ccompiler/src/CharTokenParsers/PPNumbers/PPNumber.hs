@@ -5,7 +5,6 @@ import CharTokenParsers.PrimitiveParsers.IdentifierNonDigit
 import CharTokenParsers.PrimitiveParsers.NonDigit
 import CharTokenParsers.PrimitiveParsers.UniversalCharacterName
 import CustomCombinators
-import Data.List
 import qualified Text.Parsec.Char as Char
 import Text.Parsec.Combinator
 import Text.Parsec.Prim

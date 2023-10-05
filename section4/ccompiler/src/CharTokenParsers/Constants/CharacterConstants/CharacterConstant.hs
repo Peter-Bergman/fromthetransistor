@@ -1,7 +1,6 @@
 module CharTokenParsers.Constants.CharacterConstants.CharacterConstant where
 import AbstractSyntaxTree
 import CustomCombinators
-import Data.List
 import Data.List.NonEmpty
 import Numeric
 import CharTokenParsers.PrimitiveParsers.UniversalCharacterName

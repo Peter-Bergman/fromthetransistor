@@ -1,0 +1,18 @@
+I have already done a lot of cleanup in the past (though the code in this repository is a bit messy).
+All of the notes for my prior cleanup changes are either elsewhere or non-existent.
+I think I am going to resolve all of the -Wcompat-unqualified-imports warnings.
+I think I am going to make all of the imports explicit, rather than making the each of those modules qualified.
+That might not be possible in all cases, though.
+I can make import modules as qualified, if I really need to.
+There are 7 of those warnings currently.
+They are all for Data.List imports.
+I just noticed some -Wname-shadowing warnings as I was rebuilding the code after resolving some of the -Wcompat-unqualified-imports warnings.
+I think I want to resolve those warnings, too.
+In some of the modules, I can simply remove the Data.List import.
+I might have to rewrite code to import Data.List in the future.
+It could be the case that some of its items are reexported by other modules.
+I have resolved all of the -Wcompat-unqualified-imports warnings.
+I am going to commit now.
+Actually, you know what, I need to test that I did not break the code.
+The serializedAssembly in Main still looks good.
+I will commit.

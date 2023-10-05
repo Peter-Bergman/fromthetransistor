@@ -2,7 +2,6 @@ module CharTokenParsers.StringLiterals.StringLiteral where
 import AbstractSyntaxTree
 import CharTokenParsers.PrimitiveParsers.EscapeSequence
 import CustomCombinators
-import Data.List
 import Text.Parsec
 import Text.Parsec.Combinator
 import Text.Parsec.String

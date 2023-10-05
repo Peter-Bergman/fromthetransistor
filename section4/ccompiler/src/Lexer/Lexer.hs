@@ -2,7 +2,6 @@ module Lexer.Lexer where
 import AbstractSyntaxTree
 import CustomCombinators
 import Data.Char
-import Data.List
 import Lexer.PreprocessingToken
 import Text.Parsec
 import Text.Parsec.Combinator

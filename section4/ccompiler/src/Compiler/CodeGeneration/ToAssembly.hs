@@ -5,6 +5,7 @@ import AbstractSyntaxTree
 import Compiler.CodeGeneration.AbstractAssembly
 import Compiler.SymbolTable.SymbolTable
 import Data.List
+    (intercalate)
 
 
 class ToAssembly a where
