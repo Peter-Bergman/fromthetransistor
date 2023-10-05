@@ -27,3 +27,11 @@ Each of those symbols is essentially duplicated inside the main definition.
 I am going to try to commit now.
 I just tested everything with stack run.
 It looks good.
+
+I would like to remove all of the -Wredundant-constraints warnings.
+There are only 3.
+They are all in the CustomCombinators module.
+I resolved all of those warnings.
+I am going to test now and hopefully commit afterwards.
+Everything seemed to work.
+I am going to commit.
