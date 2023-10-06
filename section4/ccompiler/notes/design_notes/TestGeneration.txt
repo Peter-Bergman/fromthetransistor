@@ -1,0 +1,21 @@
+At this point in time, I am going to try to write a framework for generating tests for the compiler.
+I want to create a framework for creating and managing data driven tests.
+I am not sure how I will store test data.
+I could potentially simply write code that would generate Haskell source files with tests in them.
+I expect that I will wind up using the Read type class to deserialize stored Haskell data.
+I will have to add Read to the list of type classes that are derived by many of the data types that I define.
+That is okay.
+I will obviously use the Show typeclass to serialize data for storage.
+If I make every data type I use implement Show and Read by derivation, I believe that the show and read methods will be inverses of one another.
+I wonder if I can add a quickcheck test for that.
+I read some of tasty's documentation.
+I think I am going to try to construct a TestTree using inputs and desired outputs of the compiler.
+I was initially imagining writing code to generate tests.
+I would like to get to a point where I can do that.
+I think it is wisest if I write one manually first.
+At this point in time, I only need one, a single test to ensure that the minimal pipeline works.
+I will make sure that I can write a test.
+Then I will start parameterizing shit and figure out how I will store and possibly update test data.
+I have thought about using git as my database, but I think working out the details of that is looking too far into the future.
+I have a single test for the minimal pipeline working.
+I think I am going to commit now.

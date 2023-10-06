@@ -75,6 +75,7 @@ library:
     - Lexer.Lexer
     - Lexer.PreprocessingToken
     # Compiler Proper specific modules
+    - Compiler.Compiler
     - Compiler.Parser.TranslationUnit
     - Compiler.SemanticAnalysis.SemanticAnalysis
     - Compiler.SymbolTable.SymbolTable
@@ -114,7 +115,7 @@ executables:
 
 tests:
   ccompiler-test:
-    main:                Spec.hs
+    main:                MinimalPipeline.hs
     source-dirs:         test
     ghc-options:
     - -threaded
@@ -122,3 +123,5 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - ccompiler
+    - tasty
+    - tasty-hunit

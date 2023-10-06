@@ -35,3 +35,6 @@ I resolved all of those warnings.
 I am going to test now and hopefully commit afterwards.
 Everything seemed to work.
 I am going to commit.
+
+Cleaning up warnings is becoming progressively trivial.
+There are some other cleanups that I could do, and some of them would be much more valuable than what I have done already, but they would probably take significantly more time.
