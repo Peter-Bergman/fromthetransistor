@@ -689,3 +689,10 @@ I eliminated all of those warnings.
 I am going to ensure that the compiler still compiles the full pipeline translation unit.
 You know what, this notes file is for the full pipeline.
 I will move to another file for notes after this commit.
+
+I am back.
+It has been a long while.
+I forget where I left off.
+I think I had been working on building some testing infrastructure.
+I guess I will read some of the above notes to get myself back up to speed.
+Oh, I just caught up a little bit and found that I was going to move my notes to another file.

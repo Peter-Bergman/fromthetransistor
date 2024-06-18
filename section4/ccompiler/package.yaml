@@ -115,7 +115,7 @@ executables:
 
 tests:
   ccompiler-test:
-    main:                MinimalPipeline.hs
+    main:                Main.hs
     source-dirs:         test
     ghc-options:
     - -threaded
@@ -125,3 +125,4 @@ tests:
     - ccompiler
     - tasty
     - tasty-hunit
+    - directory

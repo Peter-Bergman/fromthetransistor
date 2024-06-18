@@ -1,11 +1,7 @@
-module Main where
+module MinimalPipeline (testTree) where
 import Compiler.Compiler
 import Test.Tasty
 import Test.Tasty.HUnit
-
-
-main :: IO ()
-main = defaultMain testTree
 
 
 testTree :: TestTree

@@ -19,3 +19,71 @@ Then I will start parameterizing shit and figure out how I will store and possib
 I have thought about using git as my database, but I think working out the details of that is looking too far into the future.
 I have a single test for the minimal pipeline working.
 I think I am going to commit now.
+
+Okay, I am back.
+Wow, I am glad to have found the notes above.
+I have a manually created test.
+Now that I have successfully created a test manually, I will try to automate that process.
+Well, I will at least look for a simple workflow for creating tests.
+That is my end goal.
+I want to create tests quickly and easily, and I want to be able to manage those tests easily.
+Where do I begin?
+I am not sure how I would like to store the tests.
+If I store the tests as C files and assembly files, then it will be easy to read through them,
+    as long as the directory structure clusters files together thoughtfully.
+If I stored tests as Haskell files, reading the inputs and outputs of tests would be difficult.
+Having the tests written as Haskell code could enable certain code analysis from various tools,
+    and there would be little room for issues stemming from failed IO operations.
+That seems like a negligible upside for storing tests as Haskell files.
+I also think that storing tests in a more sophisticated database, whether SQL or NoSQL,
+    would make reading the files less convenient.
+I feel pretty confident that storing the tests as C files and assembly files is the best option.
+Okay, that means I need to determine the directory structure for the tests.
+I think it will be fine to have a directory for the test data.
+Maybe I would name it "test_data".
+That directory would have subdirectories, one subdirectory per test.
+I will call each of those subdirectories a "test directory", not to be confused with THE test
+    directory which holds the test code (Haskell) and in which I will store the test_data directory.
+So, each test directory will have a C source file, the input file, and an assembly file,
+    the expected output file.
+Therefore, when automatically generating a new test, I will create a new test directory (which will
+    require a prompting for a test name), and I will write the C code to a file, and using the
+    compiler, I will write the expected output to an assembly file.
+I had been planning on having the application prompt the user for a test name, and I figured the
+    C source code would be passed through standard input to the application.
+However, I think it would be easier to manually create a test directory, manually create a C
+    source file, then run a piece of code which would generate the expected output file using the
+    compiler.
+Given that my compiler does not currently support directives, what I have been calling a C source
+    file would have to be limited to a translation unit.
+Oh, on the piece of code which would generate the expected output using the compiler, I think
+    I could write code which could create or update tests (possibly interactively, prompting the
+    user for a yes/no before creating or updating the expected output of a test)
+Since the term, "test directory", is overloaded, I will now call each of the directories holding a
+    single input file and an expected output file by a different name.
+I will call those directories "test case directories".
+I like that name.
+So, I guess I would have a command line flag for stack test.
+If that flag was turned on, I would update the expected output for each data driven test case,
+    possibly interactively.
+I would like to run stack test and have it search through the test_data directory for test cases.
+
+All right, well, I think I have done some file operations before in Haskell.
+Yes, I have at least used readFile and writeFile in this project.
+I shouldn't need to add any dependencies to the test package because those basic IO operations should be in the base library.
+Okay, so what is this code going to look like?
+Well, I think I will create a Main.hs file in the test directory.
+It will utilize the test in the MinimalPipeline module.
+I think I will have another module specifically for running data driven tests.
+I guess I could name that module DataDrivenTests.
+I might just name it DataDriven, especially given the MinimalPipeline module does not have the word
+    "Test" in its name.
+Yeah, I am going with DataDriven for now.
+I do not remember all of the stuff about test trees and such from tasty, but I can hopefully figure that out.
+If the test trees are not wrapped in the IO monad somehow, then I can grab all of the test data,
+    then build the test trees by passing the test data as parameters to some function.
+I will update the package/project files after writing some code, I think.
+Oh, it looks like I will need the directory package as a dependency.
+I wish there was a version of the listDirectory action in System.Directory which listed absolute
+    paths.
+I wish there was more support for file path operations in general.
