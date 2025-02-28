@@ -1,0 +1,144 @@
+I looked through my assembler code.
+Most of it is not very understandable to me.
+Well, I do not remember all the details about the ELF format.
+I found some resources that might help me with this.
+I am honestly unsure of what directives and such I want to implement and how.
+I had been thinking I was going to parse the file in a top-down manner.
+I still think I will do that.
+However, I do not think I will do it in the same way I planned to previously.
+I had conceived of parsing sections and inside of...
+
+I lost my train of thought there.
+Anyways, I read and thought more about representing local labels and local variables.
+I will not worry about representing local variables (variables whose scope is
+    constrained to its surrounding function) with symbols.
+I noticed that gcc does not seem to create meaningful labels for local variables,
+    anyways.
+
+I believe that the next thing for me to investigate is relocation.
+Specifically, I need to learn more about assembling instructions that use symbols as
+    their operands.
+I am reading about relocation tables and relocation entries.
+It seems that there are two main types of relocation entries.
+Some relocation entries store offsets from symbol locations in the relocation destination
+    (i.e. the bits in an instruction which will be replaced by an address relative to a
+    symbol's address, once resolved), rather than as part of the relocation entry itself.
+Others store this information as part of the relocation entry itself.
+
+I have found a github repo named riscv-elf-psabi-doc.
+It has a bunch of info specifying information outside the scope of the RISC-V ISA spec.
+This includes calling conventions and a spec for creating/using the ELF.
+I think I will follow the documents in this repository, but cautiously and selectively.
+I do not want to waste a bunch of my time implementing a bunch of stuff I don't need.
+I should remember that I am just writing the assembler right now, and a lot of the
+    work involved in getting position independent code to run is being deferred until I
+    write a linker and/or loader.
+When assembling code, I will just have to worry about parsing things correctly and
+    filling the different ELF sections with the appropriate data and metadata.
+I say that partly as a comfort to myself, as there are a lot of relocation types.
+I mean, there are at least 50 that I counted.
+I doubt I will use most of those.
+I mean, to support all of those would probably mean supporting a lot of syntax.
+That's very unappealing to me.
+Honestly, I think I want to be able to load the address of a variable into a register.
+I also want to be able to jump execution to a label's address.
+I want the assembly programmer or compiler to handle register use, not the assembler.
+By that, I mean that I don't want the assembler (or any process downstream) to
+    generate machine code which implicitly moves values into registers or main memory,
+    when performing relocation.
+I would also like to avoid using relocation types which add additional instructions.
+This will force me to update relocation entries.
+However, that would not be the end of the world.
+Well, I might be able to avoid adding new instructions.
+Eh, I am not sure.
+I think it makes sense for me to be able to address the upper 20 bits of a symbol's
+    address (for use with upper immediate instructions) and the lower 12 bits (for
+    immediate instructions).
+That way, I could use labels in any instruction I want.
+If I want to exectue an instruction with the upper 20 bits, I could use those bits.
+If I want to execute an instruction with the lower 12 bits, I could use those bits.
+If I want to use the entire 32-bit address as the operand of an instruction, I would
+    need to store the entire 32-bit address in a register, first.
+I could save the upper and lower bits in a register together, then use that register as
+    an operand of the instruction I wanted to execute.
+That's what a relocation would have to do, anyways, as far as I understand.
+
+I want to determine the relocation types I will support.
+I suppose it will be subject to change.
+
+I am wondering if I should write a minimal assembler and modify it, as needed, like what
+    I am doing with the compiler.
+As I add functionality for the compiler, I can add functionality for the assembler.
+I might add some basic functionality for the bootrom, which I have not written yet.
+I might wait until I have a particular piece of hardware to work with before writing a
+    bootrom program.
+I reread the README.md file.
+It does not say anything about ELF files in section 3.
+I might simply interpret "binary files" as the lower contents of memory.
+To elaborate on that, I might just translate directives for data placement, assembly
+    instructions for code placement, and connect symbols in some ad hoc way, not
+    in accordance with the ELF format.
+In some sense, that might be even more of a hack than my previous implementation.
+However, I will not have to worry about much syntax, and the computation will have a
+    simpler state, just a symbol table where symbols point to locations in the file,
+    and bytes in the file would correspond to addresses in memory, 1 to 1.
+I like this idea.
+I can focus on parsing better than I could have when I wrote my first implementation.
+Then, I can worry about handling more complicated state for creating ELF object files.
+I am not sure how I will make programs end.
+That is not the assembler's problem per se.
+I guess I could just have stuff run in an infinite loop.
+That would be preferable over letting the program counter continue incrementing into the
+    data "segment" (in quotes because there are no segments in the base ISA).
+I like this idea of outputting raw "binary files" for the time being.
+I am wondering if I should even require sections in the assembly.
+I don't think it makes sense to enforce that kind of thing.
+That sounds unnecessary for the time being.
+I figure I will just implement instruction translation, one or two ways to add data to
+    the file, and likely support for comments.
+I might force comments to be on their own line for the sake of simplifying parsing.
+I think I will parse the input files into a list of assembly directives and instructions.
+I broke ground.
+I did some basic preprocessing for each line, removing leaading spaces.
+I want to parse one of the directives.
+I guess I have not thought much about how I will parse alternatives.
+In Haskell, I used the <|> alternative operator, and it was all dandy.
+In Python land, I don't want to do a bunch of string processing in order to handle
+    alternatives.
+I think I will get over it, for now.
+I am creating an AST for the assembly parsing and manipulation.
+Well, it might technically be a parse tree, but oh well.
+I am defining classes for alternatives.
+My parsing code is starting to mimic the parsing code I wrote for the compiler.
+I think I am going to ignore labels for the time being.
+I will go back and implement support for labels and a symbol table and all that jazz.
+Well, then, what do I need to do next?
+Well, I think I can parse both int directives and string directives, just not with labels.
+I should probably test that out by importing the module I am writing.
+Back on the topic of nasty string processing, I found there is a flag re.VERBOSE which
+    enables writing cleaner looking regular expressions.
+I am not using it yet, but I might in a bit.
+I am still implementing the IntDirective class.
+Well, I might just need to test it.
+I just remembered that I am not yet trying to handle symbol resolution.
+That makes this so much easier!
+I think I have directives working properly, both int and string directives.
+That means the assembler is supports functionality than the compiler, currently.
+The compiler can only handle a single int declaration, I believe.
+I don't think it can even assign a value.
+I just double checked the minimal pipeline test input.
+I was correct.
+The compiler will only compile a simple int, but not even give it a value explicitly.
+Well, I suppose the compiler allows symbols.
+The assembler currently does not.
+I think I will commit what I have created so far.
+I realized that the assembler does not yet read input and write output from any
+    file-like object.
+I will write a main function and have it read from standard input and write to standard
+    output.
+That is not what a normal assembler does by default, but that is fine.
+I think I've got that done, though I admit it's not a fun interface to play with from
+    my shell.
+It's more convenient to use the sample code by importing the module with the interpreter.
+Anyways, I think that is in a good spot.
+I am looking to commit.
