@@ -6,21 +6,25 @@ module register_file(
 	select_destination,
 	data_in,
 	operand_output1,
-	operand_output2,
+	operand_output2
 );
 
 	// ports
-	input [31:0] 				select_operand1,
-						select_operand2,
-						select_destination,
-						data_in;
+    input               clk,
+                        rst;
 
-	output [31:0] 				operand_output1,
+	input [4:0] 		select_operand1,
+						select_operand2,
+						select_destination;
+
+	input [31:0]		data_in;
+
+	output [31:0] 		operand_output1,
 			  			operand_output2;
 
 	// internal variables
-	reg [31:0] 				reg_file [31:0];
-	reg [31:0]				operand_output1_reg,
+	reg [31:0] 			reg_file [31:0];
+	reg [31:0]			operand_output1_reg,
 						operand_output2_reg;
 
 	// logic
