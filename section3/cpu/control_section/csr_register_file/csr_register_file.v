@@ -10,45 +10,52 @@ module CSR_Register_File(
 	write_back_address,
 	write_back_data,
 
-	increment_instret
+	increment_instret,
+
+    exception_caught
 );
 
 	// ports
-	input			read;
-	input [11:0]		read_address;
-	output [31:0]		read_data;
+	input			    clk,
+                        rst,
+                        read;
 
-	input [1:0]		write_back;
-	input [11:0]		write_back_address;
-	input [31:0]		write_back_data;
+	input [11:0]        read_address;
+	output reg [31:0]   read_data;
+
+	input [1:0]		    write_back;
+	input [11:0]        write_back_address;
+	input [31:0]        write_back_data;
 	
-	input			increment_instret;
+	input			    increment_instret;
+
+    output reg          exception_caught;
 
 	// internals
-	reg [31:0]		cycle,
-				cycleh,
-				time_,
-				timeh,
-				instret,
-				instreth;
+	reg [31:0]          cycle,
+				        cycleh,
+				        time_,
+				        timeh,
+				        instret,
+				        instreth;
 	
-	wire			has_read_permission,
-				has_write_permission;
+	wire			    has_read_permission,
+				        has_write_permission;
 
 	integer i;
 
 	// logic
 	
 	// For now, we will just give the user permission to whatever they
-	// wantt until we set up infrastructure for an operating environment.
-	has_read_permission = 1'b1;
-	has_write_permission = 1'b1;
+	// want until we set up infrastructure for an operating environment.
+	assign has_read_permission = 1'b1;
+	assign has_write_permission = 1'b1;
 
 	always_ff @ (posedge clk) begin
 
 
 		if (read) begin
-			if (read_permission) begin
+			if (has_read_permission) begin
 				case (read_address)
 					12'hC01 : 
 						read_data <= cycle;
@@ -63,7 +70,8 @@ module CSR_Register_File(
 					12'hC82 :
 						read_data <= instreth;
 					default :
-						// Invalid address trap
+                        // Invalid address exception
+						exception_caught <= 1;
 				endcase
 			end else begin
 				// This is where we would handle a permission
@@ -85,7 +93,7 @@ module CSR_Register_File(
 
 		if (write_back == 2'b01) begin
 			// clear
-			if (write_back_permission) begin
+			if (has_write_permission) begin
 				for (i = 0; i < 32; i = i + 1) begin
 					case (write_back_address)
 						12'hC01 :
@@ -101,14 +109,14 @@ module CSR_Register_File(
 						12'hC82 :
 							instreth[i] <= write_back_data[i] ? 1'b0 : instreth[i];
 						default :
-							// Invalid address
-							// trap
+							// Invalid address exception
+							exception_caught <= 1;
 					endcase
 				end
 			end
 		end else if (write_back == 2'b10) begin
 			// set
-			if (write_back_permission) begin
+			if (has_write_permission) begin
 				for (i = 0; i < 32; i = i + 1) begin
 					case (write_back_address)
 						12'hC01 :
@@ -124,14 +132,14 @@ module CSR_Register_File(
 						12'hC82 :
 							instreth[i] <= write_back_data[i] ? 1'b1 : instreth[i];
 						default :
-							// Invalid address
-							// trap
+							// Invalid address exception
+							exception_caught <= 1;
 					endcase
 				end
 			end
 		end else if (write_back == 2'b11) begin
 			// write
-			if (write_back_permission) begin
+			if (has_write_permission) begin
 				case (write_back_address)
 						12'hC01 : 
 							cycle <= write_back_data;
@@ -146,8 +154,8 @@ module CSR_Register_File(
 						12'hC82 :
 							instreth <= write_back_data;
 						default :
-							// Invalid address
-							// trap
+							// Invalid address exception
+							exception_caught <= 1;
 				endcase
 			end // end of the write_back_permission block
 
