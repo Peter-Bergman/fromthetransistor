@@ -5,7 +5,7 @@ module sram(
 	data_out,
 	read,
 	write,
-	chip_select,
+	chip_select
 
 
 );
@@ -26,15 +26,17 @@ input					chip_select,
 // internal variables
 reg [DATA-1:0] SRAM [DEPTH-1:0];
 
+assign data_out = (read == 1'b1 && write == 1'b0) ? SRAM[addr] : 0;
+
 // logic
 always @(posedge clk) begin
 	if (chip_select == 1) begin
-		if (write == 1'b1 && read == 1'b0) begin
-			SRAM [ADDRESS] = data_in;
+        if (write == 1'b1 && read == 1'b0) begin
+            SRAM[addr] <= data_in;
 		end
-		else if (read == 1'b1 && write == 1'b0) begin
-			data_out = SRAM [ADDRESS];
-		end
+		//else if (read == 1'b1 && write == 1'b0) begin
+		//    data_out = SRAM[addr];
+		//end
 	end
 	else;
 end
